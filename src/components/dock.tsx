@@ -38,6 +38,7 @@ export default function Dock(props: any) {
 				<HomeIcon />
 				<span class="dock-label">Home</span>
 			</button>
+
 			<button
 				class={activeBtn() == DockButton.STOCK ? "dock-active" : ""}
 				onClick={() => handleBtnClick(DockButton.STOCK)}
@@ -45,6 +46,7 @@ export default function Dock(props: any) {
 				<StockIcon />
 				<span class="dock-label">Stock</span>
 			</button>
+
 			<button
 				class={activeBtn() == DockButton.REPORTS ? "dock-active" : ""}
 				onClick={() => handleBtnClick(DockButton.REPORTS)}
@@ -52,6 +54,7 @@ export default function Dock(props: any) {
 				<ReportsIcon />
 				<span class="dock-label">Reports</span>
 			</button>
+
 			<button
 				class={activeBtn() == DockButton.SETTINGS ? "dock-active" : ""}
 				onClick={() => handleBtnClick(DockButton.SETTINGS)}
@@ -59,6 +62,7 @@ export default function Dock(props: any) {
 				<SettingsIcon />
 				<span class="dock-label">Settings</span>
 			</button>
+
 			<button>
 				<label class="swap swap-rotate">
 					{/* this hidden checkbox controls the state */}
