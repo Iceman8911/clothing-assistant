@@ -1,7 +1,9 @@
+import Table from "~/components/ui/table";
+
 export default function InventoryPage() {
 	return (
 		<>
-			<div>Inventory</div>
+			<Table />
 		</>
 	);
 }
