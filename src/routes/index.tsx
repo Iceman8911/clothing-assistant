@@ -29,9 +29,6 @@ export default function Home() {
 		// 	</p>
 
 		// </main>
-
-		<>
-			<Dock></Dock>
-		</>
+		<></>
 	);
 }
