@@ -15,6 +15,14 @@
 			"problemMatcher": [],
 			"label": "bun: dev",
 			"detail": "bun run vinxi dev - package.json",
+			"group": "build"
+		},
+		{
+			"type": "bun",
+			"script": "bun run --bun vinxi dev",
+			"problemMatcher": [],
+			"label": "bun: bun-dev",
+			"detail": "bun run --bun vinxi dev - package.json",
 			"group": {
 				"kind": "build",
 				"isDefault": true
