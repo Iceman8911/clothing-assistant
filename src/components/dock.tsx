@@ -5,18 +5,22 @@ import SettingsIcon from "lucide-solid/icons/settings";
 import SunIcon from "lucide-solid/icons/sun";
 import MoonIcon from "lucide-solid/icons/moon";
 import { createSignal, onMount } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 
-const enum DockButton {
-	HOME,
-	STOCK,
-	REPORTS,
-	SETTINGS,
+export const enum DockButton {
+	HOME = "/",
+	STOCK = "/inventory",
+	REPORTS = "/reports",
+	SETTINGS = "/settings",
 }
 
 export default function Dock(props: any) {
 	const [activeBtn, setActiveBtn] = createSignal(DockButton.HOME);
+	const navigate = useNavigate();
+
 	const handleBtnClick = (btn: DockButton) => {
 		setActiveBtn(btn);
+		navigate(btn);
 	};
 
 	const [prefersDarkTheme, setPrefersDarkTheme] = createSignal(false);
