@@ -24,7 +24,6 @@ export default function App() {
 				<Route path={DockButton.STOCK} component={InventoryPage} />
 				<Route path={DockButton.REPORTS} component={ReportPage} />
 				<Route path={DockButton.SETTINGS} component={SettingsPage} />
-				<FileRoutes />
 			</Router>
 		</>
 	);
