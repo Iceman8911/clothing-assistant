@@ -34,7 +34,7 @@ export default function Dock(props: any) {
 	});
 
 	return (
-		<div class="dock">
+		<div class="dock dock-lg">
 			<button
 				class={activeBtn() == DockButton.HOME ? "dock-active" : ""}
 				onClick={() => handleBtnClick(DockButton.HOME)}
