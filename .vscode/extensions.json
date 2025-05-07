@@ -1,3 +1,7 @@
 {
-	"recommendations": ["emranweb.daisyui-snippet", "bradlc.vscode-tailwindcss"]
+	"recommendations": [
+		"emranweb.daisyui-snippet",
+		"bradlc.vscode-tailwindcss",
+		"vivaxy.vscode-conventional-commits"
+	]
 }
