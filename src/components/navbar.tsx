@@ -1,3 +1,4 @@
+import SettingsIcon from "lucide-solid/icons/settings";
 import ListFilterIcon from "lucide-solid/icons/list-filter";
 import ShirtIcon from "lucide-solid/icons/shirt";
 
@@ -66,6 +67,12 @@ export default function NavBar() {
 							/>{" "}
 						</svg>
 						<span class="badge badge-xs badge-primary indicator-item"></span>
+					</div>
+				</button>
+				<button class="btn btn-ghost btn-circle">
+					<div class="indicator">
+						<SettingsIcon />
+						{/* <span class="badge badge-xs badge-primary indicator-item"></span> */}
 					</div>
 				</button>
 			</div>
