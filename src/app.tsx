@@ -1,13 +1,13 @@
 import { Route, Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
-import Nav from "~/components/Nav";
 import "./app.css";
 import Dock, { DockButton } from "./components/dock";
 import HomePage from "./routes";
 import InventoryPage from "./routes/inventory";
 import ReportPage from "./routes/reports";
 import SettingsPage from "./routes/settings";
+import NavBar from "~/components/navbar";
 
 export default function App() {
 	return (
@@ -15,6 +15,7 @@ export default function App() {
 			<Router
 				root={(props) => (
 					<>
+						<NavBar />
 						<Suspense>{props.children}</Suspense>
 						<Dock></Dock>
 					</>
