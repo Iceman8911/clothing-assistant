@@ -125,7 +125,7 @@ export default function Table<T extends Record<string, string | number>>() {
 						<For each={headerValues}>
 							{(value) => (
 								<th
-									class="text-center"
+									class="text-center cursor-pointer hover:bg-base-200"
 									onClick={() => {
 										if (selectedHeader() != value) {
 											setSelectedDirectionAndSort("asc", value);
