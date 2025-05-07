@@ -24,7 +24,7 @@ export default function App() {
 				<Route path={DockButton.HOME} component={HomePage} />
 				<Route path={DockButton.STOCK} component={InventoryPage} />
 				<Route path={DockButton.REPORTS} component={ReportPage} />
-				<Route path={DockButton.SETTINGS} component={SettingsPage} />
+				{/* <Route path={DockButton.SETTINGS} component={SettingsPage} /> */}
 			</Router>
 		</>
 	);

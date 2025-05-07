@@ -6,12 +6,14 @@ import SunIcon from "lucide-solid/icons/sun";
 import MoonIcon from "lucide-solid/icons/moon";
 import { createSignal, onMount } from "solid-js";
 import { useNavigate } from "@solidjs/router";
+import CirclePlusIcon from "lucide-solid/icons/circle-plus";
+import CreateClothingModal from "./create_clothing";
 
 export const enum DockButton {
 	HOME = "/",
 	STOCK = "/inventory",
 	REPORTS = "/reports",
-	SETTINGS = "/settings",
+	// SETTINGS = "/settings",
 }
 
 export default function Dock(props: any) {
@@ -33,55 +35,82 @@ export default function Dock(props: any) {
 		});
 	});
 
+	let createClothingModalDialog!: HTMLDialogElement;
+
 	return (
-		<div class="dock dock-lg">
-			<button
-				class={activeBtn() == DockButton.HOME ? "dock-active" : ""}
-				onClick={() => handleBtnClick(DockButton.HOME)}
-			>
-				<HomeIcon />
-				<span class="dock-label">Home</span>
-			</button>
+		<>
+			<div class="dock dock-lg">
+				<button
+					class={activeBtn() == DockButton.HOME ? "dock-active" : ""}
+					onClick={() => handleBtnClick(DockButton.HOME)}
+				>
+					<HomeIcon />
+					<span class="dock-label">Home</span>
+				</button>
 
-			<button
-				class={activeBtn() == DockButton.STOCK ? "dock-active" : ""}
-				onClick={() => handleBtnClick(DockButton.STOCK)}
-			>
-				<StockIcon />
-				<span class="dock-label">Stock</span>
-			</button>
+				<button
+					class={activeBtn() == DockButton.STOCK ? "dock-active" : ""}
+					onClick={() => handleBtnClick(DockButton.STOCK)}
+				>
+					<StockIcon />
+					<span class="dock-label">Stock</span>
+				</button>
 
-			<button
-				class={activeBtn() == DockButton.REPORTS ? "dock-active" : ""}
-				onClick={() => handleBtnClick(DockButton.REPORTS)}
-			>
-				<ReportsIcon />
-				<span class="dock-label">Reports</span>
-			</button>
+				<button onClick={() => createClothingModalDialog.showModal()}>
+					<CirclePlusIcon />
+					<span class="dock-label">Add Cloth</span>
+				</button>
 
-			<button
+				<button
+					class={activeBtn() == DockButton.REPORTS ? "dock-active" : ""}
+					onClick={() => handleBtnClick(DockButton.REPORTS)}
+				>
+					<ReportsIcon />
+					<span class="dock-label">Reports</span>
+				</button>
+
+				{/* <button
 				class={activeBtn() == DockButton.SETTINGS ? "dock-active" : ""}
 				onClick={() => handleBtnClick(DockButton.SETTINGS)}
 			>
 				<SettingsIcon />
 				<span class="dock-label">Settings</span>
-			</button>
+			</button> */}
 
-			<button>
-				<label class="swap swap-rotate">
-					{/* this hidden checkbox controls the state */}
-					<input
-						type="checkbox"
-						class="theme-controller"
-						value={prefersDarkTheme() ? "light" : "dark"}
-					/>
+				<button>
+					<label class="swap swap-rotate">
+						{/* this hidden checkbox controls the state */}
+						<input
+							type="checkbox"
+							class="theme-controller"
+							value={prefersDarkTheme() ? "light" : "dark"}
+						/>
 
-					<SunIcon class="swap-off" />
+						<SunIcon class="swap-off" />
 
-					<MoonIcon class="swap-on" />
-				</label>
-				<span class="dock-label whitespace-nowrap">Toggle Theme</span>
-			</button>
-		</div>
+						<MoonIcon class="swap-on" />
+					</label>
+					<span class="dock-label whitespace-nowrap">Toggle Theme</span>
+				</button>
+			</div>
+
+			{/* Dialog for the create clothing modal */}
+			<dialog
+				class="modal modal-bottom sm:modal-middle"
+				ref={createClothingModalDialog}
+			>
+				<div class="modal-box">
+					<form method="dialog">
+						<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+							✕
+						</button>
+					</form>
+					<CreateClothingModal />
+				</div>
+				<form method="dialog" class="modal-backdrop">
+					<button>close</button>
+				</form>
+			</dialog>
+		</>
 	);
 }
