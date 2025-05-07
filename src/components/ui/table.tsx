@@ -79,6 +79,7 @@ export default function Table<T extends Record<string, string | number>>() {
 	const headerValues = (Object.values(header) as string[]).map(
 		(val) => val[0].toUpperCase() + val.slice(1)
 	);
+
 	const [dataValues, setDataValues] = createSignal(
 		data.map((item) => Object.values(item))
 	);
@@ -115,11 +116,9 @@ export default function Table<T extends Record<string, string | number>>() {
 		});
 	};
 
-	let tableElement!: HTMLTableElement;
-
 	return (
 		<div class="overflow-x-auto">
-			<table class="table table-zebra" ref={tableElement}>
+			<table class="table table-zebra">
 				{/* head */}
 				<thead>
 					<tr>
