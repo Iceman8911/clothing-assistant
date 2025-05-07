@@ -88,6 +88,10 @@ export default function Table<T extends Record<string, string | number>>() {
 		"asc" | "desc"
 	>("asc");
 
+	const tableCheckboxIdentifierClass =
+		`checkbox-${crypto.randomUUID()}` as const;
+	const [checkboxes, setCheckboxes] = createSignal<HTMLInputElement[]>([]);
+
 	// TODO: Improve this so only the required elements are moved
 	const setSelectedDirectionAndSort = (
 		direction: "asc" | "desc",
@@ -111,15 +115,28 @@ export default function Table<T extends Record<string, string | number>>() {
 		});
 	};
 
+	let tableElement!: HTMLTableElement;
+
 	return (
 		<div class="overflow-x-auto">
-			<table class="table table-zebra">
+			<table class="table table-zebra" ref={tableElement}>
 				{/* head */}
 				<thead>
 					<tr>
 						<th>
 							<label>
-								<input type="checkbox" class="checkbox" />
+								<input
+									type="checkbox"
+									class="checkbox"
+									value="test"
+									// Check/uncheck every other appropriate checkbox
+									onClick={(e) => {
+										const target = e.target as HTMLInputElement;
+										checkboxes().forEach((checkbox) => {
+											checkbox.checked = target.checked;
+										});
+									}}
+								/>
 							</label>
 						</th>
 						<For each={headerValues}>
@@ -161,7 +178,16 @@ export default function Table<T extends Record<string, string | number>>() {
 										<th class="w-min">
 											{/* {index() + 1}{" "} */}
 											<label>
-												<input type="checkbox" class="checkbox" />
+												<input
+													type="checkbox"
+													class={"checkbox " + tableCheckboxIdentifierClass}
+													// Store the checkbox element in the checkboxes array
+													ref={(el) => {
+														if (el) {
+															setCheckboxes((prev) => [...prev, el]);
+														}
+													}}
+												/>
 											</label>
 										</th>
 										<For each={value}>
