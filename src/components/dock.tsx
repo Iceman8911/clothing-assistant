@@ -117,7 +117,7 @@ export default function Dock(props: any) {
 							✕
 						</button>
 					</form>
-					<CreateClothingModal />
+					<CreateClothingModal dialogParent={createClothingModalDialog} />
 				</div>
 				<form method="dialog" class="modal-backdrop">
 					<button>close</button>
