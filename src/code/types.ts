@@ -6,14 +6,23 @@ interface ClothingBase {
 	name: string;
 	description: string;
 	// TODO
-	brand: "NA" | "louise";
-	gender: "male" | "female" | "unisex";
+	brand: Capitalize<"NA" | "louise">;
+	gender: Capitalize<"male" | "female" | "unisex">;
 	/** Too varied for a more specific type */
 	color: string;
 	material: string;
-	season: "spring" | "summer" | "fall" | "winter";
-	occasion: "casual" | "formal" | "activewear";
-	condition: "new" | "used" | "refurbished";
+	season: {
+		spring: boolean;
+		summer: boolean;
+		fall: boolean;
+		winter: boolean;
+	};
+	occasion: {
+		formal: boolean;
+		casual: boolean;
+		activeWear: boolean;
+	};
+	condition: Capitalize<"new" | "used" | "refurbished">;
 
 	costPrice: number;
 	sellingPrice: number;
