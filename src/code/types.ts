@@ -32,23 +32,23 @@ interface ClothingBase {
 }
 
 interface ClothingTop extends ClothingBase {
-	category: "tops";
-	type: "shirt" | "blouse" | "sweater";
+	category: "Tops";
+	subCategory: Capitalize<"shirt" | "blouse" | "sweater">;
 }
 
 interface ClothingBottom extends ClothingBase {
-	category: "bottoms";
-	type: "pants" | "shorts" | "skirt";
+	category: "Bottoms";
+	subCategory: Capitalize<"pants" | "shorts" | "skirt">;
 }
 
 interface ClothingInnerWear extends ClothingBase {
-	category: "innerWear";
-	type: "underwear" | "socks";
+	category: "Inner Wear";
+	subCategory: Capitalize<"underwear" | "socks">;
 }
 
 interface ClothingOuterwear extends ClothingBase {
-	category: "outerWear";
-	type: "jacket" | "coat" | "hat";
+	category: "Outer Wear";
+	subCategory: Capitalize<"jacket" | "coat" | "hat">;
 }
 
 export type ClothingItem =

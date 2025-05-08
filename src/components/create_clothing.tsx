@@ -103,8 +103,8 @@ export default function CreateClothingModal(props: {
 		color: "Red",
 		gender: "Unisex",
 		quantity: 1,
-		category: "tops",
-		type: "shirt",
+		category: "Tops",
+		subCategory: "Shirt",
 		brand: "Louise",
 		condition: "New",
 		costPrice: 1000,
@@ -220,6 +220,31 @@ export default function CreateClothingModal(props: {
 				</fieldset>
 
 				<fieldset class="fieldset col-span-3 md:col-span-2">
+					<legend class="fieldset-legend">Category:</legend>
+					<select class="select" required>
+						<For
+							each={
+								[
+									"Tops",
+									"Bottoms",
+									"Inner Wear",
+									"Outer Wear",
+								] as ClothingItem["category"][]
+							}
+						>
+							{(category) => (
+								<option selected={category === "Tops"}>{category}</option>
+							)}
+						</For>
+					</select>
+				</fieldset>
+
+				<fieldset class="fieldset col-span-3 md:col-span-2">
+					<legend class="fieldset-legend">Sub Category:</legend>
+					<input type="text" class="input" placeholder="Shirt" required />
+				</fieldset>
+
+				<fieldset class="fieldset col-span-3 md:col-span-2">
 					<legend class="fieldset-legend">Condition</legend>
 					<select class="select">
 						<For each={clothingCondition}>
@@ -292,7 +317,8 @@ export default function CreateClothingModal(props: {
 					</For>
 				</fieldset>
 
-				<fieldset class="fieldset col-span-2">
+				{/* This would be moved up a bit to fit a blank space in the grid that's only visible on wider screens */}
+				<fieldset class="fieldset col-span-2 md:col-start-5 md:row-start-6">
 					<legend class="fieldset-legend">Brand:</legend>
 					<input type="text" class="input" placeholder="NA" />
 					<div class="label">Optional</div>
