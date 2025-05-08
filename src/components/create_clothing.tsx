@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { createSignal, For } from "solid-js";
 import { ClothingItem } from "~/code/types";
 
 export default function CreateClothingModal(props: {
@@ -90,6 +90,32 @@ export default function CreateClothingModal(props: {
 
 	let clothingDisplay!: HTMLDivElement;
 	let clothingForm!: HTMLFormElement;
+
+	const [previewImg, setPreviewImg] = createSignal("");
+
+	/**
+	 * The actual cloth data
+	 */
+	const clothingItem: ClothingItem = {
+		id: crypto.randomUUID(),
+		name: "Shirt",
+		description: "Shirt",
+		color: "Red",
+		gender: "Unisex",
+		quantity: 1,
+		category: "tops",
+		type: "shirt",
+		brand: "Louise",
+		condition: "New",
+		costPrice: 1000,
+		sellingPrice: 1000,
+		dateBought: new Date(),
+		material: "Cotton",
+		occasion: { casual: false, activeWear: false, formal: false },
+		season: { fall: false, spring: false, summer: false, winter: false },
+		size: "M",
+		img: new File([], ""),
+	};
 	return (
 		<>
 			<form
@@ -101,13 +127,35 @@ export default function CreateClothingModal(props: {
 			<p class="py-4">Press ESC key or click outside to close</p> */}
 
 				<div
-					class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2"
+					class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center"
 					ref={clothingDisplay}
+					style={{ "background-image": previewImg() }}
 				></div>
 
 				<fieldset class="fieldset row-start-3 col-span-4">
 					<legend class="fieldset-legend">Select an Image</legend>
-					<input type="file" class="file-input" required />
+					<input
+						type="file"
+						class="file-input"
+						required
+						onChange={async (e) => {
+							const input = e.target as HTMLInputElement;
+							const file = input.files?.[0];
+
+							function fileToDataURL(file: File) {
+								return new Promise((resolve, reject) => {
+									const reader = new FileReader();
+									reader.onload = (e) => resolve(reader.result);
+									reader.onerror = reject;
+									reader.readAsDataURL(file);
+								});
+							}
+
+							if (!file) return;
+
+							setPreviewImg(`url(${await fileToDataURL(file)})`);
+						}}
+					/>
 					<label class="label">Max size 10MB</label>
 				</fieldset>
 
@@ -258,6 +306,7 @@ export default function CreateClothingModal(props: {
 					form={clothingFormId}
 					onClick={(_) => {
 						clothingForm.reset();
+						setPreviewImg("");
 					}}
 				>
 					Reset
