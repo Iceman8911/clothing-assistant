@@ -4,7 +4,10 @@ import { createSignal, For } from "solid-js";
 interface TableProps<
 	TTableRowStructure extends Record<string, string | number>
 > {
-	header: (keyof TTableRowStructure)[];
+	/**
+	 * Note that the value of each member is used as the actual header, so `{color:"Color", size:"Size"}`
+	 */
+	header: TTableRowStructure;
 	data: TTableRowStructure[];
 }
 
@@ -17,71 +20,83 @@ interface ClothData extends Record<string, string | number> {
 	quantity: number;
 }
 
-export default function Table<T extends Record<string, string | number>>() {
+export default function Table<T extends Record<string, string | number>>(
+	props: TableProps<T>
+) {
 	// props?: TableProps<T>
 	// FIXME: Get rid of this once the API is ready
-	const dummyTableData: TableProps<ClothData> = {
-		header: ["cloth", "color", "size", "type", "price", "quantity"],
-		data: [
-			{
-				cloth: "T-Shirt",
-				color: "Red",
-				size: "L",
-				type: "T-Shirt",
-				price: 100,
-				quantity: 10,
-			},
-			{
-				cloth: "Jeans",
-				color: "Blue",
-				size: "M",
-				type: "Jeans",
-				price: 50,
-				quantity: 20,
-			},
-			{
-				cloth: "Jacket",
-				color: "Black",
-				size: "S",
-				type: "Jacket",
-				price: 150,
-				quantity: 5,
-			},
-			{
-				cloth: "Sweater",
-				color: "White",
-				size: "L",
-				type: "Sweater",
-				price: 120,
-				quantity: 15,
-			},
-			{
-				cloth: "Dress",
-				color: "Red",
-				size: "M",
-				type: "Dress",
-				price: 80,
-				quantity: 25,
-			},
-			{
-				cloth: "Gloves",
-				color: "Black",
-				size: "M",
-				type: "Gloves",
-				price: 20,
-				quantity: 30,
-			},
-		],
-	};
-	console;
+	// const dummyTableData: TableProps<ClothData> = {
+	// 	header: ["cloth", "color", "size", "type", "price", "quantity"],
+	// 	data: [
+	// 		{
+	// 			cloth: "T-Shirt",
+	// 			color: "Red",
+	// 			size: "L",
+	// 			type: "T-Shirt",
+	// 			price: 100,
+	// 			quantity: 10,
+	// 		},
+	// 		{
+	// 			cloth: "Jeans",
+	// 			color: "Blue",
+	// 			size: "M",
+	// 			type: "Jeans",
+	// 			price: 50,
+	// 			quantity: 20,
+	// 		},
+	// 		{
+	// 			cloth: "Jacket",
+	// 			color: "Black",
+	// 			size: "S",
+	// 			type: "Jacket",
+	// 			price: 150,
+	// 			quantity: 5,
+	// 		},
+	// 		{
+	// 			cloth: "Sweater",
+	// 			color: "White",
+	// 			size: "L",
+	// 			type: "Sweater",
+	// 			price: 120,
+	// 			quantity: 15,
+	// 		},
+	// 		{
+	// 			cloth: "Dress",
+	// 			color: "Red",
+	// 			size: "M",
+	// 			type: "Dress",
+	// 			price: 80,
+	// 			quantity: 25,
+	// 		},
+	// 		{
+	// 			cloth: "Gloves",
+	// 			color: "Black",
+	// 			size: "M",
+	// 			type: "Gloves",
+	// 			price: 20,
+	// 			quantity: 30,
+	// 		},
+	// 	],
+	// };
+	// console;
 	// const { header, data } = props;
-	const { header, data } = dummyTableData;
+	console.log(props);
+	const { header, data } = props;
 	const headerValues = (Object.values(header) as string[]).map(
 		(val) => val[0].toUpperCase() + val.slice(1)
 	);
+	const headerKeys = Object.keys(header);
 
 	const [dataValues, setDataValues] = createSignal(
-		data.map((item) => Object.values(item))
+		data.map((item) =>
+			Object.entries(item)
+				.map(([key, val]) => {
+					if (headerKeys.includes(key)) {
+						return val;
+					}
+				})
+				.filter((val) => val != undefined)
+		)
 	);
 
 	const [selectedHeader, setSelectedHeader] = createSignal(headerValues[0]);
