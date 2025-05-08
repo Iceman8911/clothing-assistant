@@ -5,8 +5,7 @@ interface ClothingBase {
 	id: string;
 	name: string;
 	description: string;
-	// TODO
-	brand: Capitalize<"NA" | "louise">;
+	brand: string;
 	gender: Capitalize<"male" | "female" | "unisex">;
 	/** Too varied for a more specific type */
 	color: string;

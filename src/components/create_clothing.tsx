@@ -62,9 +62,27 @@ export default function CreateClothingModal() {
 		"Wool",
 	] as const;
 	const defaultClothingMaterial = clothingMaterials[0];
-
 	const clothingColorListId = crypto.randomUUID();
 	const clothingMaterialListId = crypto.randomUUID();
+
+	const MIN_PRICE_INPUT = 0;
+	const MAX_PRICE_INPUT = 999999999;
+	const sanitisePriceInput = (e: FocusEvent) => {
+		const target = e.target as HTMLInputElement;
+
+		// Remove invalid things like "e12121" or "121-121"
+		if (!target.value) {
+			target.value = `${MIN_PRICE_INPUT}`;
+			return;
+		}
+
+		const targetValue = parseInt(target.value);
+		targetValue > MAX_PRICE_INPUT
+			? (target.value = `${MAX_PRICE_INPUT}`)
+			: targetValue < MIN_PRICE_INPUT
+			? (target.value = `${MIN_PRICE_INPUT}`)
+			: target.value;
+	};
 
 	let clothingDisplay!: HTMLDivElement;
 	return (
@@ -79,7 +97,7 @@ export default function CreateClothingModal() {
 
 			<fieldset class="fieldset row-start-3 col-span-4">
 				<legend class="fieldset-legend">Select an Image</legend>
-				<input type="file" class="file-input" />
+				<input type="file" class="file-input" required />
 				<label class="label">Max size 10MB</label>
 			</fieldset>
 
@@ -89,6 +107,7 @@ export default function CreateClothingModal() {
 					type="text"
 					class="input"
 					placeholder="Da Vinci's Leather Vest"
+					required
 				/>
 			</fieldset>
 
@@ -108,6 +127,38 @@ export default function CreateClothingModal() {
 						{(size) => <option selected={size === "M"}>{size}</option>}
 					</For>
 				</select>
+			</fieldset>
+
+			<fieldset class="fieldset col-span-3">
+				<legend class="fieldset-legend">Cost Price:</legend>
+				<label class="input">
+					₦
+					<input
+						type="number"
+						class="grow validator"
+						placeholder="1000"
+						required
+						min={MIN_PRICE_INPUT}
+						max={MAX_PRICE_INPUT}
+						onfocusout={sanitisePriceInput}
+					/>
+				</label>
+			</fieldset>
+
+			<fieldset class="fieldset col-span-3">
+				<legend class="fieldset-legend">Selling Price:</legend>
+				<label class="input">
+					₦
+					<input
+						type="number"
+						class="grow validator"
+						placeholder="1000"
+						required
+						min={MIN_PRICE_INPUT}
+						max={MAX_PRICE_INPUT}
+						onfocusout={sanitisePriceInput}
+					/>
+				</label>
 			</fieldset>
 
 			<fieldset class="fieldset col-span-3 md:col-span-2">
@@ -181,6 +232,12 @@ export default function CreateClothingModal() {
 						</label>
 					)}
 				</For>
+			</fieldset>
+
+			<fieldset class="fieldset col-span-2">
+				<legend class="fieldset-legend">Brand:</legend>
+				<input type="text" class="input" placeholder="NA" />
+				<div class="label">Optional</div>
 			</fieldset>
 		</form>
 	);
