@@ -77,7 +77,11 @@ export default function Dock(props: any) {
 				<span class="dock-label">Settings</span>
 			</button> */}
 
-				<button>
+				<button
+					onClick={(e) => {
+						(e.target as HTMLButtonElement).querySelector("input")?.click();
+					}}
+				>
 					<label class="swap swap-rotate">
 						{/* this hidden checkbox controls the state */}
 						<input
@@ -90,7 +94,15 @@ export default function Dock(props: any) {
 
 						<MoonIcon class="swap-on" />
 					</label>
-					<span class="dock-label whitespace-nowrap">Toggle Theme</span>
+					<span
+						class="dock-label whitespace-nowrap"
+						onClick={(e) => {
+							e.stopPropagation();
+							e.target.parentElement?.click();
+						}}
+					>
+						Toggle Theme
+					</span>
 				</button>
 			</div>
 
