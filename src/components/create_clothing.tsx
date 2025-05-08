@@ -1,3 +1,4 @@
+import Compressor from "compressorjs";
 import { createSignal, For } from "solid-js";
 import { ClothingItem } from "~/code/types";
 
@@ -153,7 +154,21 @@ export default function CreateClothingModal(props: {
 
 							if (!file) return;
 
-							setPreviewImg(`url(${await fileToDataURL(file)})`);
+							new Compressor(file, {
+								quality: 0.75,
+								retainExif: true,
+								async success(result) {
+									const newFile = new File([result], file.name, {
+										type: file.type,
+									});
+									clothingItem.img = newFile;
+
+									setPreviewImg(`url(${await fileToDataURL(newFile)})`);
+								},
+								error(err) {
+									console.log(err.message);
+								},
+							});
 						}}
 					/>
 					<label class="label">Max size 10MB</label>
