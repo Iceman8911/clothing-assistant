@@ -98,14 +98,14 @@ export default function CreateClothingModal(props: {
 	 */
 	const clothingItem: ClothingItem = {
 		id: crypto.randomUUID(),
-		name: "Shirt",
-		description: "Shirt",
+		name: "",
+		description: "",
 		color: "Red",
 		gender: "Unisex",
 		quantity: 1,
 		category: "Tops",
 		subCategory: "Shirt",
-		brand: "Louise",
+		brand: "",
 		condition: "New",
 		costPrice: 1000,
 		sellingPrice: 1000,
@@ -166,6 +166,10 @@ export default function CreateClothingModal(props: {
 						class="input"
 						placeholder="Da Vinci's Leather Vest"
 						required
+						// value={clothingItem.name}
+						onChange={({ target }) => {
+							clothingItem.name = target.value;
+						}}
 					/>
 				</fieldset>
 
@@ -174,15 +178,25 @@ export default function CreateClothingModal(props: {
 					<textarea
 						class="textarea h-24"
 						placeholder="A short description about the cloth"
+						onChange={({ target }) => {
+							clothingItem.name = target.value;
+						}}
 					></textarea>
 					<div class="label">Optional</div>
 				</fieldset>
 
 				<fieldset class="fieldset col-span-2">
 					<legend class="fieldset-legend">Size</legend>
-					<select class="select">
+					<select
+						class="select"
+						onChange={({ target }) => {
+							clothingItem.size = target.value as ClothingItem["size"];
+						}}
+					>
 						<For each={clothingSizes}>
-							{(size) => <option selected={size === "M"}>{size}</option>}
+							{(size) => (
+								<option selected={size === clothingItem.size}>{size}</option>
+							)}
 						</For>
 					</select>
 				</fieldset>
@@ -199,6 +213,9 @@ export default function CreateClothingModal(props: {
 							min={MIN_PRICE_INPUT}
 							max={MAX_PRICE_INPUT}
 							onfocusout={sanitisePriceInput}
+							onChange={({ target }) => {
+								clothingItem.costPrice = parseInt(target.value);
+							}}
 						/>
 					</label>
 				</fieldset>
@@ -215,13 +232,23 @@ export default function CreateClothingModal(props: {
 							min={MIN_PRICE_INPUT}
 							max={MAX_PRICE_INPUT}
 							onfocusout={sanitisePriceInput}
+							onChange={({ target }) => {
+								clothingItem.sellingPrice = parseInt(target.value);
+							}}
 						/>
 					</label>
 				</fieldset>
 
 				<fieldset class="fieldset col-span-3 md:col-span-2">
 					<legend class="fieldset-legend">Category:</legend>
-					<select class="select" required>
+					<select
+						class="select"
+						required
+						onChange={({ target }) => {
+							clothingItem.category =
+								target.value as (typeof clothingItem)["category"];
+						}}
+					>
 						<For
 							each={
 								[
@@ -233,7 +260,9 @@ export default function CreateClothingModal(props: {
 							}
 						>
 							{(category) => (
-								<option selected={category === "Tops"}>{category}</option>
+								<option selected={category === clothingItem.category}>
+									{category}
+								</option>
 							)}
 						</For>
 					</select>
@@ -241,15 +270,32 @@ export default function CreateClothingModal(props: {
 
 				<fieldset class="fieldset col-span-3 md:col-span-2">
 					<legend class="fieldset-legend">Sub Category:</legend>
-					<input type="text" class="input" placeholder="Shirt" required />
+					<input
+						type="text"
+						class="input"
+						placeholder="Shirt"
+						required
+						onChange={({ target }) => {
+							clothingItem.subCategory =
+								target.value as (typeof clothingItem)["subCategory"];
+						}}
+					/>
 				</fieldset>
 
 				<fieldset class="fieldset col-span-3 md:col-span-2">
 					<legend class="fieldset-legend">Condition</legend>
-					<select class="select">
+					<select
+						class="select"
+						onChange={({ target }) => {
+							clothingItem.condition =
+								target.value as (typeof clothingItem)["condition"];
+						}}
+					>
 						<For each={clothingCondition}>
 							{(condition) => (
-								<option selected={condition === "New"}>{condition}</option>
+								<option selected={condition === clothingItem.condition}>
+									{condition}
+								</option>
 							)}
 						</For>
 					</select>
@@ -262,6 +308,10 @@ export default function CreateClothingModal(props: {
 						class="input"
 						placeholder={defaultClothingMaterial}
 						list={clothingMaterialListId}
+						onChange={({ target }) => {
+							clothingItem.material =
+								target.value as (typeof clothingItem)["material"];
+						}}
 					/>
 					<datalist id={clothingMaterialListId}>
 						<For each={clothingMaterials}>
@@ -277,6 +327,10 @@ export default function CreateClothingModal(props: {
 						class="input"
 						placeholder={defaultClothingColor}
 						list={clothingColorListId}
+						onChange={({ target }) => {
+							clothingItem.color =
+								target.value as (typeof clothingItem)["color"];
+						}}
 					/>
 					<datalist id={clothingColorListId}>
 						<For each={clothingColors}>
@@ -293,7 +347,11 @@ export default function CreateClothingModal(props: {
 								<input
 									type="checkbox"
 									class="checkbox"
-									checked={season == "Spring" || season == "Summer"}
+									onChange={({ target }) => {
+										clothingItem.season[
+											season.toLowerCase() as keyof (typeof clothingItem)["season"]
+										] = target.checked;
+									}}
 								/>
 								{season}
 							</label>
@@ -309,7 +367,15 @@ export default function CreateClothingModal(props: {
 								<input
 									type="checkbox"
 									class="checkbox"
-									checked={occasion == "Casual"}
+									onChange={({ target }) => {
+										if (occasion == "Active Wear") {
+											clothingItem.occasion.activeWear = target.checked;
+										} else {
+											clothingItem.occasion[
+												occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"]
+											] = target.checked;
+										}
+									}}
 								/>
 								{occasion}
 							</label>
@@ -320,7 +386,14 @@ export default function CreateClothingModal(props: {
 				{/* This would be moved up a bit to fit a blank space in the grid that's only visible on wider screens */}
 				<fieldset class="fieldset col-span-2 md:col-start-5 md:row-start-6">
 					<legend class="fieldset-legend">Brand:</legend>
-					<input type="text" class="input" placeholder="NA" />
+					<input
+						type="text"
+						class="input"
+						placeholder="NA"
+						onChange={({ target }) => {
+							clothingItem.brand = target.value;
+						}}
+					/>
 					<div class="label">Optional</div>
 				</fieldset>
 			</form>
@@ -343,6 +416,7 @@ export default function CreateClothingModal(props: {
 					class="btn btn-primary btn-soft "
 					form={clothingFormId}
 					onClick={(_) => {
+						clothingItem.dateBought = new Date();
 						if (clothingForm.reportValidity()) props.dialogParent.close();
 					}}
 				>
