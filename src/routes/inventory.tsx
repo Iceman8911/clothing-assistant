@@ -1,5 +1,6 @@
-import { createMemo } from "solid-js";
+import { createMemo, createSignal } from "solid-js";
 import { gClothingItems } from "~/code/shared";
+import CreateClothingModal from "~/components/create_clothing";
 import Table from "~/components/ui/table";
 
 export default function InventoryPage() {
@@ -18,6 +19,8 @@ export default function InventoryPage() {
 		});
 	});
 
+	const [isModalOpen, setIsModalOpen] = createSignal(false);
+
 	return (
 		<>
 			<Table
@@ -30,7 +33,14 @@ export default function InventoryPage() {
 					sellingPrice: "Price",
 					quantity: "Quantity",
 				}}
-				onRowClick={(x) => {}}
+				onRowClick={({ id }) => {
+					setIsModalOpen(true);
+				}}
+			/>
+
+			<CreateClothingModal
+				openState={isModalOpen()}
+				setOpenState={setIsModalOpen}
 			/>
 		</>
 	);
