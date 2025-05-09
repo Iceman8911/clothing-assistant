@@ -111,7 +111,7 @@ export default function Dock(props: any) {
 
 			{/* Dialog for the create clothing modal */}
 			<CreateClothingModal
-				openState={isModalOpen()}
+				openState={isModalOpen}
 				setOpenState={setIsModalOpen}
 			/>
 		</>

@@ -1,11 +1,18 @@
 import Compressor from "compressorjs";
-import { createEffect, createSignal, For, Setter } from "solid-js";
+import {
+	Accessor,
+	createEffect,
+	createSignal,
+	For,
+	on,
+	Setter,
+} from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 import { gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
 
 export default function CreateClothingModal(prop: {
-	openState: boolean;
+	openState: Accessor<boolean>;
 	setOpenState: Setter<boolean>;
 	clothIdToEdit?: string;
 }) {
@@ -135,24 +142,26 @@ export default function CreateClothingModal(prop: {
 	const isEditMode = () => (prop.clothIdToEdit ? true : false);
 
 	// Alter some things depending on if we're creating or editing
-	createEffect(async () => {
-		if (isEditMode()) {
-			setClothingItem(gClothingItems.get(prop.clothIdToEdit!)!);
-		}
+	createEffect(
+		on([isEditMode, prop.openState], async () => {
+			if (isEditMode()) {
+				setClothingItem(gClothingItems.get(prop.clothIdToEdit!)!);
+			}
 
-		if (prop.openState && clothingItem.img.name) {
-			setPreviewImg(`url(${await fileToDataURL(clothingItem.img)})`);
-			// Also set the file input's value
-			const dataTransfer = new DataTransfer();
-			dataTransfer.items.add(clothingItem.img);
-			clothingImgInput.files = dataTransfer.files;
-		}
-	});
+			if (prop.openState() && clothingItem.img.name) {
+				setPreviewImg(`url(${await fileToDataURL(clothingItem.img)})`);
+				// Also set the file input's value
+				const dataTransfer = new DataTransfer();
+				dataTransfer.items.add(clothingItem.img);
+				clothingImgInput.files = dataTransfer.files;
+			}
+		})
+	);
 
 	return (
 		<dialog
 			class="modal modal-bottom sm:modal-middle"
-			open={prop.openState}
+			open={prop.openState()}
 			onClose={() => prop.setOpenState(false)}
 		>
 			<div class="modal-box">

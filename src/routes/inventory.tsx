@@ -43,7 +43,7 @@ export default function InventoryPage() {
 			/>
 
 			<CreateClothingModal
-				openState={isModalOpen()}
+				openState={isModalOpen}
 				setOpenState={setIsModalOpen}
 				clothIdToEdit={idOfClothingItemToEdit()}
 			/>
