@@ -1,9 +1,7 @@
-import { createSignal } from "solid-js";
 import type { ClothingItem } from "./types";
+import { ReactiveMap } from "@solid-primitives/map";
 
-const [clothingItems, setClothingItems] = createSignal<ClothingItem[]>([]);
-
-export {
-	clothingItems as clothingItemSignal,
-	setClothingItems as setClothingItemsSignal,
-};
+/**
+ * Each clothing item is indexed with it's `id`
+ */
+export const gClothingItems = new ReactiveMap<string, ClothingItem>();

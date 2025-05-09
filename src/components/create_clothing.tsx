@@ -1,6 +1,6 @@
 import Compressor from "compressorjs";
 import { createSignal, For } from "solid-js";
-import { clothingItemSignal, setClothingItemsSignal } from "~/code/shared";
+import { gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
 
 export default function CreateClothingModal(props: {
@@ -434,10 +434,13 @@ export default function CreateClothingModal(props: {
 					onClick={(_) => {
 						clothingItem.id = crypto.randomUUID();
 						clothingItem.dateBought = new Date();
-						// if (clothingForm.reportValidity()) {
-						setClothingItemsSignal((prev) => [...prev, clothingItem]);
-						props.dialogParent.close();
-						// }
+						if (clothingForm.reportValidity()) {
+							gClothingItems.set(
+								clothingItem.id,
+								structuredClone(clothingItem)
+							);
+							props.dialogParent.close();
+						}
 					}}
 				>
 					Create

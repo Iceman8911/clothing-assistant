@@ -1,20 +1,35 @@
-import { ClothingItem } from "~/code/types";
+import { createMemo } from "solid-js";
+import { gClothingItems } from "~/code/shared";
 import Table from "~/components/ui/table";
-import { clothingItemSignal } from "./../code/shared";
 
 export default function InventoryPage() {
-	const headers: Partial<Record<keyof ClothingItem, any>> = {
-		name: "Name",
-		color: "Color",
-		size: "Size",
-		category: "Category",
-		sellingPrice: "Price",
-		quantity: "Quantity",
-	};
+	// Filter out only the properties of the clothing that should be displayed
+	const filteredRowData = createMemo(() => {
+		return [...gClothingItems.values()].map((cloth) => {
+			return {
+				name: cloth.name,
+				color: cloth.color,
+				size: cloth.size,
+				category: cloth.category,
+				sellingPrice: cloth.sellingPrice,
+				quantity: cloth.quantity,
+			};
+		});
+	});
 
 	return (
 		<>
-			<Table data={clothingItemSignal()} header={headers} />
+			<Table
+				rows={filteredRowData()}
+				header={{
+					name: "Name",
+					color: "Color",
+					size: "Size",
+					category: "Category",
+					sellingPrice: "Price",
+					quantity: "Quantity",
+				}}
+			/>
 		</>
 	);
 }
