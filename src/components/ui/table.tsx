@@ -1,5 +1,13 @@
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
-import { createEffect, createMemo, createSignal, For, on } from "solid-js";
+import {
+	createEffect,
+	createMemo,
+	createSignal,
+	For,
+	Match,
+	on,
+	Switch,
+} from "solid-js";
 
 interface TableProps<
 	TTableRowStructure extends Record<string, string | number>
@@ -75,13 +83,18 @@ export default function Table<T extends Record<string, string | number>>(
 									}}
 								>
 									{props.header[key]}
-									<UpArrowIcon
-										classList={{
-											hidden: selectedHeader() != key,
-											"rotate-180": selectionDirection() == "desc",
-											"inline-block absolute w-5 h-5": selectedHeader() == key,
-										}}
-									/>
+									<Switch>
+										<Match when={processedRows().length > 0}>
+											<UpArrowIcon
+												classList={{
+													hidden: selectedHeader() != key,
+													"rotate-180": selectionDirection() == "desc",
+													"inline-block absolute w-5 h-5":
+														selectedHeader() == key,
+												}}
+											/>
+										</Match>
+									</Switch>
 								</th>
 							)}
 						</For>
