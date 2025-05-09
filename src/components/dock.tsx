@@ -25,6 +25,10 @@ export default function Dock(props: any) {
 		navigate(btn);
 	};
 
+	onMount(() => {
+		navigate(DockButton.HOME);
+	});
+
 	const [prefersDarkTheme, setPrefersDarkTheme] = createSignal(false);
 
 	onMount(() => {
