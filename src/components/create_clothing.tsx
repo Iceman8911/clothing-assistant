@@ -1,6 +1,6 @@
 import Compressor from "compressorjs";
 import { createEffect, createSignal, For, Setter } from "solid-js";
-import { createStore, unwrap } from "solid-js/store";
+import { createStore, produce, unwrap } from "solid-js/store";
 import { gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
 
@@ -198,7 +198,11 @@ export default function CreateClothingModal(prop: {
 											const newFile = new File([result], file.name, {
 												type: file.type,
 											});
-											setClothingItem("img", newFile);
+											setClothingItem(
+												produce((state) => {
+													state.img = newFile;
+												})
+											);
 
 											setPreviewImg(`url(${await fileToDataURL(newFile)})`);
 										},
@@ -221,7 +225,11 @@ export default function CreateClothingModal(prop: {
 								required
 								// value={clothingItem.name}
 								onChange={({ target }) => {
-									setClothingItem("name", target.value);
+									setClothingItem(
+										produce((state) => {
+											state.name = target.value;
+										})
+									);
 								}}
 							/>
 						</fieldset>
@@ -233,7 +241,11 @@ export default function CreateClothingModal(prop: {
 								placeholder="A short description about the cloth"
 								value={clothingItem.description}
 								onChange={({ target }) => {
-									setClothingItem("description", target.value);
+									setClothingItem(
+										produce((state) => {
+											state.description = target.value;
+										})
+									);
 								}}
 							></textarea>
 							<div class="label">Optional</div>
@@ -244,7 +256,11 @@ export default function CreateClothingModal(prop: {
 							<select
 								class="select"
 								onChange={({ target }) => {
-									setClothingItem("size", target.value as ClothingItem["size"]);
+									setClothingItem(
+										produce((state) => {
+											state.size = target.value as ClothingItem["size"];
+										})
+									);
 								}}
 							>
 								<For each={clothingSizes}>
@@ -270,7 +286,11 @@ export default function CreateClothingModal(prop: {
 									max={MAX_PRICE_INPUT}
 									onfocusout={sanitisePriceInput}
 									onChange={({ target }) => {
-										setClothingItem("costPrice", parseInt(target.value));
+										setClothingItem(
+											produce((state) => {
+												state.costPrice = parseInt(target.value);
+											})
+										);
 									}}
 									value={clothingItem.costPrice}
 								/>
@@ -290,7 +310,11 @@ export default function CreateClothingModal(prop: {
 									max={MAX_PRICE_INPUT}
 									onfocusout={sanitisePriceInput}
 									onChange={({ target }) => {
-										setClothingItem("sellingPrice", parseInt(target.value));
+										setClothingItem(
+											produce((state) => {
+												state.sellingPrice = parseInt(target.value);
+											})
+										);
 									}}
 									value={clothingItem.sellingPrice}
 								/>
@@ -304,8 +328,9 @@ export default function CreateClothingModal(prop: {
 								required
 								onChange={({ target }) => {
 									setClothingItem(
-										"category",
-										target.value as (typeof clothingItem)["category"]
+										produce((state) => {
+											state.category = target.value as ClothingItem["category"];
+										})
 									);
 								}}
 							>
@@ -337,8 +362,10 @@ export default function CreateClothingModal(prop: {
 								required
 								onChange={({ target }) => {
 									setClothingItem(
-										"subCategory",
-										target.value as (typeof clothingItem)["subCategory"]
+										produce((state) => {
+											state.subCategory =
+												target.value as (typeof clothingItem)["subCategory"];
+										})
 									);
 								}}
 								value={clothingItem.subCategory}
@@ -351,8 +378,10 @@ export default function CreateClothingModal(prop: {
 								class="select"
 								onChange={({ target }) => {
 									setClothingItem(
-										"condition",
-										target.value as (typeof clothingItem)["condition"]
+										produce((state) => {
+											state.condition =
+												target.value as (typeof clothingItem)["condition"];
+										})
 									);
 								}}
 							>
@@ -375,8 +404,9 @@ export default function CreateClothingModal(prop: {
 								list={clothingMaterialListId}
 								onChange={({ target }) => {
 									setClothingItem(
-										"material",
-										target.value as (typeof clothingItem)["material"]
+										produce((state) => {
+											state.material = target.value;
+										})
 									);
 								}}
 								value={clothingItem.material}
@@ -397,8 +427,9 @@ export default function CreateClothingModal(prop: {
 								list={clothingColorListId}
 								onChange={({ target }) => {
 									setClothingItem(
-										"color",
-										target.value as (typeof clothingItem)["color"]
+										produce((state) => {
+											state.color = target.value;
+										})
 									);
 								}}
 								value={clothingItem.color}
@@ -418,15 +449,15 @@ export default function CreateClothingModal(prop: {
 										<input
 											type="checkbox"
 											class="checkbox"
-											onChange={({ target }) => {
-												const isSeasonChecked =
-													clothingItem.season[
-														season.toLowerCase() as keyof (typeof clothingItem)["season"]
-													];
+											onChange={(_) => {
+												const key =
+													season.toLowerCase() as keyof (typeof clothingItem)["season"];
+												const isSeasonChecked = clothingItem.season[key];
+
 												setClothingItem(
-													"season",
-													season.toLowerCase() as keyof (typeof clothingItem)["season"],
-													isSeasonChecked ? false : true
+													produce((state) => {
+														state.season[key] = !isSeasonChecked;
+													})
 												);
 											}}
 											checked={
@@ -452,19 +483,19 @@ export default function CreateClothingModal(prop: {
 											onChange={({ target }) => {
 												if (occasion == "Active Wear") {
 													setClothingItem(
-														"occasion",
-														"activeWear",
-														clothingItem.occasion.activeWear ? false : true
+														produce((state) => {
+															state.occasion.activeWear =
+																!clothingItem.occasion.activeWear;
+														})
 													);
 												} else {
+													const key =
+														occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"];
+
 													setClothingItem(
-														"occasion",
-														occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"],
-														clothingItem.occasion[
-															occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"]
-														]
-															? false
-															: true
+														produce((state) => {
+															state.occasion[key] = !clothingItem.occasion[key];
+														})
 													);
 												}
 											}}
@@ -490,7 +521,11 @@ export default function CreateClothingModal(prop: {
 								class="input"
 								placeholder="NA"
 								onChange={({ target }) => {
-									setClothingItem("brand", target.value);
+									setClothingItem(
+										produce((state) => {
+											state.brand = target.value;
+										})
+									);
 								}}
 								value={clothingItem.brand}
 							/>
@@ -517,8 +552,12 @@ export default function CreateClothingModal(prop: {
 							form={clothingFormId}
 							onClick={(_) => {
 								if (!isEditMode()) {
-									setClothingItem("id", crypto.randomUUID());
-									setClothingItem("dateBought", new Date());
+									setClothingItem(
+										produce((state) => {
+											state.id = crypto.randomUUID();
+											state.dateBought = new Date();
+										})
+									);
 								}
 
 								if (clothingForm.reportValidity()) {
