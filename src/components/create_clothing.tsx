@@ -185,6 +185,7 @@ export default function CreateClothingModal(prop: {
 							class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center"
 							ref={clothingDisplay}
 							style={{ "background-image": previewImg() }}
+							onClick={() => clothingImgInput.click()}
 						></div>
 
 						<fieldset class="fieldset row-start-3 col-span-4">
