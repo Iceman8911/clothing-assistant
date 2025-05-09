@@ -118,6 +118,9 @@ export default function Table<T extends Record<string, string | number>>(
 															setCheckboxes((prev) => [...prev, el]);
 														}
 													}}
+													onClick={(e) => {
+														e.stopPropagation();
+													}}
 												/>
 											</label>
 										</th>
