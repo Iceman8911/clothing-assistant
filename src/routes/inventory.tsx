@@ -30,10 +30,7 @@ export default function InventoryPage() {
 					sellingPrice: "Price",
 					quantity: "Quantity",
 				}}
-				onRowClick={(x) => {
-					console.log("here");
-					console.log(x);
-				}}
+				onRowClick={(x) => {}}
 			/>
 		</>
 	);

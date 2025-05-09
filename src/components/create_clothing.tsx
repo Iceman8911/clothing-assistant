@@ -1,10 +1,11 @@
 import Compressor from "compressorjs";
-import { createSignal, For } from "solid-js";
+import { createSignal, For, Setter } from "solid-js";
 import { gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
 
-export default function CreateClothingModal(props: {
-	dialogParent: HTMLDialogElement;
+export default function CreateClothingModal(prop: {
+	openState: boolean;
+	setOpenState: Setter<boolean>;
 }) {
 	const clothingSizes: ClothingItem["size"][] = ["XS", "S", "M", "L", "XL"];
 	const clothingCondition: ClothingItem["condition"][] = [
@@ -118,334 +119,355 @@ export default function CreateClothingModal(props: {
 		size: "M",
 		img: new File([], ""),
 	};
+
 	return (
-		<>
-			<form
-				class="grid grid-cols-6 gap-3"
-				id={clothingFormId}
-				ref={clothingForm}
-			>
-				{/* <h3 class="font-bold text-lg">Test Clothing Modal</h3>
+		<dialog
+			class="modal modal-bottom sm:modal-middle"
+			open={prop.openState}
+			onClose={() => prop.setOpenState(false)}
+		>
+			<div class="modal-box">
+				<form method="dialog">
+					<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+						✕
+					</button>
+				</form>
+
+				{/* The main form */}
+				<div>
+					<form
+						class="grid grid-cols-6 gap-3"
+						id={clothingFormId}
+						ref={clothingForm}
+					>
+						{/* <h3 class="font-bold text-lg">Test Clothing Modal</h3>
 			<p class="py-4">Press ESC key or click outside to close</p> */}
 
-				<div
-					class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center"
-					ref={clothingDisplay}
-					style={{ "background-image": previewImg() }}
-				></div>
+						<div
+							class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center"
+							ref={clothingDisplay}
+							style={{ "background-image": previewImg() }}
+						></div>
 
-				<fieldset class="fieldset row-start-3 col-span-4">
-					<legend class="fieldset-legend">Select an Image</legend>
-					<input
-						type="file"
-						class="file-input"
-						required
-						onChange={async (e) => {
-							const input = e.target as HTMLInputElement;
-							const file = input.files?.[0];
+						<fieldset class="fieldset row-start-3 col-span-4">
+							<legend class="fieldset-legend">Select an Image</legend>
+							<input
+								type="file"
+								class="file-input"
+								required
+								onChange={async (e) => {
+									const input = e.target as HTMLInputElement;
+									const file = input.files?.[0];
 
-							function fileToDataURL(file: File) {
-								return new Promise((resolve, reject) => {
-									const reader = new FileReader();
-									reader.onload = (e) => resolve(reader.result);
-									reader.onerror = reject;
-									reader.readAsDataURL(file);
-								});
-							}
+									function fileToDataURL(file: File) {
+										return new Promise((resolve, reject) => {
+											const reader = new FileReader();
+											reader.onload = (e) => resolve(reader.result);
+											reader.onerror = reject;
+											reader.readAsDataURL(file);
+										});
+									}
 
-							if (!file) return;
+									if (!file) return;
 
-							new Compressor(file, {
-								quality: 0.75,
-								retainExif: true,
-								async success(result) {
-									const newFile = new File([result], file.name, {
-										type: file.type,
+									new Compressor(file, {
+										quality: 0.75,
+										retainExif: true,
+										async success(result) {
+											const newFile = new File([result], file.name, {
+												type: file.type,
+											});
+											clothingItem.img = newFile;
+
+											setPreviewImg(`url(${await fileToDataURL(newFile)})`);
+										},
+										error(err) {
+											console.log(err.message);
+										},
 									});
-									clothingItem.img = newFile;
+								}}
+							/>
+							<label class="label">Max size 10MB</label>
+						</fieldset>
 
-									setPreviewImg(`url(${await fileToDataURL(newFile)})`);
-								},
-								error(err) {
-									console.log(err.message);
-								},
-							});
-						}}
-					/>
-					<label class="label">Max size 10MB</label>
-				</fieldset>
+						<fieldset class="fieldset col-span-3">
+							<legend class="fieldset-legend">Name:</legend>
+							<input
+								type="text"
+								class="input"
+								placeholder="Da Vinci's Leather Vest"
+								required
+								// value={clothingItem.name}
+								onChange={({ target }) => {
+									clothingItem.name = target.value;
+								}}
+							/>
+						</fieldset>
 
-				<fieldset class="fieldset col-span-3">
-					<legend class="fieldset-legend">Name:</legend>
-					<input
-						type="text"
-						class="input"
-						placeholder="Da Vinci's Leather Vest"
-						required
-						// value={clothingItem.name}
-						onChange={({ target }) => {
-							clothingItem.name = target.value;
-						}}
-					/>
-				</fieldset>
+						<fieldset class="fieldset col-start-4 col-span-3">
+							<legend class="fieldset-legend">Description</legend>
+							<textarea
+								class="textarea h-24"
+								placeholder="A short description about the cloth"
+								onChange={({ target }) => {
+									clothingItem.description = target.value;
+								}}
+							></textarea>
+							<div class="label">Optional</div>
+						</fieldset>
 
-				<fieldset class="fieldset col-start-4 col-span-3">
-					<legend class="fieldset-legend">Description</legend>
-					<textarea
-						class="textarea h-24"
-						placeholder="A short description about the cloth"
-						onChange={({ target }) => {
-							clothingItem.description = target.value;
-						}}
-					></textarea>
-					<div class="label">Optional</div>
-				</fieldset>
+						<fieldset class="fieldset col-span-2">
+							<legend class="fieldset-legend">Size</legend>
+							<select
+								class="select"
+								onChange={({ target }) => {
+									clothingItem.size = target.value as ClothingItem["size"];
+								}}
+							>
+								<For each={clothingSizes}>
+									{(size) => (
+										<option selected={size === clothingItem.size}>
+											{size}
+										</option>
+									)}
+								</For>
+							</select>
+						</fieldset>
 
-				<fieldset class="fieldset col-span-2">
-					<legend class="fieldset-legend">Size</legend>
-					<select
-						class="select"
-						onChange={({ target }) => {
-							clothingItem.size = target.value as ClothingItem["size"];
-						}}
-					>
-						<For each={clothingSizes}>
-							{(size) => (
-								<option selected={size === clothingItem.size}>{size}</option>
-							)}
-						</For>
-					</select>
-				</fieldset>
+						<fieldset class="fieldset col-span-3">
+							<legend class="fieldset-legend">Cost Price:</legend>
+							<label class="input">
+								₦
+								<input
+									type="number"
+									class="grow validator"
+									placeholder="1000"
+									required
+									min={MIN_PRICE_INPUT}
+									max={MAX_PRICE_INPUT}
+									onfocusout={sanitisePriceInput}
+									onChange={({ target }) => {
+										clothingItem.costPrice = parseInt(target.value);
+									}}
+								/>
+							</label>
+						</fieldset>
 
-				<fieldset class="fieldset col-span-3">
-					<legend class="fieldset-legend">Cost Price:</legend>
-					<label class="input">
-						₦
-						<input
-							type="number"
-							class="grow validator"
-							placeholder="1000"
-							required
-							min={MIN_PRICE_INPUT}
-							max={MAX_PRICE_INPUT}
-							onfocusout={sanitisePriceInput}
-							onChange={({ target }) => {
-								clothingItem.costPrice = parseInt(target.value);
+						<fieldset class="fieldset col-span-3">
+							<legend class="fieldset-legend">Selling Price:</legend>
+							<label class="input">
+								₦
+								<input
+									type="number"
+									class="grow validator"
+									placeholder="1000"
+									required
+									min={MIN_PRICE_INPUT}
+									max={MAX_PRICE_INPUT}
+									onfocusout={sanitisePriceInput}
+									onChange={({ target }) => {
+										clothingItem.sellingPrice = parseInt(target.value);
+									}}
+								/>
+							</label>
+						</fieldset>
+
+						<fieldset class="fieldset col-span-3 md:col-span-2">
+							<legend class="fieldset-legend">Category:</legend>
+							<select
+								class="select"
+								required
+								onChange={({ target }) => {
+									clothingItem.category =
+										target.value as (typeof clothingItem)["category"];
+								}}
+							>
+								<For
+									each={
+										[
+											"Tops",
+											"Bottoms",
+											"Inner Wear",
+											"Outer Wear",
+										] as ClothingItem["category"][]
+									}
+								>
+									{(category) => (
+										<option selected={category === clothingItem.category}>
+											{category}
+										</option>
+									)}
+								</For>
+							</select>
+						</fieldset>
+
+						<fieldset class="fieldset col-span-3 md:col-span-2">
+							<legend class="fieldset-legend">Sub Category:</legend>
+							<input
+								type="text"
+								class="input"
+								placeholder="Shirt"
+								required
+								onChange={({ target }) => {
+									clothingItem.subCategory =
+										target.value as (typeof clothingItem)["subCategory"];
+								}}
+							/>
+						</fieldset>
+
+						<fieldset class="fieldset col-span-3 md:col-span-2">
+							<legend class="fieldset-legend">Condition</legend>
+							<select
+								class="select"
+								onChange={({ target }) => {
+									clothingItem.condition =
+										target.value as (typeof clothingItem)["condition"];
+								}}
+							>
+								<For each={clothingCondition}>
+									{(condition) => (
+										<option selected={condition === clothingItem.condition}>
+											{condition}
+										</option>
+									)}
+								</For>
+							</select>
+						</fieldset>
+
+						<fieldset class="fieldset col-span-3 md:col-span-2">
+							<legend class="fieldset-legend">Material:</legend>
+							<input
+								type="text"
+								class="input"
+								placeholder={defaultClothingMaterial}
+								list={clothingMaterialListId}
+								onChange={({ target }) => {
+									clothingItem.material =
+										target.value as (typeof clothingItem)["material"];
+								}}
+							/>
+							<datalist id={clothingMaterialListId}>
+								<For each={clothingMaterials}>
+									{(material) => <option value={material}></option>}
+								</For>
+							</datalist>
+						</fieldset>
+
+						<fieldset class="fieldset col-span-2">
+							<legend class="fieldset-legend">Color:</legend>
+							<input
+								type="text"
+								class="input"
+								placeholder={defaultClothingColor}
+								list={clothingColorListId}
+								onChange={({ target }) => {
+									clothingItem.color =
+										target.value as (typeof clothingItem)["color"];
+								}}
+							/>
+							<datalist id={clothingColorListId}>
+								<For each={clothingColors}>
+									{(color) => <option value={color}></option>}
+								</For>
+							</datalist>
+						</fieldset>
+
+						<fieldset class="fieldset bg-base-100 border-base-300 rounded-box border p-4 grid grid-cols-2 col-span-4 md:col-span-3 max-w-[100%]">
+							<legend class="fieldset-legend">Season</legend>
+							<For each={["Spring", "Summer", "Fall", "Winter"] as const}>
+								{(season) => (
+									<label class="label">
+										<input
+											type="checkbox"
+											class="checkbox"
+											onChange={({ target }) => {
+												clothingItem.season[
+													season.toLowerCase() as keyof (typeof clothingItem)["season"]
+												] = target.checked;
+											}}
+										/>
+										{season}
+									</label>
+								)}
+							</For>
+						</fieldset>
+
+						<fieldset class="fieldset bg-base-100 border-base-300 rounded-box border p-4 grid grid-cols-2 col-span-4 md:col-span-3 max-w-[100%]">
+							<legend class="fieldset-legend">Occasion</legend>
+							<For each={["Casual", "Formal", "Active Wear"] as const}>
+								{(occasion) => (
+									<label class="label">
+										<input
+											type="checkbox"
+											class="checkbox"
+											onChange={({ target }) => {
+												if (occasion == "Active Wear") {
+													clothingItem.occasion.activeWear = target.checked;
+												} else {
+													clothingItem.occasion[
+														occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"]
+													] = target.checked;
+												}
+											}}
+										/>
+										{occasion}
+									</label>
+								)}
+							</For>
+						</fieldset>
+
+						{/* This would be moved up a bit to fit a blank space in the grid that's only visible on wider screens */}
+						<fieldset class="fieldset col-span-2 md:col-start-5 md:row-start-6">
+							<legend class="fieldset-legend">Brand:</legend>
+							<input
+								type="text"
+								class="input"
+								placeholder="NA"
+								onChange={({ target }) => {
+									clothingItem.brand = target.value;
+								}}
+							/>
+							<div class="label">Optional</div>
+						</fieldset>
+					</form>
+
+					<div class="mt-4 flex gap-4">
+						<button
+							type="button"
+							class="btn btn-secondary btn-soft ml-auto"
+							form={clothingFormId}
+							onClick={(_) => {
+								clothingForm.reset();
+								setPreviewImg("");
 							}}
-						/>
-					</label>
-				</fieldset>
-
-				<fieldset class="fieldset col-span-3">
-					<legend class="fieldset-legend">Selling Price:</legend>
-					<label class="input">
-						₦
-						<input
-							type="number"
-							class="grow validator"
-							placeholder="1000"
-							required
-							min={MIN_PRICE_INPUT}
-							max={MAX_PRICE_INPUT}
-							onfocusout={sanitisePriceInput}
-							onChange={({ target }) => {
-								clothingItem.sellingPrice = parseInt(target.value);
-							}}
-						/>
-					</label>
-				</fieldset>
-
-				<fieldset class="fieldset col-span-3 md:col-span-2">
-					<legend class="fieldset-legend">Category:</legend>
-					<select
-						class="select"
-						required
-						onChange={({ target }) => {
-							clothingItem.category =
-								target.value as (typeof clothingItem)["category"];
-						}}
-					>
-						<For
-							each={
-								[
-									"Tops",
-									"Bottoms",
-									"Inner Wear",
-									"Outer Wear",
-								] as ClothingItem["category"][]
-							}
 						>
-							{(category) => (
-								<option selected={category === clothingItem.category}>
-									{category}
-								</option>
-							)}
-						</For>
-					</select>
-				</fieldset>
+							Reset
+						</button>
 
-				<fieldset class="fieldset col-span-3 md:col-span-2">
-					<legend class="fieldset-legend">Sub Category:</legend>
-					<input
-						type="text"
-						class="input"
-						placeholder="Shirt"
-						required
-						onChange={({ target }) => {
-							clothingItem.subCategory =
-								target.value as (typeof clothingItem)["subCategory"];
-						}}
-					/>
-				</fieldset>
-
-				<fieldset class="fieldset col-span-3 md:col-span-2">
-					<legend class="fieldset-legend">Condition</legend>
-					<select
-						class="select"
-						onChange={({ target }) => {
-							clothingItem.condition =
-								target.value as (typeof clothingItem)["condition"];
-						}}
-					>
-						<For each={clothingCondition}>
-							{(condition) => (
-								<option selected={condition === clothingItem.condition}>
-									{condition}
-								</option>
-							)}
-						</For>
-					</select>
-				</fieldset>
-
-				<fieldset class="fieldset col-span-3 md:col-span-2">
-					<legend class="fieldset-legend">Material:</legend>
-					<input
-						type="text"
-						class="input"
-						placeholder={defaultClothingMaterial}
-						list={clothingMaterialListId}
-						onChange={({ target }) => {
-							clothingItem.material =
-								target.value as (typeof clothingItem)["material"];
-						}}
-					/>
-					<datalist id={clothingMaterialListId}>
-						<For each={clothingMaterials}>
-							{(material) => <option value={material}></option>}
-						</For>
-					</datalist>
-				</fieldset>
-
-				<fieldset class="fieldset col-span-2">
-					<legend class="fieldset-legend">Color:</legend>
-					<input
-						type="text"
-						class="input"
-						placeholder={defaultClothingColor}
-						list={clothingColorListId}
-						onChange={({ target }) => {
-							clothingItem.color =
-								target.value as (typeof clothingItem)["color"];
-						}}
-					/>
-					<datalist id={clothingColorListId}>
-						<For each={clothingColors}>
-							{(color) => <option value={color}></option>}
-						</For>
-					</datalist>
-				</fieldset>
-
-				<fieldset class="fieldset bg-base-100 border-base-300 rounded-box border p-4 grid grid-cols-2 col-span-4 md:col-span-3 max-w-[100%]">
-					<legend class="fieldset-legend">Season</legend>
-					<For each={["Spring", "Summer", "Fall", "Winter"] as const}>
-						{(season) => (
-							<label class="label">
-								<input
-									type="checkbox"
-									class="checkbox"
-									onChange={({ target }) => {
-										clothingItem.season[
-											season.toLowerCase() as keyof (typeof clothingItem)["season"]
-										] = target.checked;
-									}}
-								/>
-								{season}
-							</label>
-						)}
-					</For>
-				</fieldset>
-
-				<fieldset class="fieldset bg-base-100 border-base-300 rounded-box border p-4 grid grid-cols-2 col-span-4 md:col-span-3 max-w-[100%]">
-					<legend class="fieldset-legend">Occasion</legend>
-					<For each={["Casual", "Formal", "Active Wear"] as const}>
-						{(occasion) => (
-							<label class="label">
-								<input
-									type="checkbox"
-									class="checkbox"
-									onChange={({ target }) => {
-										if (occasion == "Active Wear") {
-											clothingItem.occasion.activeWear = target.checked;
-										} else {
-											clothingItem.occasion[
-												occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"]
-											] = target.checked;
-										}
-									}}
-								/>
-								{occasion}
-							</label>
-						)}
-					</For>
-				</fieldset>
-
-				{/* This would be moved up a bit to fit a blank space in the grid that's only visible on wider screens */}
-				<fieldset class="fieldset col-span-2 md:col-start-5 md:row-start-6">
-					<legend class="fieldset-legend">Brand:</legend>
-					<input
-						type="text"
-						class="input"
-						placeholder="NA"
-						onChange={({ target }) => {
-							clothingItem.brand = target.value;
-						}}
-					/>
-					<div class="label">Optional</div>
-				</fieldset>
-			</form>
-
-			<div class="mt-4 flex gap-4">
-				<button
-					type="button"
-					class="btn btn-secondary btn-soft ml-auto"
-					form={clothingFormId}
-					onClick={(_) => {
-						clothingForm.reset();
-						setPreviewImg("");
-					}}
-				>
-					Reset
-				</button>
-
-				<button
-					type="button"
-					class="btn btn-primary btn-soft "
-					form={clothingFormId}
-					onClick={(_) => {
-						clothingItem.id = crypto.randomUUID();
-						clothingItem.dateBought = new Date();
-						if (clothingForm.reportValidity()) {
-							gClothingItems.set(
-								clothingItem.id,
-								structuredClone(clothingItem)
-							);
-							props.dialogParent.close();
-						}
-					}}
-				>
-					Create
-				</button>
+						<button
+							type="button"
+							class="btn btn-primary btn-soft "
+							form={clothingFormId}
+							onClick={(_) => {
+								clothingItem.id = crypto.randomUUID();
+								clothingItem.dateBought = new Date();
+								if (clothingForm.reportValidity()) {
+									gClothingItems.set(
+										clothingItem.id,
+										structuredClone(clothingItem)
+									);
+									prop.setOpenState(false);
+								}
+							}}
+						>
+							Create
+						</button>
+					</div>
+				</div>
 			</div>
-		</>
+			<form method="dialog" class="modal-backdrop">
+				<button>close</button>
+			</form>
+		</dialog>
 	);
 }

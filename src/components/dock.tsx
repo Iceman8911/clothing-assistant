@@ -30,6 +30,7 @@ export default function Dock(props: any) {
 	});
 
 	const [prefersDarkTheme, setPrefersDarkTheme] = createSignal(false);
+	const [isModalOpen, setIsModalOpen] = createSignal(false);
 
 	onMount(() => {
 		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -38,8 +39,6 @@ export default function Dock(props: any) {
 			setPrefersDarkTheme(event.matches);
 		});
 	});
-
-	let createClothingModalDialog!: HTMLDialogElement;
 
 	return (
 		<>
@@ -60,7 +59,7 @@ export default function Dock(props: any) {
 					<span class="dock-label">Stock</span>
 				</button>
 
-				<button onClick={() => createClothingModalDialog.showModal()}>
+				<button onClick={() => setIsModalOpen(true)}>
 					<CirclePlusIcon />
 					<span class="dock-label">Add Cloth</span>
 				</button>
@@ -111,22 +110,10 @@ export default function Dock(props: any) {
 			</div>
 
 			{/* Dialog for the create clothing modal */}
-			<dialog
-				class="modal modal-bottom sm:modal-middle"
-				ref={createClothingModalDialog}
-			>
-				<div class="modal-box">
-					<form method="dialog">
-						<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-							✕
-						</button>
-					</form>
-					<CreateClothingModal dialogParent={createClothingModalDialog} />
-				</div>
-				<form method="dialog" class="modal-backdrop">
-					<button>close</button>
-				</form>
-			</dialog>
+			<CreateClothingModal
+				openState={isModalOpen()}
+				setOpenState={setIsModalOpen}
+			/>
 		</>
 	);
 }
