@@ -75,11 +75,13 @@ export default function Table<T extends Record<string, string | number>>(
 								<th
 									class="text-center cursor-pointer hover:bg-base-200"
 									onClick={() => {
-										setSelectionDirection(
-											selectionDirection() == "asc" ? "desc" : "asc"
-										);
+										batch(() => {
+											setSelectionDirection(
+												selectionDirection() == "asc" ? "desc" : "asc"
+											);
 
-										setSelectedHeader(key);
+											setSelectedHeader(key);
+										});
 									}}
 								>
 									{props.header[key]}
