@@ -106,15 +106,6 @@ export default function CreateClothingModal(prop: {
 
 	const [previewImg, setPreviewImg] = createSignal("");
 
-	function fileToDataURL(file: File) {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.onload = (e) => resolve(reader.result);
-			reader.onerror = reject;
-			reader.readAsDataURL(file);
-		});
-	}
-
 	/**
 	 * The actual cloth data
 	 */
@@ -137,6 +128,7 @@ export default function CreateClothingModal(prop: {
 		season: { fall: false, spring: false, summer: false, winter: false },
 		size: "M",
 		img: new File([], ""),
+		imgUrl: "",
 	});
 
 	const isEditMode = () => (prop.clothIdToEdit ? true : false);
@@ -149,7 +141,6 @@ export default function CreateClothingModal(prop: {
 			}
 
 			if (prop.openState() && clothingItem.img.name) {
-				setPreviewImg(`url(${await fileToDataURL(clothingItem.img)})`);
 				// Also set the file input's value
 				const dataTransfer = new DataTransfer();
 				dataTransfer.items.add(clothingItem.img);
@@ -184,7 +175,7 @@ export default function CreateClothingModal(prop: {
 						<div
 							class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center"
 							ref={clothingDisplay}
-							style={{ "background-image": previewImg() }}
+							style={{ "background-image": `url(${clothingItem.imgUrl})` }}
 							onClick={() => clothingImgInput.click()}
 						></div>
 
@@ -211,10 +202,9 @@ export default function CreateClothingModal(prop: {
 											setClothingItem(
 												produce((state) => {
 													state.img = newFile;
+													state.imgUrl = URL.createObjectURL(newFile);
 												})
 											);
-
-											setPreviewImg(`url(${await fileToDataURL(newFile)})`);
 										},
 										error(err) {
 											console.log(err.message);

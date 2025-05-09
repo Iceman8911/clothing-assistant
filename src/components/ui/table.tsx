@@ -9,6 +9,7 @@ import {
 	on,
 	Switch,
 } from "solid-js";
+import { gClothingItems } from "~/code/shared";
 
 interface BaseInterface {
 	id: string | number;
@@ -138,11 +139,41 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 											</label>
 										</th>
 										<For each={Object.entries(rowObject)}>
-											{([key, val]) => {
+											{([key, val], i) => {
 												return (
 													<Switch>
+														{/* Don't display the id */}
 														<Match when={key != "id"}>
-															<td class="text-center">{val}</td>
+															<td
+																class="text-center"
+																classList={{
+																	"flex flex-col md:flex-row items-center justify-center gap-2":
+																		key == "name",
+																}}
+															>
+																{/* Display a small thumbnail */}
+																<Switch>
+																	<Match
+																		when={
+																			key == "name" &&
+																			Object.keys(rowObject).includes("id")
+																		}
+																	>
+																		<div class="avatar">
+																			<div class="mask mask-squircle w-16">
+																				<img
+																					src={
+																						gClothingItems.get(
+																							rowObject["id"] as string
+																						)!.imgUrl
+																					}
+																				/>
+																			</div>
+																		</div>
+																	</Match>
+																</Switch>
+																<div class="w-min">{val}</div>
+															</td>
 														</Match>
 													</Switch>
 												);

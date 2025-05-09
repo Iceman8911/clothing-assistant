@@ -29,6 +29,7 @@ interface ClothingBase {
 	size: "XS" | "S" | "M" | "L" | "XL";
 	dateBought: Date;
 	img: File;
+	imgUrl: string;
 }
 
 interface ClothingTop extends ClothingBase {
