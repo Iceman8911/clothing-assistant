@@ -1,5 +1,6 @@
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
 import {
+	batch,
 	createEffect,
 	createMemo,
 	createSignal,
@@ -9,22 +10,26 @@ import {
 	Switch,
 } from "solid-js";
 
-interface TableProps<
-	TTableRowStructure extends Record<string, string | number>
-> {
+interface BaseInterface {
+	id: string | number;
+	[key: string]: string | number;
+}
+interface TableProps<TTableRowStructure extends BaseInterface> {
 	/**
-	 * Note that the value of each member is used as the actual header, so `{color:"Color", size:"Size"}` will produce headers "Color" and "Size"
+	 * Note that the value of each member is used as the actual header, so `{color:"Color", size:"Size"}` will produce headers "Color" and "Size". No need to include an id name here since it wouldn't be displayed
 	 */
-	header: Record<keyof TTableRowStructure, string>;
+	header: Record<Exclude<keyof TTableRowStructure, "id">, string>;
 	/**
-	 * Only the contents of shared properties between `header` and this are shown
+	 * Only the contents of shared properties between `header` and this are shown. `id` is not included and only used internally
 	 */
 	rows: TTableRowStructure[];
+	/**
+	 * Function to call when a row is clicked
+	 */
+	onRowClick?: (row: TTableRowStructure) => void;
 }
 
-export default function Table<T extends Record<string, string | number>>(
-	props: TableProps<T>
-) {
+export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 	const headerKeys = Object.keys(props.header) as string[];
 
 	const [selectedHeader, setSelectedHeader] = createSignal(headerKeys[0]);
@@ -33,15 +38,14 @@ export default function Table<T extends Record<string, string | number>>(
 	>("asc");
 
 	const processedRows = createMemo(() => {
-		return props.rows
-			.sort((a, b) => {
-				if (selectionDirection() == "asc") {
-					return a[selectedHeader()] < b[selectedHeader()] ? -1 : 1;
-				} else {
-					return a[selectedHeader()] > b[selectedHeader()] ? -1 : 1;
-				}
-			})
-			.map((val) => Object.values(val));
+		return props.rows.toSorted((a, b) => {
+			const header = selectedHeader();
+			if (selectionDirection() == "asc") {
+				return a[header] < b[header] ? -1 : 1;
+			} else {
+				return a[header] > b[header] ? -1 : 1;
+			}
+		});
 	});
 
 	const tableCheckboxIdentifierClass =
@@ -104,10 +108,17 @@ export default function Table<T extends Record<string, string | number>>(
 				</thead>
 				<tbody>
 					<For each={processedRows()}>
-						{(value, index) => {
+						{(rowObject, index) => {
 							return (
 								<>
-									<tr class="hover:bg-base-300">
+									<tr
+										class="hover:bg-base-300"
+										onClick={() => {
+											if (props.onRowClick) {
+												props.onRowClick(rowObject);
+											}
+										}}
+									>
 										<th class="w-min">
 											{/* {index() + 1}{" "} */}
 											<label>
@@ -126,8 +137,16 @@ export default function Table<T extends Record<string, string | number>>(
 												/>
 											</label>
 										</th>
-										<For each={value}>
-											{(val) => <td class="text-center">{val}</td>}
+										<For each={Object.entries(rowObject)}>
+											{([key, val]) => {
+												return (
+													<Switch>
+														<Match when={key != "id"}>
+															<td class="text-center">{val}</td>
+														</Match>
+													</Switch>
+												);
+											}}
 										</For>
 									</tr>
 								</>

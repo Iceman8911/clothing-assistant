@@ -7,6 +7,7 @@ export default function InventoryPage() {
 	const filteredRowData = createMemo(() => {
 		return [...gClothingItems.values()].map((cloth) => {
 			return {
+				id: cloth.id,
 				name: cloth.name,
 				color: cloth.color,
 				size: cloth.size,
@@ -28,6 +29,10 @@ export default function InventoryPage() {
 					category: "Category",
 					sellingPrice: "Price",
 					quantity: "Quantity",
+				}}
+				onRowClick={(x) => {
+					console.log("here");
+					console.log(x);
 				}}
 			/>
 		</>
