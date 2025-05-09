@@ -195,7 +195,7 @@ export default function CreateClothingModal(props: {
 						class="textarea h-24"
 						placeholder="A short description about the cloth"
 						onChange={({ target }) => {
-							clothingItem.name = target.value;
+							clothingItem.description = target.value;
 						}}
 					></textarea>
 					<div class="label">Optional</div>
