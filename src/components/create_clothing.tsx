@@ -1,11 +1,13 @@
 import Compressor from "compressorjs";
-import { createSignal, For, Setter } from "solid-js";
+import { createEffect, createSignal, For, Setter } from "solid-js";
+import { createStore, unwrap } from "solid-js/store";
 import { gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
 
 export default function CreateClothingModal(prop: {
 	openState: boolean;
 	setOpenState: Setter<boolean>;
+	clothIdToEdit?: string;
 }) {
 	const clothingSizes: ClothingItem["size"][] = ["XS", "S", "M", "L", "XL"];
 	const clothingCondition: ClothingItem["condition"][] = [
@@ -93,17 +95,27 @@ export default function CreateClothingModal(prop: {
 
 	let clothingDisplay!: HTMLDivElement;
 	let clothingForm!: HTMLFormElement;
+	let clothingImgInput!: HTMLInputElement;
 
 	const [previewImg, setPreviewImg] = createSignal("");
+
+	function fileToDataURL(file: File) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = (e) => resolve(reader.result);
+			reader.onerror = reject;
+			reader.readAsDataURL(file);
+		});
+	}
 
 	/**
 	 * The actual cloth data
 	 */
-	const clothingItem: ClothingItem = {
+	const [clothingItem, setClothingItem] = createStore<ClothingItem>({
 		id: "0",
 		name: "",
 		description: "",
-		color: "Red",
+		color: "",
 		gender: "Unisex",
 		quantity: 1,
 		category: "Tops",
@@ -118,7 +130,24 @@ export default function CreateClothingModal(prop: {
 		season: { fall: false, spring: false, summer: false, winter: false },
 		size: "M",
 		img: new File([], ""),
-	};
+	});
+
+	const isEditMode = () => (prop.clothIdToEdit ? true : false);
+
+	// Alter some things depending on if we're creating or editing
+	createEffect(async () => {
+		if (isEditMode()) {
+			setClothingItem(gClothingItems.get(prop.clothIdToEdit!)!);
+		}
+
+		if (prop.openState && clothingItem.img.name) {
+			setPreviewImg(`url(${await fileToDataURL(clothingItem.img)})`);
+			// Also set the file input's value
+			const dataTransfer = new DataTransfer();
+			dataTransfer.items.add(clothingItem.img);
+			clothingImgInput.files = dataTransfer.files;
+		}
+	});
 
 	return (
 		<dialog
@@ -155,18 +184,10 @@ export default function CreateClothingModal(prop: {
 								type="file"
 								class="file-input"
 								required
+								ref={clothingImgInput}
 								onChange={async (e) => {
 									const input = e.target as HTMLInputElement;
 									const file = input.files?.[0];
-
-									function fileToDataURL(file: File) {
-										return new Promise((resolve, reject) => {
-											const reader = new FileReader();
-											reader.onload = (e) => resolve(reader.result);
-											reader.onerror = reject;
-											reader.readAsDataURL(file);
-										});
-									}
 
 									if (!file) return;
 
@@ -177,7 +198,7 @@ export default function CreateClothingModal(prop: {
 											const newFile = new File([result], file.name, {
 												type: file.type,
 											});
-											clothingItem.img = newFile;
+											setClothingItem("img", newFile);
 
 											setPreviewImg(`url(${await fileToDataURL(newFile)})`);
 										},
@@ -196,10 +217,11 @@ export default function CreateClothingModal(prop: {
 								type="text"
 								class="input"
 								placeholder="Da Vinci's Leather Vest"
+								value={isEditMode() ? clothingItem.name : ""}
 								required
 								// value={clothingItem.name}
 								onChange={({ target }) => {
-									clothingItem.name = target.value;
+									setClothingItem("name", target.value);
 								}}
 							/>
 						</fieldset>
@@ -209,8 +231,9 @@ export default function CreateClothingModal(prop: {
 							<textarea
 								class="textarea h-24"
 								placeholder="A short description about the cloth"
+								value={clothingItem.description}
 								onChange={({ target }) => {
-									clothingItem.description = target.value;
+									setClothingItem("description", target.value);
 								}}
 							></textarea>
 							<div class="label">Optional</div>
@@ -221,7 +244,7 @@ export default function CreateClothingModal(prop: {
 							<select
 								class="select"
 								onChange={({ target }) => {
-									clothingItem.size = target.value as ClothingItem["size"];
+									setClothingItem("size", target.value as ClothingItem["size"]);
 								}}
 							>
 								<For each={clothingSizes}>
@@ -247,8 +270,9 @@ export default function CreateClothingModal(prop: {
 									max={MAX_PRICE_INPUT}
 									onfocusout={sanitisePriceInput}
 									onChange={({ target }) => {
-										clothingItem.costPrice = parseInt(target.value);
+										setClothingItem("costPrice", parseInt(target.value));
 									}}
+									value={clothingItem.costPrice}
 								/>
 							</label>
 						</fieldset>
@@ -266,8 +290,9 @@ export default function CreateClothingModal(prop: {
 									max={MAX_PRICE_INPUT}
 									onfocusout={sanitisePriceInput}
 									onChange={({ target }) => {
-										clothingItem.sellingPrice = parseInt(target.value);
+										setClothingItem("sellingPrice", parseInt(target.value));
 									}}
+									value={clothingItem.sellingPrice}
 								/>
 							</label>
 						</fieldset>
@@ -278,8 +303,10 @@ export default function CreateClothingModal(prop: {
 								class="select"
 								required
 								onChange={({ target }) => {
-									clothingItem.category =
-										target.value as (typeof clothingItem)["category"];
+									setClothingItem(
+										"category",
+										target.value as (typeof clothingItem)["category"]
+									);
 								}}
 							>
 								<For
@@ -309,9 +336,12 @@ export default function CreateClothingModal(prop: {
 								placeholder="Shirt"
 								required
 								onChange={({ target }) => {
-									clothingItem.subCategory =
-										target.value as (typeof clothingItem)["subCategory"];
+									setClothingItem(
+										"subCategory",
+										target.value as (typeof clothingItem)["subCategory"]
+									);
 								}}
+								value={clothingItem.subCategory}
 							/>
 						</fieldset>
 
@@ -320,8 +350,10 @@ export default function CreateClothingModal(prop: {
 							<select
 								class="select"
 								onChange={({ target }) => {
-									clothingItem.condition =
-										target.value as (typeof clothingItem)["condition"];
+									setClothingItem(
+										"condition",
+										target.value as (typeof clothingItem)["condition"]
+									);
 								}}
 							>
 								<For each={clothingCondition}>
@@ -342,9 +374,12 @@ export default function CreateClothingModal(prop: {
 								placeholder={defaultClothingMaterial}
 								list={clothingMaterialListId}
 								onChange={({ target }) => {
-									clothingItem.material =
-										target.value as (typeof clothingItem)["material"];
+									setClothingItem(
+										"material",
+										target.value as (typeof clothingItem)["material"]
+									);
 								}}
+								value={clothingItem.material}
 							/>
 							<datalist id={clothingMaterialListId}>
 								<For each={clothingMaterials}>
@@ -361,9 +396,12 @@ export default function CreateClothingModal(prop: {
 								placeholder={defaultClothingColor}
 								list={clothingColorListId}
 								onChange={({ target }) => {
-									clothingItem.color =
-										target.value as (typeof clothingItem)["color"];
+									setClothingItem(
+										"color",
+										target.value as (typeof clothingItem)["color"]
+									);
 								}}
+								value={clothingItem.color}
 							/>
 							<datalist id={clothingColorListId}>
 								<For each={clothingColors}>
@@ -381,10 +419,21 @@ export default function CreateClothingModal(prop: {
 											type="checkbox"
 											class="checkbox"
 											onChange={({ target }) => {
+												const isSeasonChecked =
+													clothingItem.season[
+														season.toLowerCase() as keyof (typeof clothingItem)["season"]
+													];
+												setClothingItem(
+													"season",
+													season.toLowerCase() as keyof (typeof clothingItem)["season"],
+													isSeasonChecked ? false : true
+												);
+											}}
+											checked={
 												clothingItem.season[
 													season.toLowerCase() as keyof (typeof clothingItem)["season"]
-												] = target.checked;
-											}}
+												]
+											}
 										/>
 										{season}
 									</label>
@@ -402,13 +451,30 @@ export default function CreateClothingModal(prop: {
 											class="checkbox"
 											onChange={({ target }) => {
 												if (occasion == "Active Wear") {
-													clothingItem.occasion.activeWear = target.checked;
+													setClothingItem(
+														"occasion",
+														"activeWear",
+														clothingItem.occasion.activeWear ? false : true
+													);
 												} else {
-													clothingItem.occasion[
-														occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"]
-													] = target.checked;
+													setClothingItem(
+														"occasion",
+														occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"],
+														clothingItem.occasion[
+															occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"]
+														]
+															? false
+															: true
+													);
 												}
 											}}
+											checked={
+												occasion == "Active Wear"
+													? clothingItem.occasion.activeWear
+													: clothingItem.occasion[
+															occasion.toLowerCase() as keyof (typeof clothingItem)["occasion"]
+													  ]
+											}
 										/>
 										{occasion}
 									</label>
@@ -424,8 +490,9 @@ export default function CreateClothingModal(prop: {
 								class="input"
 								placeholder="NA"
 								onChange={({ target }) => {
-									clothingItem.brand = target.value;
+									setClothingItem("brand", target.value);
 								}}
+								value={clothingItem.brand}
 							/>
 							<div class="label">Optional</div>
 						</fieldset>
@@ -449,18 +516,22 @@ export default function CreateClothingModal(prop: {
 							class="btn btn-primary btn-soft "
 							form={clothingFormId}
 							onClick={(_) => {
-								clothingItem.id = crypto.randomUUID();
-								clothingItem.dateBought = new Date();
+								if (!isEditMode()) {
+									setClothingItem("id", crypto.randomUUID());
+									setClothingItem("dateBought", new Date());
+								}
+
 								if (clothingForm.reportValidity()) {
+									console.log(clothingItem);
 									gClothingItems.set(
 										clothingItem.id,
-										structuredClone(clothingItem)
+										structuredClone(unwrap(clothingItem))
 									);
 									prop.setOpenState(false);
 								}
 							}}
 						>
-							Create
+							{isEditMode() ? "Save" : "Create"}
 						</button>
 					</div>
 				</div>

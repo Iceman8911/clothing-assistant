@@ -20,6 +20,9 @@ export default function InventoryPage() {
 	});
 
 	const [isModalOpen, setIsModalOpen] = createSignal(false);
+	const [idOfClothingItemToEdit, setIdOfClothingItemToEdit] = createSignal<
+		string | undefined
+	>();
 
 	return (
 		<>
@@ -34,6 +37,7 @@ export default function InventoryPage() {
 					quantity: "Quantity",
 				}}
 				onRowClick={({ id }) => {
+					setIdOfClothingItemToEdit(id);
 					setIsModalOpen(true);
 				}}
 			/>
@@ -41,6 +45,7 @@ export default function InventoryPage() {
 			<CreateClothingModal
 				openState={isModalOpen()}
 				setOpenState={setIsModalOpen}
+				clothIdToEdit={idOfClothingItemToEdit()}
 			/>
 		</>
 	);
