@@ -522,7 +522,6 @@ export default function CreateClothingModal(prop: {
 								}
 
 								if (clothingForm.reportValidity()) {
-									console.log(clothingItem);
 									gClothingItems.set(
 										clothingItem.id,
 										structuredClone(unwrap(clothingItem))
