@@ -1,9 +1,9 @@
-import { createStore } from "solid-js/store";
+import { createSignal } from "solid-js";
 import type { ClothingItem } from "./types";
 
-const [clothingItems, setClothingItems] = createStore<ClothingItem[]>([]);
+const [clothingItems, setClothingItems] = createSignal<ClothingItem[]>([]);
 
 export {
-	clothingItems as clothingItemStore,
-	setClothingItems as setClothingItemsStore,
+	clothingItems as clothingItemSignal,
+	setClothingItems as setClothingItemsSignal,
 };

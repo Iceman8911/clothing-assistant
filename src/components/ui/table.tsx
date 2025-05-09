@@ -1,5 +1,6 @@
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
-import { createSignal, For } from "solid-js";
+import { createEffect, createSignal, For, on } from "solid-js";
+import { clothingItemSignal } from "~/code/shared";
 
 interface TableProps<
 	TTableRowStructure extends Record<string, string | number>
@@ -17,13 +18,17 @@ interface TableProps<
 export default function Table<T extends Record<string, any>>(
 	props: TableProps<T>
 ) {
-	const { header, data } = props;
-	const headerValues = Object.values(header) as string[];
-	const headerKeys = Object.keys(header);
+	const headerValues = Object.values(props.header) as string[];
+	const headerKeys = Object.keys(props.header);
 
 	const [dataValues, setDataValues] = createSignal(
-		data.map((item) => headerKeys.map((key) => item[key]))
+		props.data.map((item) => headerKeys.map((key) => item[key]))
 	);
+
+	createEffect(() => {
+		console.log(props.data);
+		console.log(dataValues());
+	});
 
 	const [selectedHeader, setSelectedHeader] = createSignal(headerValues[0]);
 	const [selectionDirection, setSelectionDirection] = createSignal<
