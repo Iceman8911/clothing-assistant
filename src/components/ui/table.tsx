@@ -41,7 +41,7 @@ export default function Table<T extends Record<string, string | number>>(
 	const [checkboxes, setCheckboxes] = createSignal<HTMLInputElement[]>([]);
 
 	return (
-		<div class="overflow-x-auto">
+		<div class="overflow-x-auto max-h-[80vh]">
 			<table class="table table-zebra">
 				{/* head */}
 				<thead>
