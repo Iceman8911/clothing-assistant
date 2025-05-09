@@ -5,98 +5,24 @@ interface TableProps<
 	TTableRowStructure extends Record<string, string | number>
 > {
 	/**
-	 * Note that the value of each member is used as the actual header, so `{color:"Color", size:"Size"}`
+	 * Note that the value of each member is used as the actual header, so `{color:"Color", size:"Size"}` will produce headers "Color" and "Size"
 	 */
-	header: TTableRowStructure;
+	header: Partial<Record<keyof TTableRowStructure, string>>;
+	/**
+	 * Only the contents of shared properties between `header` and this are shown
+	 */
 	data: TTableRowStructure[];
 }
 
-interface ClothData extends Record<string, string | number> {
-	cloth: string;
-	color: string;
-	size: string;
-	type: string;
-	price: number;
-	quantity: number;
-}
-
-export default function Table<T extends Record<string, string | number>>(
+export default function Table<T extends Record<string, any>>(
 	props: TableProps<T>
 ) {
-	// props?: TableProps<T>
-	// FIXME: Get rid of this once the API is ready
-	// const dummyTableData: TableProps<ClothData> = {
-	// 	header: ["cloth", "color", "size", "type", "price", "quantity"],
-	// 	data: [
-	// 		{
-	// 			cloth: "T-Shirt",
-	// 			color: "Red",
-	// 			size: "L",
-	// 			type: "T-Shirt",
-	// 			price: 100,
-	// 			quantity: 10,
-	// 		},
-	// 		{
-	// 			cloth: "Jeans",
-	// 			color: "Blue",
-	// 			size: "M",
-	// 			type: "Jeans",
-	// 			price: 50,
-	// 			quantity: 20,
-	// 		},
-	// 		{
-	// 			cloth: "Jacket",
-	// 			color: "Black",
-	// 			size: "S",
-	// 			type: "Jacket",
-	// 			price: 150,
-	// 			quantity: 5,
-	// 		},
-	// 		{
-	// 			cloth: "Sweater",
-	// 			color: "White",
-	// 			size: "L",
-	// 			type: "Sweater",
-	// 			price: 120,
-	// 			quantity: 15,
-	// 		},
-	// 		{
-	// 			cloth: "Dress",
-	// 			color: "Red",
-	// 			size: "M",
-	// 			type: "Dress",
-	// 			price: 80,
-	// 			quantity: 25,
-	// 		},
-	// 		{
-	// 			cloth: "Gloves",
-	// 			color: "Black",
-	// 			size: "M",
-	// 			type: "Gloves",
-	// 			price: 20,
-	// 			quantity: 30,
-	// 		},
-	// 	],
-	// };
-	// console;
-	// const { header, data } = props;
-	console.log(props);
 	const { header, data } = props;
-	const headerValues = (Object.values(header) as string[]).map(
-		(val) => val[0].toUpperCase() + val.slice(1)
-	);
+	const headerValues = Object.values(header) as string[];
 	const headerKeys = Object.keys(header);
 
 	const [dataValues, setDataValues] = createSignal(
-		data.map((item) =>
-			Object.entries(item)
-				.map(([key, val]) => {
-					if (headerKeys.includes(key)) {
-						return val;
-					}
-				})
-				.filter((val) => val != undefined)
-		)
+		data.map((item) => headerKeys.map((key) => item[key]))
 	);
 
 	const [selectedHeader, setSelectedHeader] = createSignal(headerValues[0]);
@@ -118,9 +44,9 @@ export default function Table<T extends Record<string, string | number>>(
 		setDataValues((val) => {
 			return val.toSorted((a, b) => {
 				const rowItemA =
-					a[headerValues.indexOf(headerToSortBy ?? selectedHeader())];
+					a[headerKeys.indexOf(headerToSortBy ?? selectedHeader())];
 				const rowItemB =
-					b[headerValues.indexOf(headerToSortBy ?? selectedHeader())];
+					b[headerKeys.indexOf(headerToSortBy ?? selectedHeader())];
 
 				if (selectionDirection() == "asc") {
 					return rowItemA > rowItemB ? 1 : -1;
