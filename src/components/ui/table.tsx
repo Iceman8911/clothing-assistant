@@ -51,7 +51,7 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 
 			const fuseSearch = new Fuse(rowsToReturn, {
 				keys: searchRowKeys,
-				shouldSort: true,
+				ignoreLocation: true,
 			});
 
 			rowsToReturn = fuseSearch
