@@ -10,8 +10,8 @@ import {
 	Switch,
 } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
-import { recognizeDescribeApi } from "~/code/image-recognition/ai-api";
-import { gClothingItems } from "~/code/shared";
+import { understandImageWithGemini } from "./../code/image-recognition/ai-api";
+import { gApiKeys, gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
 import { fileToDataURL } from "~/code/utilities";
 
@@ -188,13 +188,16 @@ export default function CreateClothingModal(prop: {
 										onClick={async (e) => {
 											e.stopPropagation();
 											// TODO: Call API
-											const base64String = await fileToDataURL(
-												clothingItem.img
-											);
+											const base64String = (
+												await fileToDataURL(clothingItem.img)
+											).replace(/^data:image\/\w+;base64,/, "");
 
-											recognizeDescribeApi(base64String, (err, data) => {
-												console.log(data);
-											});
+											console.log(
+												await understandImageWithGemini(
+													base64String,
+													gApiKeys.gemini
+												)
+											);
 										}}
 									>
 										<p>Generate Data</p>

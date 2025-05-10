@@ -6,15 +6,15 @@ export default function SettingsPage() {
 		<div class="p-4">
 			<h2 class="font-bold">Settings</h2>
 			<fieldset class="fieldset">
-				<legend class="fieldset-legend">Cloudmersive API Key:</legend>
+				<legend class="fieldset-legend">Gemini API Key:</legend>
 				<input
 					type="text"
 					class="input"
 					placeholder="Type here"
-					value={gApiKeys.cloudmersive}
+					value={gApiKeys.gemini}
 					onfocusout={(e) =>
 						gSetApiKeys(
-							produce((state) => (state.cloudmersive = e.currentTarget.value))
+							produce((state) => (state.gemini = e.currentTarget.value))
 						)
 					}
 				/>

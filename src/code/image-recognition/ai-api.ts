@@ -1,27 +1,27 @@
-//@ts-expect-error
-import cloudmersiveValidateApiClient from "cloudmersive-image-api-client";
 import { gApiKeys } from "../shared";
+import { GoogleGenAI } from "@google/genai";
 
-type Callback = (
-	error: Error,
-	result: { [key: string]: any },
-	response: Response
-) => void;
-type RecogniseDescribeAPI = (imageFile: string, callback: Callback) => void;
-
-function initCloudmersive(): any {
-	const defaultClient = cloudmersiveValidateApiClient.ApiClient.instance;
-	const Apikey = defaultClient.authentications["Apikey"];
-	Apikey.apiKey = gApiKeys.cloudmersive;
-
-	return new cloudmersiveValidateApiClient.RecognizeApi();
+function initGoogleGenAI(apiKey: string) {
+	return new GoogleGenAI({ apiKey });
 }
 
-export const recognizeDescribeApi: RecogniseDescribeAPI = (
-	imageFile,
-	callback
-) => {
-	const api = initCloudmersive();
+export async function understandImageWithGemini(
+	/** Base64 encoded image */
+	imageData: string,
+	apiKey: string,
+	model = "gemini-2.0-flash"
+) {
+	const ai = initGoogleGenAI(apiKey);
 
-	api.recognizeDescribe(imageFile, callback);
-};
+	const contents = [
+		{
+			inlineData: {
+				mimeType: "image/jpeg",
+				data: imageData,
+			},
+		},
+		{ text: "Return a short description of this image" },
+	];
+
+	return await ai.models.generateContent({ model, contents });
+}
