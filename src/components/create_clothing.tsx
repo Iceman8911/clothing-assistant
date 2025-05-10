@@ -536,14 +536,23 @@ export default function CreateClothingModal(prop: {
 					<div class="mt-4 flex gap-4">
 						<button
 							type="button"
-							class="btn btn-secondary btn-soft ml-auto"
+							class="btn btn-soft ml-auto"
+							classList={{
+								"btn-secondary": !isEditMode(),
+								"btn-error": isEditMode(),
+							}}
 							form={clothingFormId}
 							onClick={(_) => {
-								clothingForm.reset();
-								setPreviewImg("");
+								if (isEditMode()) {
+									prop.setOpenState(false);
+									gClothingItems.delete(clothingItem.id);
+								} else {
+									clothingForm.reset();
+									setPreviewImg("");
+								}
 							}}
 						>
-							Reset
+							{isEditMode() ? "Delete" : "Reset"}
 						</button>
 
 						<button
