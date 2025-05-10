@@ -14,6 +14,7 @@ import { gClothingItems, gSearchText } from "~/code/shared";
 
 interface BaseInterface {
 	id: string | number;
+	name: string;
 	[key: string]: string | number;
 }
 interface TableProps<TTableRowStructure extends BaseInterface> {
@@ -155,7 +156,15 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 												/>
 											</label>
 										</th>
-										<For each={Object.entries(rowObject)}>
+										<For
+											each={
+												Object.entries(rowObject) as (
+													| ["name", string]
+													| ["id", string | number]
+													| [string, string | number]
+												)[]
+											}
+										>
 											{([key, val], i) => {
 												return (
 													<Switch>
