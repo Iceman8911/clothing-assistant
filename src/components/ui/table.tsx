@@ -41,7 +41,25 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 	>("asc");
 
 	const processedRows = createMemo(() => {
-		const sortedRows = props.rows.toSorted((a, b) => {
+		let rowsToReturn = props.rows;
+
+		if (props.rows[0] && gSearchText()) {
+			const searchRowKeys = headerKeys.filter((key) => {
+				const type = typeof props.rows[0][key];
+				return type == "string" || type == "number";
+			});
+
+			const fuseSearch = new Fuse(rowsToReturn, {
+				keys: searchRowKeys,
+				shouldSort: true,
+			});
+
+			rowsToReturn = fuseSearch
+				.search(gSearchText())
+				.map((result) => result.item);
+		}
+
+		rowsToReturn = rowsToReturn.toSorted((a, b) => {
 			const header = selectedHeader();
 			if (selectionDirection() == "asc") {
 				return a[header] < b[header] ? -1 : 1;
@@ -50,21 +68,7 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 			}
 		});
 
-		if (props.rows[0] && gSearchText()) {
-			const searchRowKeys = headerKeys.filter((key) => {
-				const type = typeof props.rows[0][key];
-				return type == "string" || type == "number";
-			});
-
-			const fuseSearch = new Fuse(sortedRows, {
-				keys: searchRowKeys,
-				shouldSort: true,
-			});
-
-			return fuseSearch.search(gSearchText()).map((result) => result.item);
-		}
-
-		return sortedRows;
+		return rowsToReturn;
 	});
 
 	const tableCheckboxIdentifierClass =
