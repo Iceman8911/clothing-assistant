@@ -104,8 +104,6 @@ export default function CreateClothingModal(prop: {
 	let clothingForm!: HTMLFormElement;
 	let clothingImgInput!: HTMLInputElement;
 
-	const [previewImg, setPreviewImg] = createSignal("");
-
 	/**
 	 * The actual cloth data
 	 */
@@ -550,7 +548,6 @@ export default function CreateClothingModal(prop: {
 									gClothingItems.delete(clothingItem.id);
 								} else {
 									clothingForm.reset();
-									setPreviewImg("");
 								}
 							}}
 						>
