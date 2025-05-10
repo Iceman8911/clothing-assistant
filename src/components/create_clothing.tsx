@@ -10,8 +10,10 @@ import {
 	Switch,
 } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
+import { recognizeDescribeApi } from "~/code/image-recognition/ai-api";
 import { gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
+import { fileToDataURL } from "~/code/utilities";
 
 export default function CreateClothingModal(prop: {
 	openState: Accessor<boolean>;
@@ -183,9 +185,16 @@ export default function CreateClothingModal(prop: {
 									<button
 										type="button"
 										class="btn btn-primary btn-soft flex justify-center items-center opacity-75"
-										onClick={(e) => {
+										onClick={async (e) => {
 											e.stopPropagation();
 											// TODO: Call API
+											const base64String = await fileToDataURL(
+												clothingItem.img
+											);
+
+											recognizeDescribeApi(base64String, (err, data) => {
+												console.log(data);
+											});
 										}}
 									>
 										<p>Generate Data</p>

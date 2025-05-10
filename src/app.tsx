@@ -7,8 +7,6 @@ import InventoryPage from "./routes/inventory";
 import ReportPage from "./routes/reports";
 import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
-
-import "./code/image-recognition/ai-api";
 import { CustomRoute } from "./code/enums";
 import Dock from "./components/dock";
 
