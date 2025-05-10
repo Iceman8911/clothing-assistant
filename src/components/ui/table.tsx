@@ -162,7 +162,6 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 														{/* Don't display the id */}
 														<Match when={key != "id"}>
 															<td
-																class="text-center"
 																classList={{
 																	"flex flex-col md:flex-row items-center justify-center gap-2":
 																		key == "name",
@@ -189,7 +188,14 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 																		</div>
 																	</Match>
 																</Switch>
-																<div class="w-min">{val}</div>
+																<div
+																	class="w-min"
+																	classList={{
+																		"mr-auto ml-auto": key != "name",
+																	}}
+																>
+																	{val}
+																</div>
 															</td>
 														</Match>
 													</Switch>
