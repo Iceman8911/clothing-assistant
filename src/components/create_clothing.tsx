@@ -4,8 +4,10 @@ import {
 	createEffect,
 	createSignal,
 	For,
+	Match,
 	on,
 	Setter,
+	Switch,
 } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 import { gClothingItems } from "~/code/shared";
@@ -171,11 +173,26 @@ export default function CreateClothingModal(prop: {
 			<p class="py-4">Press ESC key or click outside to close</p> */}
 
 						<div
-							class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center"
+							class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center flex justify-center items-center"
 							ref={clothingDisplay}
 							style={{ "background-image": `url(${clothingItem.imgUrl})` }}
 							onClick={() => clothingImgInput.click()}
-						></div>
+						>
+							<Switch>
+								<Match when={clothingItem.imgUrl}>
+									<button
+										type="button"
+										class="btn btn-primary btn-soft flex justify-center items-center opacity-75"
+										onClick={(e) => {
+											e.stopPropagation();
+											// TODO: Call API
+										}}
+									>
+										<p>Generate Data</p>
+									</button>
+								</Match>
+							</Switch>
+						</div>
 
 						<fieldset class="fieldset row-start-3 col-span-4">
 							<legend class="fieldset-legend">Select an Image</legend>
