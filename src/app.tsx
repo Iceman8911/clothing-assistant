@@ -9,6 +9,8 @@ import ReportPage from "./routes/reports";
 import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
 
+import "./code/image-recognition/ai-api";
+
 export default function App() {
 	return (
 		<>
