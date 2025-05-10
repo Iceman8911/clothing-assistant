@@ -8,25 +8,19 @@ import { createSignal, onMount } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import CirclePlusIcon from "lucide-solid/icons/circle-plus";
 import CreateClothingModal from "./create_clothing";
-
-export const enum DockButton {
-	HOME = "/",
-	STOCK = "/inventory",
-	REPORTS = "/reports",
-	// SETTINGS = "/settings",
-}
+import { CustomRoute } from "~/code/enums";
 
 export default function Dock(props: any) {
-	const [activeBtn, setActiveBtn] = createSignal(DockButton.HOME);
+	const [activeBtn, setActiveBtn] = createSignal(CustomRoute.HOME);
 	const navigate = useNavigate();
 
-	const handleBtnClick = (btn: DockButton) => {
+	const handleBtnClick = (btn: CustomRoute) => {
 		setActiveBtn(btn);
 		navigate(btn);
 	};
 
 	onMount(() => {
-		navigate(DockButton.HOME);
+		navigate(CustomRoute.HOME);
 	});
 
 	const [prefersDarkTheme, setPrefersDarkTheme] = createSignal(false);
@@ -44,16 +38,16 @@ export default function Dock(props: any) {
 		<>
 			<div class="dock dock-lg">
 				<button
-					class={activeBtn() == DockButton.HOME ? "dock-active" : ""}
-					onClick={() => handleBtnClick(DockButton.HOME)}
+					class={activeBtn() == CustomRoute.HOME ? "dock-active" : ""}
+					onClick={() => handleBtnClick(CustomRoute.HOME)}
 				>
 					<HomeIcon />
 					<span class="dock-label">Home</span>
 				</button>
 
 				<button
-					class={activeBtn() == DockButton.STOCK ? "dock-active" : ""}
-					onClick={() => handleBtnClick(DockButton.STOCK)}
+					class={activeBtn() == CustomRoute.STOCK ? "dock-active" : ""}
+					onClick={() => handleBtnClick(CustomRoute.STOCK)}
 				>
 					<StockIcon />
 					<span class="dock-label">Stock</span>
@@ -65,8 +59,8 @@ export default function Dock(props: any) {
 				</button>
 
 				<button
-					class={activeBtn() == DockButton.REPORTS ? "dock-active" : ""}
-					onClick={() => handleBtnClick(DockButton.REPORTS)}
+					class={activeBtn() == CustomRoute.REPORTS ? "dock-active" : ""}
+					onClick={() => handleBtnClick(CustomRoute.REPORTS)}
 				>
 					<ReportsIcon />
 					<span class="dock-label">Reports</span>
