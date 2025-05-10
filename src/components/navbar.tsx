@@ -2,6 +2,7 @@ import SettingsIcon from "lucide-solid/icons/settings";
 import ListFilterIcon from "lucide-solid/icons/list-filter";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import SearchIcon from "lucide-solid/icons/search";
+import { gSetSearchText } from "~/code/shared";
 
 export default function NavBar() {
 	return (
@@ -42,7 +43,13 @@ export default function NavBar() {
 
 					<label class="input input-primary dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm -right-15 md:-right-10 -bottom-10">
 						<SearchIcon class="w-4 h-4 mt-auto mb-auto" />
-						<input type="search" required placeholder="Search" />
+						<input
+							type="search"
+							required
+							placeholder="Search"
+							class="max-w-[90%]"
+							oninput={(e) => gSetSearchText(e.currentTarget.value)}
+						/>
 					</label>
 				</div>
 

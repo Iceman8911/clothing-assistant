@@ -1,3 +1,4 @@
+import Fuse from "fuse.js";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
 import {
 	batch,
@@ -9,7 +10,7 @@ import {
 	on,
 	Switch,
 } from "solid-js";
-import { gClothingItems } from "~/code/shared";
+import { gClothingItems, gSearchText } from "~/code/shared";
 
 interface BaseInterface {
 	id: string | number;
@@ -39,7 +40,7 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 	>("asc");
 
 	const processedRows = createMemo(() => {
-		return props.rows.toSorted((a, b) => {
+		const sortedRows = props.rows.toSorted((a, b) => {
 			const header = selectedHeader();
 			if (selectionDirection() == "asc") {
 				return a[header] < b[header] ? -1 : 1;
@@ -47,6 +48,22 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 				return a[header] > b[header] ? -1 : 1;
 			}
 		});
+
+		if (props.rows[0] && gSearchText()) {
+			const searchRowKeys = headerKeys.filter((key) => {
+				const type = typeof props.rows[0][key];
+				return type == "string" || type == "number";
+			});
+
+			const fuseSearch = new Fuse(sortedRows, {
+				keys: searchRowKeys,
+				shouldSort: true,
+			});
+
+			return fuseSearch.search(gSearchText()).map((result) => result.item);
+		}
+
+		return sortedRows;
 	});
 
 	const tableCheckboxIdentifierClass =
