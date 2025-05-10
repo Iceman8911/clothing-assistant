@@ -3,8 +3,11 @@ import ListFilterIcon from "lucide-solid/icons/list-filter";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import SearchIcon from "lucide-solid/icons/search";
 import { gSetSearchText } from "~/code/shared";
-
+import { useNavigate } from "@solidjs/router";
+import { CustomRoute } from "~/code/enums";
 export default function NavBar() {
+	const navigate = useNavigate();
+
 	return (
 		<div class="navbar bg-base-100 shadow-sm">
 			<div class="navbar-start">
@@ -74,7 +77,10 @@ export default function NavBar() {
 					</div>
 				</button>
 
-				<button class="btn btn-ghost btn-circle">
+				<button
+					class="btn btn-ghost btn-circle"
+					onclick={(_) => navigate(CustomRoute.SETTINGS)}
+				>
 					<div class="indicator">
 						<SettingsIcon />
 						{/* <span class="badge badge-xs badge-primary indicator-item"></span> */}
