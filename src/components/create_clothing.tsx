@@ -201,6 +201,8 @@ export default function CreateClothingModal(prop: {
 											});
 											setClothingItem(
 												produce((state) => {
+													if (state.imgUrl) URL.revokeObjectURL(state.imgUrl);
+
 													state.img = newFile;
 													state.imgUrl = URL.createObjectURL(newFile);
 												})
