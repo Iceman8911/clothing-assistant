@@ -1,6 +1,7 @@
 import SettingsIcon from "lucide-solid/icons/settings";
 import ListFilterIcon from "lucide-solid/icons/list-filter";
 import ShirtIcon from "lucide-solid/icons/shirt";
+import SearchIcon from "lucide-solid/icons/search";
 
 export default function NavBar() {
 	return (
@@ -31,24 +32,20 @@ export default function NavBar() {
 				<ShirtIcon class="mr-1" />
 				Cloventh
 			</div>
+
 			<div class="navbar-end">
-				<button class="btn btn-ghost btn-circle">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						{" "}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-						/>{" "}
-					</svg>
-				</button>
+				{/* Search Dropdown */}
+				<div class="dropdown">
+					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+						<SearchIcon class="w-5 h-5" />
+					</div>
+
+					<label class="input input-primary dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm -right-15 md:-right-10 -bottom-10">
+						<SearchIcon class="w-4 h-4 mt-auto mb-auto" />
+						<input type="search" required placeholder="Search" />
+					</label>
+				</div>
+
 				<button class="btn btn-ghost btn-circle">
 					<div class="indicator">
 						<svg
@@ -69,6 +66,7 @@ export default function NavBar() {
 						<span class="badge badge-xs badge-primary indicator-item"></span>
 					</div>
 				</button>
+
 				<button class="btn btn-ghost btn-circle">
 					<div class="indicator">
 						<SettingsIcon />
