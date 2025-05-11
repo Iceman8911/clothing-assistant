@@ -1,6 +1,6 @@
+import { ClothingItem } from "../classes/clothing";
 import { gApiKeys } from "../shared";
 import { GoogleGenAI } from "@google/genai";
-import { ClothingItem } from "../types";
 
 function initGoogleGenAI(apiKey: string) {
 	return new GoogleGenAI({ apiKey });

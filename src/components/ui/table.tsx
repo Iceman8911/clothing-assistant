@@ -194,7 +194,7 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 																					src={
 																						gClothingItems.get(
 																							rowObject["id"] as string
-																						)!.imgUrl
+																						)!.imgData
 																					}
 																				/>
 																			</div>

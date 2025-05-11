@@ -1,8 +1,8 @@
 import { createSignal } from "solid-js";
-import type { ClothingItem } from "./types";
 import { ReactiveMap } from "@solid-primitives/map";
 import { createStore } from "solid-js/store";
 import { useNavigate } from "@solidjs/router";
+import { ClothingItem } from "./classes/clothing";
 
 /**
  * Each clothing item is indexed with it's `id`
