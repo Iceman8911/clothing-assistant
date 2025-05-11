@@ -187,17 +187,49 @@ export default function CreateClothingModal(prop: {
 										class="btn btn-primary btn-soft flex justify-center items-center opacity-75"
 										onClick={async (e) => {
 											e.stopPropagation();
-											// TODO: Call API
+
 											const base64String = (
 												await fileToDataURL(clothingItem.img)
 											).replace(/^data:image\/\w+;base64,/, "");
 
-											console.log(
-												await understandImageWithGemini(
-													base64String,
-													gApiKeys.gemini
-												)
-											);
+											try {
+												/**
+												 * Example: \```json
+{
+  "Name": "Plaid Shirt",
+  "Description": "A short-sleeved plaid shirt with a button-down front, chest pockets with flaps, and a pointed collar.",
+  "Category": "Tops",
+  "Subcategory": "Shirt",
+  "Material": "Cotton",
+  "Color": "Blue, Orange, Black",
+  "Brand": "NA",
+  "Season": "Spring, Summer, Fall",
+  "Occasion": "Casual",
+  "Condition": "New",
+  "Gender": "Male"
+}
+```
+												 */
+												let aiJsonTextResponse =
+													(
+														await understandImageWithGemini(
+															base64String,
+															gApiKeys.gemini
+														)
+													).text ?? "";
+
+												// Cleanup the opening and closing braces
+												aiJsonTextResponse = aiJsonTextResponse
+													.replace("```", "")
+													.replace("json", "")
+													.replace("```", "");
+
+												const aiJsonResponse = JSON.parse(aiJsonTextResponse);
+
+												console.log(aiJsonResponse);
+											} catch (error) {
+												console.log(error);
+											}
 										}}
 									>
 										<p>Generate Data</p>
