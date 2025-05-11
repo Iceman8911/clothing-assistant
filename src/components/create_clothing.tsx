@@ -87,22 +87,22 @@ export default function CreateClothingModal(prop: {
 	const clothingColorListId = crypto.randomUUID();
 	const clothingMaterialListId = crypto.randomUUID();
 
-	const MIN_PRICE_INPUT = 0;
-	const MAX_PRICE_INPUT = 999999999;
-	const sanitisePriceInput = (e: FocusEvent) => {
+	const MIN_NUMBER_INPUT = 0;
+	const MAX_NUMBER_INPUT = 999999999;
+	const sanitiseNumberInput = (e: FocusEvent) => {
 		const target = e.target as HTMLInputElement;
 
 		// Remove invalid things like "e12121" or "121-121"
 		if (!target.value) {
-			target.value = `${MIN_PRICE_INPUT}`;
+			target.value = `${MIN_NUMBER_INPUT}`;
 			return;
 		}
 
 		const targetValue = parseInt(target.value);
-		targetValue > MAX_PRICE_INPUT
-			? (target.value = `${MAX_PRICE_INPUT}`)
-			: targetValue < MIN_PRICE_INPUT
-			? (target.value = `${MIN_PRICE_INPUT}`)
+		targetValue > MAX_NUMBER_INPUT
+			? (target.value = `${MAX_NUMBER_INPUT}`)
+			: targetValue < MIN_NUMBER_INPUT
+			? (target.value = `${MIN_NUMBER_INPUT}`)
 			: target.value;
 	};
 
@@ -379,7 +379,7 @@ export default function CreateClothingModal(prop: {
 							</select>
 						</fieldset>
 
-						<fieldset class="fieldset col-span-3">
+						<fieldset class="fieldset col-span-2">
 							<legend class="fieldset-legend">Cost Price:</legend>
 							<label class="input">
 								₦
@@ -388,9 +388,9 @@ export default function CreateClothingModal(prop: {
 									class="grow validator"
 									placeholder="1000"
 									required
-									min={MIN_PRICE_INPUT}
-									max={MAX_PRICE_INPUT}
-									onfocusout={sanitisePriceInput}
+									min={MIN_NUMBER_INPUT}
+									max={MAX_NUMBER_INPUT}
+									onfocusout={sanitiseNumberInput}
 									onChange={({ target }) => {
 										clothingItem.costPrice = parseInt(target.value);
 									}}
@@ -399,7 +399,26 @@ export default function CreateClothingModal(prop: {
 							</label>
 						</fieldset>
 
-						<fieldset class="fieldset col-span-3">
+						<fieldset class="fieldset col-span-2">
+							<legend class="fieldset-legend">Quantity:</legend>
+							<label class="input">
+								<input
+									type="number"
+									class="grow validator"
+									placeholder="1000"
+									required
+									min={MIN_NUMBER_INPUT}
+									max={MAX_NUMBER_INPUT}
+									onfocusout={sanitiseNumberInput}
+									onChange={({ target }) => {
+										clothingItem.quantity = parseInt(target.value);
+									}}
+									value={clothingItem.quantity}
+								/>
+							</label>
+						</fieldset>
+
+						<fieldset class="fieldset col-span-2">
 							<legend class="fieldset-legend">Selling Price:</legend>
 							<label class="input">
 								₦
@@ -408,9 +427,9 @@ export default function CreateClothingModal(prop: {
 									class="grow validator"
 									placeholder="1000"
 									required
-									min={MIN_PRICE_INPUT}
-									max={MAX_PRICE_INPUT}
-									onfocusout={sanitisePriceInput}
+									min={MIN_NUMBER_INPUT}
+									max={MAX_NUMBER_INPUT}
+									onfocusout={sanitiseNumberInput}
 									onChange={({ target }) => {
 										clothingItem.sellingPrice = parseInt(target.value);
 									}}
