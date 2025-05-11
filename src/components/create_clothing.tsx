@@ -10,7 +10,10 @@ import {
 	Switch,
 } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
-import { understandImageWithGemini } from "./../code/image-recognition/ai-api";
+import {
+	AiJsonResponse,
+	understandImageWithGemini,
+} from "./../code/image-recognition/ai-api";
 import { gApiKeys, gClothingItems } from "~/code/shared";
 import { ClothingItem } from "~/code/types";
 import { fileToDataURL } from "~/code/utilities";
@@ -193,23 +196,6 @@ export default function CreateClothingModal(prop: {
 											).replace(/^data:image\/\w+;base64,/, "");
 
 											try {
-												/**
-												 * Example: \```json
-{
-  "Name": "Plaid Shirt",
-  "Description": "A short-sleeved plaid shirt with a button-down front, chest pockets with flaps, and a pointed collar.",
-  "Category": "Tops",
-  "Subcategory": "Shirt",
-  "Material": "Cotton",
-  "Color": "Blue, Orange, Black",
-  "Brand": "NA",
-  "Season": "Spring, Summer, Fall",
-  "Occasion": "Casual",
-  "Condition": "New",
-  "Gender": "Male"
-}
-```
-												 */
 												let aiJsonTextResponse =
 													(
 														await understandImageWithGemini(
@@ -224,9 +210,86 @@ export default function CreateClothingModal(prop: {
 													.replace("json", "")
 													.replace("```", "");
 
-												const aiJsonResponse = JSON.parse(aiJsonTextResponse);
+												const aiJsonResponse: AiJsonResponse =
+													JSON.parse(aiJsonTextResponse);
 
-												console.log(aiJsonResponse);
+												// Fill up the appropriate fields
+												for (const i in aiJsonResponse) {
+													if (
+														Object.prototype.hasOwnProperty.call(
+															aiJsonResponse,
+															i
+														)
+													) {
+														const key = i as keyof AiJsonResponse;
+														const value = aiJsonResponse[key];
+
+														setClothingItem(
+															produce((state) => {
+																switch (key) {
+																	case "Name":
+																	case "Description":
+																	case "Category":
+																	case "Material":
+																	case "Condition":
+																	case "Gender":
+																	case "Brand":
+																		//@ts-expect-error
+																		state[
+																			key.toLowerCase() as keyof ClothingItem
+																		] = value;
+																		break;
+																	case "Color":
+																		state.color = (value as string[]).join(
+																			", "
+																		);
+																		break;
+																	case "Season":
+																		// Just reset it at first
+																		state.season = {
+																			fall: false,
+																			spring: false,
+																			summer: false,
+																			winter: false,
+																		};
+
+																		(value as AiJsonResponse["Season"]).forEach(
+																			(val) => {
+																				state.season[
+																					val.toLowerCase() as keyof ClothingItem["season"]
+																				] = true;
+																			}
+																		);
+																		break;
+																	case "Occasion":
+																		// Just reset it at first
+																		state.occasion = {
+																			formal: false,
+																			casual: false,
+																			activeWear: false,
+																		};
+
+																		(
+																			value as AiJsonResponse["Occasion"]
+																		).forEach((val) => {
+																			if (val == "Active Wear") {
+																				state.occasion.activeWear = true;
+																			} else {
+																				state.occasion[
+																					val.toLowerCase() as keyof ClothingItem["occasion"]
+																				] = true;
+																			}
+																		});
+																		break;
+																	case "Subcategory":
+																		state.subCategory =
+																			value as ClothingItem["subCategory"];
+																		break;
+																}
+															})
+														);
+													}
+												}
 											} catch (error) {
 												console.log(error);
 											}
@@ -282,7 +345,7 @@ export default function CreateClothingModal(prop: {
 								type="text"
 								class="input"
 								placeholder="Da Vinci's Leather Vest"
-								value={isEditMode() ? clothingItem.name : ""}
+								value={clothingItem.name}
 								required
 								// value={clothingItem.name}
 								onChange={({ target }) => {
