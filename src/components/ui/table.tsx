@@ -76,7 +76,7 @@ export default function Table<T extends BaseInterface>(props: TableProps<T>) {
 	const [checkboxes, setCheckboxes] = createSignal<HTMLInputElement[]>([]);
 
 	return (
-		<div class="overflow-x-auto max-h-[80vh]">
+		<div class="overflow-x-auto">
 			<table class="table table-zebra">
 				{/* head */}
 				<thead>

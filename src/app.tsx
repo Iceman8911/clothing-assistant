@@ -17,7 +17,9 @@ export default function App() {
 				root={(props) => (
 					<>
 						<NavBar />
-						<Suspense>{props.children}</Suspense>
+						<div class="h-[80vh] overflow-y-auto">
+							<Suspense>{props.children}</Suspense>
+						</div>
 						<Dock></Dock>
 					</>
 				)}
