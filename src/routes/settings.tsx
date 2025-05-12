@@ -36,7 +36,9 @@ export default function SettingsPage() {
 	});
 
 	createEffect(() => {
+		// Track any changes to properties
 		trackStore(gSettings);
+
 		const settings = structuredClone(unwrap(gSettings));
 
 		if (!settings.apiKeys.persist) {
