@@ -16,8 +16,19 @@ export const gClothingItems = new ReactiveMap<string, ClothingItem>();
  */
 export const [gSearchText, gSetSearchText] = createSignal("");
 
-export const [gSettings, gSetSettings] = createStore({
+export const gDefaultSettings = {
 	apiKeys: {
+		// Settings
+		/**
+		 * Whether API keys should be persisted in the browser's local storage
+		 */
+		persist: false,
+
+		// AI Models
 		gemini: "",
 	},
-});
+};
+
+export const [gSettings, gSetSettings] = createStore(
+	structuredClone(gDefaultSettings)
+);
