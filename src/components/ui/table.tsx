@@ -1,4 +1,4 @@
-import Fuse from "fuse.js";
+import Fuse from "fuse.js/min-basic";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
 import {
 	batch,
