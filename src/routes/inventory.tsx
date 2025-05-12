@@ -4,46 +4,27 @@ import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
 
-interface TableHeader {
-	name: "Name";
-	color: "Color";
-	size: "Size";
-	category: "Category";
-	sellingPrice: "Price";
-	quantity: "Quantity";
-}
-
 export default function InventoryPage() {
 	// Filter out only the properties of the clothing that should be displayed
 	const filteredRowData = createMemo(() => {
-		return [...gClothingItems.values()].map((cloth) => {
-			return {
-				id: cloth.id,
-				name: cloth.name,
-				color: cloth.color,
-				size: cloth.size,
-				category: cloth.category,
-				sellingPrice: cloth.sellingPrice,
-				quantity: cloth.quantity,
-			};
-		});
+		return [...gClothingItems.values()];
 	});
 
-	const tableHeaders: TableHeader = {
+	const tableHeaders = {
 		name: "Name",
 		color: "Color",
-		size: "Size",
 		category: "Category",
 		sellingPrice: "Price",
+		size: "Size",
 		quantity: "Quantity",
-	};
+	} as const;
 
 	const [isModalOpen, setIsModalOpen] = createSignal(false);
 	const [idOfClothingItemToEdit, setIdOfClothingItemToEdit] = createSignal<
 		string | undefined
 	>();
 
-	const headerKeys = Object.keys(tableHeaders) as (keyof TableHeader)[];
+	const headerKeys = Object.keys(tableHeaders) as (keyof typeof tableHeaders)[];
 
 	const [selectedHeader, setSelectedHeader] = createSignal(headerKeys[0]);
 	const [selectionDirection, setSelectionDirection] = createSignal<
@@ -145,14 +126,14 @@ export default function InventoryPage() {
 								return (
 									<>
 										<tr
-											class="hover:bg-base-300"
+											class="hover:bg-base-300 *:text-center"
 											onClick={() => {
 												// Open the clothing creation modal
 												setIdOfClothingItemToEdit(rowObject.id);
 												setIsModalOpen(true);
 											}}
 										>
-											<th class="w-min">
+											<td>
 												{/* {index() + 1}{" "} */}
 												<label>
 													<input
@@ -169,62 +150,21 @@ export default function InventoryPage() {
 														}}
 													/>
 												</label>
-											</th>
-											<For
-												each={
-													Object.entries(rowObject) as (
-														| ["name", string]
-														| ["id", string | number]
-														| [string, string | number]
-													)[]
-												}
-											>
-												{([key, val], i) => {
-													return (
-														<Switch>
-															{/* Don't display the id */}
-															<Match when={key != "id"}>
-																<td
-																	classList={{
-																		"flex flex-col md:flex-row items-center justify-center gap-2":
-																			key == "name",
-																	}}
-																>
-																	{/* Display a small thumbnail */}
-																	<Switch>
-																		<Match
-																			when={
-																				key == "name" &&
-																				Object.keys(rowObject).includes("id")
-																			}
-																		>
-																			<div class="avatar">
-																				<div class="mask mask-squircle w-16">
-																					<img
-																						src={
-																							gClothingItems.get(
-																								rowObject["id"] as string
-																							)!.imgData
-																						}
-																					/>
-																				</div>
-																			</div>
-																		</Match>
-																	</Switch>
-																	<div
-																		class="w-min"
-																		classList={{
-																			"mr-auto ml-auto": key != "name",
-																		}}
-																	>
-																		{val}
-																	</div>
-																</td>
-															</Match>
-														</Switch>
-													);
-												}}
-											</For>
+											</td>
+											<td class="flex flex-col md:flex-row items-center justify-center gap-2">
+												<div class="avatar">
+													<div class="mask mask-squircle w-16">
+														<img src={rowObject.imgData} />
+													</div>
+												</div>
+
+												<div class="mr-auto ml-auto">{rowObject.name}</div>
+											</td>
+											<td>{rowObject.color}</td>
+											<td>{rowObject.category}</td>
+											<td>{rowObject.sellingPrice}</td>
+											<td>{rowObject.size}</td>
+											<td>{rowObject.quantity}</td>
 										</tr>
 									</>
 								);
