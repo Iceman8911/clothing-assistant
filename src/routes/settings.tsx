@@ -75,9 +75,9 @@ export default function SettingsPage() {
 					</label>
 					<p class="label inline-block max-w-72 whitespace-break-spaces">
 						<span class="text-warning font-bold">WARNING: </span> API Keys would
-						be stored client-side and thus be at risk to any malicious
-						extensions or cross site attacks, otherwise, they're cleared upon
-						loading the app.
+						be stored client-side and thus be{" "}
+						<em class="text-warning">at risk</em> to any malicious extensions or
+						cross site attacks.
 					</p>
 				</fieldset>
 
