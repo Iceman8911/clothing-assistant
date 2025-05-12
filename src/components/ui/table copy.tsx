@@ -10,7 +10,7 @@ import {
 	on,
 	Switch,
 } from "solid-js";
-import { gClothingItems, gSearchText } from "~/code/shared";
+import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 
 interface BaseInterface {
 	id: string | number;
@@ -72,7 +72,7 @@ function Table<T extends BaseInterface>(props: TableProps<T>) {
 	});
 
 	const tableCheckboxIdentifierClass =
-		`checkbox-${crypto.randomUUID()}` as const;
+		`checkbox-${generateRandomId()}` as const;
 	const [checkboxes, setCheckboxes] = createSignal<HTMLInputElement[]>([]);
 
 	return (

@@ -1,6 +1,7 @@
 import { createMutable } from "solid-js/store";
 import { fileToDataURL } from "../utilities";
 import { Accessor, createMemo } from "solid-js";
+import { generateRandomId } from "../shared";
 
 interface MutableClassProps {
 	name: string;
@@ -75,7 +76,7 @@ export class ClothingItem implements MutableClassProps {
 		if (data instanceof ClothingItem) {
 			this.id = data.id;
 		} else {
-			this.id = crypto.randomUUID();
+			this.id = generateRandomId();
 		}
 
 		this.name = data.name;
@@ -114,6 +115,6 @@ export class ClothingItem implements MutableClassProps {
 
 	randomizeId() {
 		//@ts-expect-error
-		this.id = crypto.randomUUID();
+		this.id = generateRandomId();
 	}
 }

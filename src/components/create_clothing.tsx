@@ -14,7 +14,7 @@ import {
 	AiJsonResponse,
 	understandImageWithGemini,
 } from "./../code/image-recognition/ai-api";
-import { gApiKeys, gClothingItems } from "~/code/shared";
+import { gApiKeys, gClothingItems, generateRandomId } from "~/code/shared";
 import { fileToDataURL } from "~/code/utilities";
 import { ClothingItem } from "~/code/classes/clothing";
 import { formatDiagnostic } from "typescript";
@@ -84,8 +84,8 @@ export default function CreateClothingModal(prop: {
 		"Wool",
 	] as const;
 	const defaultClothingMaterial = clothingMaterials[0];
-	const clothingColorListId = crypto.randomUUID();
-	const clothingMaterialListId = crypto.randomUUID();
+	const clothingColorListId = generateRandomId();
+	const clothingMaterialListId = generateRandomId();
 
 	const MIN_NUMBER_INPUT = 0;
 	const MAX_NUMBER_INPUT = 999999999;
@@ -106,7 +106,7 @@ export default function CreateClothingModal(prop: {
 			: target.value;
 	};
 
-	const clothingFormId = crypto.randomUUID();
+	const clothingFormId = generateRandomId();
 
 	let clothingDisplay!: HTMLDivElement;
 	let clothingForm!: HTMLFormElement;

@@ -4,6 +4,8 @@ import { createStore } from "solid-js/store";
 import { useNavigate } from "@solidjs/router";
 import { ClothingItem } from "./classes/clothing";
 
+export const generateRandomId = crypto.randomUUID;
+
 /**
  * Each clothing item is indexed with it's `id`
  */
