@@ -18,6 +18,7 @@ import { gClothingItems, generateRandomId, gSettings } from "~/code/shared";
 import { fileToDataURL } from "~/code/utilities";
 import { ClothingItem } from "~/code/classes/clothing";
 import { formatDiagnostic } from "typescript";
+import Sparkles from "lucide-solid/icons/sparkles";
 
 export default function CreateClothingModal(prop: {
 	openState: Accessor<boolean>;
@@ -295,7 +296,9 @@ export default function CreateClothingModal(prop: {
 											}
 										}}
 									>
-										<p>Generate Data (AI)</p>
+										<p>
+											Generate Data (AI <Sparkles class="inline-block" />)
+										</p>
 									</button>
 								</Match>
 							</Switch>
