@@ -18,7 +18,16 @@ export default function SettingsPage() {
 						)
 					}
 				/>
-				<p class="label">Optional</p>
+				<p class="label inline">
+					Required for any <em>AI</em> functionality. Click{" "}
+					<a
+						href="https://ai.google.dev/gemini-api/docs/api-key"
+						class="link-primary"
+					>
+						here
+					</a>{" "}
+					to get one.
+				</p>
 			</fieldset>
 		</div>
 	);
