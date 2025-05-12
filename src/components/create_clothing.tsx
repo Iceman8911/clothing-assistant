@@ -14,7 +14,7 @@ import {
 	AiJsonResponse,
 	understandImageWithGemini,
 } from "./../code/image-recognition/ai-api";
-import { gApiKeys, gClothingItems, generateRandomId } from "~/code/shared";
+import { gClothingItems, generateRandomId, gSettings } from "~/code/shared";
 import { fileToDataURL } from "~/code/utilities";
 import { ClothingItem } from "~/code/classes/clothing";
 import { formatDiagnostic } from "typescript";
@@ -206,7 +206,7 @@ export default function CreateClothingModal(prop: {
 													(
 														await understandImageWithGemini(
 															clothingItem.base64,
-															gApiKeys.gemini
+															gSettings.apiKeys.gemini
 														)
 													).text ?? "";
 

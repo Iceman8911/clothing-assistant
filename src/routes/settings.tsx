@@ -1,5 +1,5 @@
 import { produce } from "solid-js/store";
-import { gApiKeys, gSetApiKeys } from "~/code/shared";
+import { gSetSettings, gSettings } from "~/code/shared";
 
 export default function SettingsPage() {
 	return (
@@ -11,10 +11,10 @@ export default function SettingsPage() {
 					type="text"
 					class="input"
 					placeholder="Type here"
-					value={gApiKeys.gemini}
+					value={gSettings.apiKeys.gemini}
 					onfocusout={(e) =>
-						gSetApiKeys(
-							produce((state) => (state.gemini = e.currentTarget.value))
+						gSetSettings(
+							produce((state) => (state.apiKeys.gemini = e.currentTarget.value))
 						)
 					}
 				/>

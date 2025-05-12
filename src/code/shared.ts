@@ -16,7 +16,8 @@ export const gClothingItems = new ReactiveMap<string, ClothingItem>();
  */
 export const [gSearchText, gSetSearchText] = createSignal("");
 
-export const [gApiKeys, gSetApiKeys] = createStore({
-	// cloudmersive: "",
-	gemini: "",
+export const [gSettings, gSetSettings] = createStore({
+	apiKeys: {
+		gemini: "",
+	},
 });
