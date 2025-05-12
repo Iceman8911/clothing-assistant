@@ -41,7 +41,6 @@ export default function InventoryPage() {
 					setIsModalOpen(true);
 				}}
 			>
-				<button></button>
 			</ClothingTable>
 
 			<CreateClothingModal
