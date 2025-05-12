@@ -295,7 +295,7 @@ export default function CreateClothingModal(prop: {
 											}
 										}}
 									>
-										<p>Generate Data</p>
+										<p>Generate Data (AI)</p>
 									</button>
 								</Match>
 							</Switch>
