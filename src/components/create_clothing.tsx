@@ -204,12 +204,8 @@ export default function CreateClothingModal(prop: {
 
 											try {
 												let aiJsonTextResponse =
-													(
-														await understandImageWithGemini(
-															clothingItem.base64,
-															gSettings.apiKeys.gemini
-														)
-													).text ?? "";
+													(await understandImageWithGemini(clothingItem.base64))
+														.text ?? "";
 
 												// Cleanup the opening and closing braces
 												aiJsonTextResponse = aiJsonTextResponse

@@ -1,5 +1,5 @@
 import { ClothingItem } from "../classes/clothing";
-import { gApiKeys } from "../shared";
+import { gSettings } from "../shared";
 import { GoogleGenAI } from "@google/genai";
 
 function initGoogleGenAI(apiKey: string) {
@@ -9,10 +9,9 @@ function initGoogleGenAI(apiKey: string) {
 export async function understandImageWithGemini(
 	/** Base64 encoded image */
 	imageData: string,
-	apiKey: string,
 	model = "gemini-2.0-flash"
 ) {
-	const ai = initGoogleGenAI(apiKey);
+	const ai = initGoogleGenAI(gSettings.apiKeys.gemini);
 
 	const contents = [
 		{
