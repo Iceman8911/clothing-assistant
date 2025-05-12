@@ -1,7 +1,7 @@
 import { createMemo, createSignal } from "solid-js";
 import { gClothingItems } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
-import Table from "~/components/ui/table";
+import ClothingTable from "~/components/ui/table";
 
 export default function InventoryPage() {
 	// Filter out only the properties of the clothing that should be displayed
@@ -26,7 +26,7 @@ export default function InventoryPage() {
 
 	return (
 		<>
-			<Table
+			<ClothingTable
 				rows={filteredRowData()}
 				header={{
 					name: "Name",
@@ -40,7 +40,9 @@ export default function InventoryPage() {
 					setIdOfClothingItemToEdit(id);
 					setIsModalOpen(true);
 				}}
-			/>
+			>
+				<button></button>
+			</ClothingTable>
 
 			<CreateClothingModal
 				openState={isModalOpen}

@@ -6,7 +6,6 @@ import {
 	createMemo,
 	createSignal,
 	For,
-	type JSX,
 	Match,
 	on,
 	Switch,
@@ -31,13 +30,9 @@ interface TableProps<TTableRowStructure extends BaseInterface> {
 	 * Function to call when a row is clicked
 	 */
 	onRowClick?: (row: TTableRowStructure) => void;
-
-	children?: JSX.Element;
 }
 
-export default function ClothingTable<T extends BaseInterface>(
-	props: TableProps<T>
-) {
+function Table<T extends BaseInterface>(props: TableProps<T>) {
 	const headerKeys = Object.keys(props.header) as string[];
 
 	const [selectedHeader, setSelectedHeader] = createSignal(headerKeys[0]);
