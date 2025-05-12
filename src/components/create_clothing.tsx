@@ -236,6 +236,7 @@ export default function CreateClothingModal(prop: {
 															case "Condition":
 															case "Gender":
 															case "Brand":
+															case "Size":
 																//@ts-expect-error
 																state[key.toLowerCase() as keyof ClothingItem] =
 																	value;

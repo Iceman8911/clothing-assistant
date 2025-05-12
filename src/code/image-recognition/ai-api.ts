@@ -34,6 +34,7 @@ export async function understandImageWithGemini(
       Occasion ("Formal", "Casual", "Active Wear". Multiple can be selected.):
       Condition ("New", "Used", "Refurbished"):
       Gender ("Male", "Female", "Unisex"):
+			Size ("XS", "S", "M", "L", "XL"):
       `,
 		},
 	];
@@ -69,7 +70,8 @@ export async function understandImageWithGemini(
       "Season": "[Spring, Summer, Fall]",
       "Occasion": "Casual",
       "Condition": "New",
-      "Gender": "Male"
+      "Gender": "Male",
+			"Size": "M"
       }
   ```
   */
@@ -85,4 +87,5 @@ export interface AiJsonResponse {
 	Occasion: ("Formal" | "Casual" | "Active Wear")[];
 	Condition: ClothingItem["condition"];
 	Gender: ClothingItem["gender"];
+	Size: ClothingItem["size"];
 }
