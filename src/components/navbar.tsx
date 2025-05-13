@@ -2,9 +2,10 @@ import SettingsIcon from "lucide-solid/icons/settings";
 import ListFilterIcon from "lucide-solid/icons/list-filter";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import SearchIcon from "lucide-solid/icons/search";
-import { gSetSearchText } from "~/code/shared";
+import { gSearchText, gSetSearchText } from "~/code/shared";
 import { useNavigate } from "@solidjs/router";
 import { CustomRoute } from "~/code/enums";
+import { Match, Switch } from "solid-js";
 export default function NavBar() {
 	const navigate = useNavigate();
 
@@ -41,7 +42,15 @@ export default function NavBar() {
 				{/* Search Dropdown */}
 				<div class="dropdown">
 					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-						<SearchIcon class="w-5 h-5" />
+						{/* Display an indicator so the user knows that a search term / text is active */}
+						<Switch fallback={<SearchIcon class="w-5 h-5" />}>
+							<Match when={gSearchText()}>
+								<div class="indicator">
+									<span class="indicator-item status status-warning "></span>
+									<SearchIcon class="w-5 h-5" />
+								</div>
+							</Match>
+						</Switch>
 					</div>
 
 					<label class="input input-primary dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm -right-15 md:-right-10 -bottom-10">
