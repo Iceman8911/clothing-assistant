@@ -15,7 +15,12 @@ import {
 	AiJsonResponse,
 	understandImageWithGemini,
 } from "./../code/image-recognition/ai-api";
-import { gClothingItems, generateRandomId, gSettings } from "~/code/shared";
+import {
+	gClothingItems,
+	generateRandomId,
+	gIsUserConnectedToInternet,
+	gSettings,
+} from "~/code/shared";
 import { fileToDataURL } from "~/code/utilities";
 import { ClothingItem } from "~/code/classes/clothing";
 import { formatDiagnostic } from "typescript";
@@ -235,7 +240,11 @@ export default function CreateClothingModal(prop: {
 										onClick={async (e) => {
 											e.stopPropagation();
 
-											if (isAiGeneratingData()) return;
+											if (
+												isAiGeneratingData() ||
+												!(await gIsUserConnectedToInternet())
+											)
+												return;
 
 											try {
 												setIsAiGeneratingData(true);

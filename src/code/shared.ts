@@ -33,3 +33,20 @@ export const gSettingsLocalStorageKey = "settings";
 export const [gSettings, gSetSettings] = createStore(
 	structuredClone(gDefaultSettings)
 );
+
+export async function gIsUserConnectedToInternet(): Promise<boolean> {
+	try {
+		const response = await fetch(
+			"http://fedoraproject.org/static/hotspot.txt",
+			{
+				method: "POST",
+				mode: "no-cors",
+			}
+		);
+
+		if (response) return true;
+		else return false;
+	} catch (error) {
+		return false;
+	}
+}
