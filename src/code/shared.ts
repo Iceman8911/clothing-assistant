@@ -29,6 +29,7 @@ export const gDefaultSettings = {
 	},
 };
 
+export const gSettingsLocalStorageKey = "settings";
 export const [gSettings, gSetSettings] = createStore(
 	structuredClone(gDefaultSettings)
 );

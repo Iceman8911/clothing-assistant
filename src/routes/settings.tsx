@@ -1,39 +1,21 @@
 import { trackStore } from "@solid-primitives/deep";
 import { createEffect, on, onMount } from "solid-js";
 import { produce, unwrap } from "solid-js/store";
-import { gDefaultSettings, gSetSettings, gSettings } from "~/code/shared";
+import {
+	gDefaultSettings,
+	gSetSettings,
+	gSettings,
+	gSettingsLocalStorageKey,
+} from "~/code/shared";
 
 export default function SettingsPage() {
-	const localStorageKey = "settings";
-
 	function saveSettings(settings: typeof gSettings) {
 		try {
-			localStorage.setItem(localStorageKey, JSON.stringify(settings));
+			localStorage.setItem(gSettingsLocalStorageKey, JSON.stringify(settings));
 		} catch (error) {
 			console.error(error);
 		}
 	}
-
-	function loadSettings(): typeof gSettings {
-		try {
-			const data = localStorage.getItem(localStorageKey);
-
-			if (!data) throw new Error();
-
-			return JSON.parse(data);
-		} catch (_) {
-			console.error(
-				"Error parsing local storage data, falling back to defaults"
-			);
-
-			// Fallback to defaults
-			return structuredClone(gDefaultSettings);
-		}
-	}
-
-	onMount(() => {
-		gSetSettings(loadSettings());
-	});
 
 	createEffect(() => {
 		// Track any changes to properties
