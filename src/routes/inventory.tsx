@@ -1,8 +1,9 @@
-import Fuse from "fuse.js";
+import Fuse, { type IFuseOptions } from "fuse.js";
 import { batch, createMemo, createSignal, For, Match, Switch } from "solid-js";
 import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
+import { type ClothingItem } from "~/code/classes/clothing";
 
 export default function InventoryPage() {
 	// Filter out only the properties of the clothing that should be displayed
@@ -35,37 +36,52 @@ export default function InventoryPage() {
 		let rowsToReturn = filteredRowData();
 
 		if (filteredRowData()[0] && gSearchText()) {
-			const fuseSearch = new Fuse(rowsToReturn, {
+			const fuseOptions: IFuseOptions<ClothingItem> = {
 				keys: [
-					{ name: "name", weight: 2.5 },
-					{ name: "color", weight: 2 },
-					{ name: "material", weight: 2 },
-					{ name: "category", weight: 1.5 },
-					{ name: "subCategory", weight: 1.5 },
-					{ name: "description", weight: 1.5 },
+					{ name: "name", weight: 5 },
+					{ name: "color", weight: 4.5 },
+					{ name: "description", weight: 4.5 },
+					{ name: "gender", weight: 1.5 },
+					{ name: "material", weight: 2.5 },
+					{ name: "category", weight: 3.5 },
+					{ name: "subCategory", weight: 3.5 },
 					"condition",
 					"brand",
-					"gender",
 					"size",
 					"costPrice",
 					"sellingPrice",
 				],
+				threshold: 0.4,
 				ignoreLocation: true,
-			});
+			};
 
-			rowsToReturn = fuseSearch
-				.search(gSearchText())
+			const fuseSearch = new Fuse(rowsToReturn, fuseOptions);
+			let fuseSearchResult = fuseSearch
+				.search(gSearchText().trim())
 				.map((result) => result.item);
-		}
 
-		rowsToReturn = rowsToReturn.toSorted((a, b) => {
-			const header = selectedHeader();
-			if (selectionDirection() == "asc") {
-				return a[header] < b[header] ? -1 : 1;
-			} else {
-				return a[header] > b[header] ? -1 : 1;
+			if (fuseSearchResult.length / rowsToReturn.length <= 0.2) {
+				// TODO: Display a text saying that the search algorithm expanded its threshold
+				// Try again but with lower threshold
+				fuseSearchResult = new Fuse(rowsToReturn, {
+					...fuseOptions,
+					threshold: 0.53,
+				})
+					.search(gSearchText().trim())
+					.map((result) => result.item);
 			}
-		});
+
+			rowsToReturn = fuseSearchResult;
+		} else {
+			rowsToReturn = rowsToReturn.toSorted((a, b) => {
+				const header = selectedHeader();
+				if (selectionDirection() == "asc") {
+					return a[header] < b[header] ? -1 : 1;
+				} else {
+					return a[header] > b[header] ? -1 : 1;
+				}
+			});
+		}
 
 		return rowsToReturn;
 	});
