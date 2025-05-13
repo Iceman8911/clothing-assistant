@@ -379,7 +379,7 @@ export default function CreateClothingModal(prop: {
 							</select>
 						</fieldset>
 
-						<fieldset class="fieldset col-span-2">
+						<fieldset class="fieldset col-span-3">
 							<legend class="fieldset-legend">Cost Price:</legend>
 							<label class="input">
 								₦
@@ -399,7 +399,27 @@ export default function CreateClothingModal(prop: {
 							</label>
 						</fieldset>
 
-						<fieldset class="fieldset col-span-2">
+						<fieldset class="fieldset col-span-3">
+							<legend class="fieldset-legend">Selling Price:</legend>
+							<label class="input">
+								₦
+								<input
+									type="number"
+									class="grow validator"
+									placeholder="1000"
+									required
+									min={MIN_NUMBER_INPUT}
+									max={MAX_NUMBER_INPUT}
+									onfocusout={sanitiseNumberInput}
+									onChange={({ target }) => {
+										clothingItem.sellingPrice = parseInt(target.value);
+									}}
+									value={clothingItem.sellingPrice}
+								/>
+							</label>
+						</fieldset>
+
+						<fieldset class="fieldset col-span-3">
 							<legend class="fieldset-legend">Quantity:</legend>
 							<label class="input">
 								<input
@@ -418,24 +438,27 @@ export default function CreateClothingModal(prop: {
 							</label>
 						</fieldset>
 
-						<fieldset class="fieldset col-span-2">
-							<legend class="fieldset-legend">Selling Price:</legend>
-							<label class="input">
-								₦
-								<input
-									type="number"
-									class="grow validator"
-									placeholder="1000"
-									required
-									min={MIN_NUMBER_INPUT}
-									max={MAX_NUMBER_INPUT}
-									onfocusout={sanitiseNumberInput}
-									onChange={({ target }) => {
-										clothingItem.sellingPrice = parseInt(target.value);
-									}}
-									value={clothingItem.sellingPrice}
-								/>
-							</label>
+						<fieldset class="fieldset col-span-3">
+							<legend class="fieldset-legend">Gender:</legend>
+							<select
+								class="select"
+								required
+								onChange={({ target }) => {
+									clothingItem.gender = target.value as ClothingItem["gender"];
+								}}
+							>
+								<For
+									each={
+										["Male", "Female", "Unisex"] as ClothingItem["gender"][]
+									}
+								>
+									{(gender) => (
+										<option selected={gender === clothingItem.gender}>
+											{gender}
+										</option>
+									)}
+								</For>
+							</select>
 						</fieldset>
 
 						<fieldset class="fieldset col-span-3 md:col-span-2">
@@ -601,7 +624,7 @@ export default function CreateClothingModal(prop: {
 						</fieldset>
 
 						{/* This would be moved up a bit to fit a blank space in the grid that's only visible on wider screens */}
-						<fieldset class="fieldset col-span-2 md:col-start-5 md:row-start-6">
+						<fieldset class="fieldset col-span-2 md:col-start-5 md:row-start-7">
 							<legend class="fieldset-legend">Brand:</legend>
 							<input
 								type="text"
