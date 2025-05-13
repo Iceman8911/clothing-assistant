@@ -9,6 +9,8 @@ import { Match, Switch } from "solid-js";
 export default function NavBar() {
 	const navigate = useNavigate();
 
+	let searchBar!: HTMLInputElement;
+
 	return (
 		<div class="navbar bg-base-100 shadow-sm">
 			<div class="navbar-start">
@@ -40,7 +42,12 @@ export default function NavBar() {
 
 			<div class="navbar-end">
 				{/* Search Dropdown */}
-				<div class="dropdown">
+				<div
+					class="dropdown"
+					onClick={() => {
+						searchBar.focus();
+					}}
+				>
 					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
 						{/* Display an indicator so the user knows that a search term / text is active */}
 						<Switch fallback={<SearchIcon class="w-5 h-5" />}>
@@ -61,6 +68,7 @@ export default function NavBar() {
 							placeholder="Search"
 							class="max-w-[90%]"
 							oninput={(e) => gSetSearchText(e.currentTarget.value)}
+							ref={searchBar}
 						/>
 					</label>
 				</div>
