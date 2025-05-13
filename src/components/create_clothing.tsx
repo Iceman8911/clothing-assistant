@@ -342,9 +342,17 @@ export default function CreateClothingModal(prop: {
 											setIsAiGeneratingData(false);
 										}}
 									>
-										<p>
-											Generate Data (AI <Sparkles class="inline-block" />)
-										</p>
+										<Switch
+											fallback={
+												<p>
+													Generate Data (AI <Sparkles class="inline-block" />)
+												</p>
+											}
+										>
+											<Match when={isAiGeneratingData()}>
+												<span class="loading loading-spinner"></span>
+											</Match>
+										</Switch>
 									</button>
 								</Match>
 							</Switch>
