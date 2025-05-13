@@ -225,7 +225,7 @@ export default function CreateClothingModal(prop: {
 								<Match when={clothingItem.imgData}>
 									<button
 										type="button"
-										class="btn btn-primary btn-soft flex justify-center items-center opacity-75"
+										class="btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full"
 										style={{
 											opacity: isAiGeneratingData() ? 0.5 : 1,
 											cursor: isAiGeneratingData() ? "not-allowed" : "pointer",
