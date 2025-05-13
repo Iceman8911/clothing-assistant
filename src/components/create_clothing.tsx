@@ -208,12 +208,13 @@ export default function CreateClothingModal(prop: {
 			<p class="py-4">Press ESC key or click outside to close</p> */}
 
 						<div
-							class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center flex justify-center items-center"
+							class={
+								"glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center flex justify-center items-center " +
+								(isAiGeneratingData() ? "opacity-50 cursor-not-allowed" : "")
+							}
 							ref={clothingDisplay}
 							style={{
 								"background-image": `url(${clothingItem.imgData})`,
-								opacity: isAiGeneratingData() ? 0.5 : 1,
-								cursor: isAiGeneratingData() ? "not-allowed" : "pointer",
 							}}
 							onClick={() => {
 								if (!isAiGeneratingData()) {
@@ -225,11 +226,12 @@ export default function CreateClothingModal(prop: {
 								<Match when={clothingItem.imgData}>
 									<button
 										type="button"
-										class="btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full"
-										style={{
-											opacity: isAiGeneratingData() ? 0.5 : 1,
-											cursor: isAiGeneratingData() ? "not-allowed" : "pointer",
-										}}
+										class={
+											"btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
+											(isAiGeneratingData()
+												? "cursor-not-allowed opacity-50"
+												: "cursor-pointer")
+										}
 										onClick={async (e) => {
 											e.stopPropagation();
 
