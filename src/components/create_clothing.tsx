@@ -6,6 +6,7 @@ import {
 	For,
 	Match,
 	on,
+	onMount,
 	Setter,
 	Switch,
 } from "solid-js";
@@ -139,6 +140,24 @@ export default function CreateClothingModal(prop: {
 
 	const isEditMode = () => (prop.clothIdToEdit ? true : false);
 
+	const [isAiGeneratingData, setIsAiGeneratingData] = createSignal(false);
+	type FormInputs = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+	const formInputElements: FormInputs[] = [];
+	onMount(() => {
+		// Get all input elements in the form and cache them in an array
+		formInputElements.push(
+			...(clothingForm.querySelectorAll(
+				"input, select, textarea"
+			) as NodeListOf<FormInputs>)
+		);
+	});
+	createEffect(() => {
+		// Disable all inputs when the AI is generating data (so the user wouldn't be tempted to change anything)
+		for (const element of formInputElements) {
+			element.disabled = isAiGeneratingData();
+		}
+	});
+
 	// Alter some things depending on if we're creating or editing
 	createEffect(
 		on([isEditMode, prop.openState], async () => {
@@ -191,18 +210,34 @@ export default function CreateClothingModal(prop: {
 						<div
 							class="glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center flex justify-center items-center"
 							ref={clothingDisplay}
-							style={{ "background-image": `url(${clothingItem.imgData})` }}
-							onClick={() => clothingImgInput.click()}
+							style={{
+								"background-image": `url(${clothingItem.imgData})`,
+								opacity: isAiGeneratingData() ? 0.5 : 1,
+								cursor: isAiGeneratingData() ? "not-allowed" : "pointer",
+							}}
+							onClick={() => {
+								if (!isAiGeneratingData()) {
+									clothingImgInput.click();
+								}
+							}}
 						>
 							<Switch>
 								<Match when={clothingItem.imgData}>
 									<button
 										type="button"
 										class="btn btn-primary btn-soft flex justify-center items-center opacity-75"
+										style={{
+											opacity: isAiGeneratingData() ? 0.5 : 1,
+											cursor: isAiGeneratingData() ? "not-allowed" : "pointer",
+										}}
 										onClick={async (e) => {
 											e.stopPropagation();
 
+											if (isAiGeneratingData()) return;
+
 											try {
+												setIsAiGeneratingData(true);
+
 												let aiJsonTextResponse =
 													(await understandImageWithGemini(clothingItem.base64))
 														.text ?? "";
@@ -237,9 +272,10 @@ export default function CreateClothingModal(prop: {
 															case "Gender":
 															case "Brand":
 															case "Size":
-																//@ts-expect-error
-																state[key.toLowerCase() as keyof ClothingItem] =
-																	value;
+																state[
+																	//@ts-expect-error
+																	key.toLowerCase() as keyof ClothingItem
+																] = value;
 																break;
 															case "Color":
 																state.color = (value as string[]).join(", ");
@@ -291,6 +327,8 @@ export default function CreateClothingModal(prop: {
 											} catch (error) {
 												console.log(error);
 											}
+
+											setIsAiGeneratingData(false);
 										}}
 									>
 										<p>
