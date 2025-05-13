@@ -234,7 +234,7 @@ export default function CreateClothingModal(prop: {
 										class={
 											"btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
 											(isAiGeneratingData()
-												? "cursor-not-allowed opacity-50"
+												? "cursor-not-allowed opacity-50 pointer-events-none"
 												: "cursor-pointer")
 										}
 										onClick={async (e) => {
