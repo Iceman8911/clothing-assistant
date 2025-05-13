@@ -35,13 +35,21 @@ export default function InventoryPage() {
 		let rowsToReturn = filteredRowData();
 
 		if (filteredRowData()[0] && gSearchText()) {
-			const searchRowKeys = headerKeys.filter((key) => {
-				const type = typeof filteredRowData()[0][key];
-				return type == "string" || type == "number";
-			});
-
 			const fuseSearch = new Fuse(rowsToReturn, {
-				keys: searchRowKeys,
+				keys: [
+					{ name: "name", weight: 2.5 },
+					{ name: "color", weight: 2 },
+					{ name: "material", weight: 2 },
+					{ name: "category", weight: 1.5 },
+					{ name: "subCategory", weight: 1.5 },
+					{ name: "description", weight: 1.5 },
+					"condition",
+					"brand",
+					"gender",
+					"size",
+					"costPrice",
+					"sellingPrice",
+				],
 				ignoreLocation: true,
 			});
 
