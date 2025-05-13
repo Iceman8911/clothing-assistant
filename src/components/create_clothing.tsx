@@ -1,4 +1,4 @@
-import Compressor from "compressorjs";
+import { compressImage } from "simple-image-compressor";
 import {
 	Accessor,
 	createEffect,
@@ -363,20 +363,17 @@ export default function CreateClothingModal(prop: {
 
 									if (!file) return;
 
-									new Compressor(file, {
-										quality: 0.75,
-										retainExif: true,
-										async success(result) {
-											const newFile = new File([result], file.name, {
-												type: file.type,
-											});
+									async function compressFile(file: File) {
+										const res = await compressImage(file, {
+											quality: 0.75,
+											type: "image/webp",
+										});
+										return new File([res], file.name, {
+											type: "image/webp",
+										});
+									}
 
-											clothingItem.addImg(newFile);
-										},
-										error(err) {
-											console.error(err.message);
-										},
-									});
+									clothingItem.addImg(await compressFile(file));
 								}}
 							/>
 							<label class="label">Max size 10MB</label>
