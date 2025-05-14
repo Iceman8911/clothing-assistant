@@ -5,6 +5,7 @@ import InfoIcon from "lucide-solid/icons/info";
 import SuccessIcon from "lucide-solid/icons/circle-check";
 import WarningIcon from "lucide-solid/icons/circle-alert";
 import ErrorIcon from "lucide-solid/icons/circle-x";
+import CopyIcon from "lucide-solid/icons/copy";
 import { generateRandomId } from "~/code/shared";
 
 interface Alert {
@@ -60,8 +61,18 @@ export function AlertToast() {
 											<ErrorIcon />
 										</Match>
 									</Switch>
-									<span onClick={(e) => e.stopPropagation()}>
-										{alert.message}
+									<span
+										onClick={(e) => {
+											e.stopPropagation();
+										}}
+									>
+										{alert.message}{" "}
+										<CopyIcon
+											class="inline-block cursor-pointer"
+											onClick={() =>
+												navigator.clipboard.writeText(alert.message)
+											}
+										/>
 									</span>
 								</div>
 							)}
