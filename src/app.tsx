@@ -15,6 +15,7 @@ import {
 	gSettings,
 	gSettingsLocalStorageKey,
 } from "./code/shared";
+import { AlertToast } from "./components/shared/alert-toast";
 
 export default function App() {
 	function loadSettings(): typeof gSettings {
@@ -44,6 +45,7 @@ export default function App() {
 				root={(props) => (
 					<>
 						<NavBar />
+						<AlertToast />
 						<div class="h-[80vh] overflow-y-auto">
 							<Suspense>{props.children}</Suspense>
 						</div>

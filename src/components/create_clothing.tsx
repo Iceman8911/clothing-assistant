@@ -25,6 +25,7 @@ import { fileToDataURL } from "~/code/utilities";
 import { ClothingItem } from "~/code/classes/clothing";
 import { formatDiagnostic } from "typescript";
 import Sparkles from "lucide-solid/icons/sparkles";
+import { gTriggerAlert } from "./shared/alert-toast";
 
 export default function CreateClothingModal(prop: {
 	openState: Accessor<boolean>;
@@ -243,8 +244,13 @@ export default function CreateClothingModal(prop: {
 											if (
 												isAiGeneratingData() ||
 												!(await gIsUserConnectedToInternet())
-											)
+											) {
+												gTriggerAlert(
+													"error",
+													"Could not connect to a model. Please check your connection and try again later."
+												);
 												return;
+											}
 
 											try {
 												setIsAiGeneratingData(true);
@@ -339,6 +345,7 @@ export default function CreateClothingModal(prop: {
 												console.log(error);
 											}
 
+											gTriggerAlert("success", "Data generated successfully!");
 											setIsAiGeneratingData(false);
 										}}
 									>
