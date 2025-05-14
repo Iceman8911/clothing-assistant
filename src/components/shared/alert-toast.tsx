@@ -20,66 +20,60 @@ const alerts = new ReactiveMap<string, Alert>();
 export function AlertToast() {
 	return (
 		<Portal>
-			<Switch>
-				<Match when={alerts.size}>
-					<div class="toast toast-top z-[999]">
-						<For each={[...alerts.values()]}>
-							{(alert) => (
-								<div
-									class={
-										`alert ` +
-										(alert.status == "success"
-											? "alert-success"
-											: alert.status == "info"
-											? "alert-info"
-											: alert.status == "warning"
-											? "alert-warning"
-											: "alert-error")
-									}
-									ref={(el) => {
-										// Remove the alert after a while
-										if (el) {
-											const timer = setTimeout(() => {
-												alerts.delete(alert.id);
-												clearTimeout(timer);
-											}, alert.duration);
-										}
-									}}
-									onClick={() => alerts.delete(alert.id)}
-								>
-									<Switch>
-										<Match when={alert.status == "success"}>
-											<SuccessIcon />
-										</Match>
-										<Match when={alert.status == "info"}>
-											<InfoIcon />
-										</Match>
-										<Match when={alert.status == "warning"}>
-											<WarningIcon />
-										</Match>
-										<Match when={alert.status == "error"}>
-											<ErrorIcon />
-										</Match>
-									</Switch>
-									<span
-										onClick={(e) => {
-											e.stopPropagation();
-										}}
-									>
-										{alert.message}{" "}
-										<CopyIcon
-											class="inline-block cursor-pointer"
-											onClick={() =>
-												navigator.clipboard.writeText(alert.message)
-											}
-										/>
-									</span>
-								</div>
-							)}
-						</For>
-					</div>
-				</Match>
-			</Switch>
+			<div class="toast toast-top z-[999]">
+				<For each={[...alerts.values()]}>
+					{(alert) => (
+						<div
+							class={
+								`alert ` +
+								(alert.status == "success"
+									? "alert-success"
+									: alert.status == "info"
+									? "alert-info"
+									: alert.status == "warning"
+									? "alert-warning"
+									: "alert-error")
+							}
+							ref={(el) => {
+								// Remove the alert after a while
+								if (el) {
+									const timer = setTimeout(() => {
+										alerts.delete(alert.id);
+										clearTimeout(timer);
+									}, alert.duration);
+								}
+							}}
+							onClick={() => alerts.delete(alert.id)}
+						>
+							<Switch>
+								<Match when={alert.status == "success"}>
+									<SuccessIcon />
+								</Match>
+								<Match when={alert.status == "info"}>
+									<InfoIcon />
+								</Match>
+								<Match when={alert.status == "warning"}>
+									<WarningIcon />
+								</Match>
+								<Match when={alert.status == "error"}>
+									<ErrorIcon />
+								</Match>
+							</Switch>
+							<span
+								onClick={(e) => {
+									e.stopPropagation();
+								}}
+							>
+								{alert.message}{" "}
+								<CopyIcon
+									class="inline-block cursor-pointer"
+									onClick={() => navigator.clipboard.writeText(alert.message)}
+								/>
+							</span>
+						</div>
+					)}
+				</For>
+			</div>
 		</Portal>
 	);
 }
