@@ -25,7 +25,7 @@ export function AlertToast() {
 					{(alert) => (
 						<div
 							class={
-								`alert ` +
+								`alert alert-soft ` +
 								(alert.status == "success"
 									? "alert-success"
 									: alert.status == "info"
