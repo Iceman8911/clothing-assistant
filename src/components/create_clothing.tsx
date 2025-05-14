@@ -341,11 +341,16 @@ export default function CreateClothingModal(prop: {
 														}
 													}
 												}
-											} catch (error) {
-												console.log(error);
-											}
 
-											gTriggerAlert("success", "Data generated successfully!");
+												gTriggerAlert(
+													"success",
+													"Data generated successfully!"
+												);
+											} catch (e) {
+												const error = e as Error;
+
+												gTriggerAlert("error", error.message);
+											}
 											setIsAiGeneratingData(false);
 										}}
 									>
