@@ -82,12 +82,16 @@ export function gTriggerAlert(
 	status: "success" | "info" | "warning" | "error",
 	message: string,
 	/**
-	 * Defaults to 3 seconds
+	 * Defaults to ~3 seconds
 	 */
-	duration = 3000
+	duration = 3333
 ) {
 	const id = generateRandomId();
-	alerts.set(id, { id, status, message, duration });
+	alerts.set(id, {
+		id,
+		status,
+		message,
+		duration: status == "error" ? duration * 1.5 : duration,
+	});
 	return id;
-	// return createRoot(() => <AlertToast alerts={alerts} />);
 }
