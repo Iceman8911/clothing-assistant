@@ -8,15 +8,17 @@ export default function GenericModal(props: {
 }) {
   return (
     <>
-      <dialog id="my_modal_2" class="modal" open={props.stateAccessor()}>
+      <dialog
+        id="my_modal_2"
+        class="modal"
+        open={props.stateAccessor()}
+        onClose={(_) => {
+          props.stateSetter(false);
+        }}
+      >
         <div class="modal-box">
           <form method="dialog">
-            <button
-              class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-              onClick={(_) => {
-                props.stateSetter(false);
-              }}
-            >
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
               ✕
             </button>
           </form>
@@ -24,11 +26,7 @@ export default function GenericModal(props: {
           {props.children}
         </div>
         <form method="dialog" class="modal-backdrop">
-          <button
-            onClick={(_) => {
-              props.stateSetter(false);
-            }}
-          ></button>
+          <button></button>
         </form>
       </dialog>
     </>
