@@ -1,208 +1,262 @@
 import Fuse, { type IFuseOptions } from "fuse.js";
+import SquarePen from "lucide-solid/icons/square-pen";
+import UpArrowIcon from "lucide-solid/icons/chevron-up";
 import { batch, createMemo, createSignal, For, Match, Switch } from "solid-js";
+import { createStore, produce } from "solid-js/store";
+import { Portal } from "solid-js/web";
+import { type ClothingItem } from "~/code/classes/clothing";
 import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
-import UpArrowIcon from "lucide-solid/icons/chevron-up";
-import { type ClothingItem } from "~/code/classes/clothing";
 
 export default function InventoryPage() {
-	// Filter out only the properties of the clothing that should be displayed
-	const filteredRowData = createMemo(() => {
-		return [...gClothingItems.values()];
-	});
+  // Filter out only the properties of the clothing that should be displayed
+  const filteredRowData = createMemo(() => {
+    return [...gClothingItems.values()];
+  });
 
-	const tableHeaders = {
-		name: "Name",
-		color: "Color",
-		category: "Category",
-		sellingPrice: "Price",
-		size: "Size",
-		quantity: "Quantity",
-	} as const;
+  const tableHeaders = {
+    name: "Name",
+    color: "Color",
+    category: "Category",
+    sellingPrice: "Price",
+    size: "Size",
+    quantity: "Quantity",
+  } as const;
 
-	const [isModalOpen, setIsModalOpen] = createSignal(false);
-	const [idOfClothingItemToEdit, setIdOfClothingItemToEdit] = createSignal<
-		string | undefined
-	>();
+  const [isModalOpen, setIsUtilityMenuOpen] = createSignal(false);
+  const [idOfClothingItemToEdit, setIdOfClothingItemToEdit] = createSignal<
+    string | undefined
+  >();
 
-	const headerKeys = Object.keys(tableHeaders) as (keyof typeof tableHeaders)[];
+  const headerKeys = Object.keys(tableHeaders) as (keyof typeof tableHeaders)[];
 
-	const [selectedHeader, setSelectedHeader] = createSignal(headerKeys[0]);
-	const [selectionDirection, setSelectionDirection] = createSignal<
-		"asc" | "desc"
-	>("asc");
+  const [selectedHeader, setSelectedHeader] = createSignal(headerKeys[0]);
+  const [selectionDirection, setSelectionDirection] = createSignal<
+    "asc" | "desc"
+  >("asc");
 
-	const processedRows = createMemo(() => {
-		let rowsToReturn = filteredRowData();
+  const processedRows = createMemo(() => {
+    let rowsToReturn = filteredRowData();
 
-		if (filteredRowData()[0] && gSearchText()) {
-			const fuseOptions: IFuseOptions<ClothingItem> = {
-				keys: [
-					{ name: "name", weight: 5 },
-					{ name: "color", weight: 4.5 },
-					{ name: "description", weight: 4.5 },
-					{ name: "gender", weight: 1.5 },
-					{ name: "material", weight: 2.5 },
-					{ name: "category", weight: 3.5 },
-					{ name: "subCategory", weight: 3.5 },
-					"condition",
-					"brand",
-					"size",
-					"costPrice",
-					"sellingPrice",
-				],
-				threshold: 0.4,
-				ignoreLocation: true,
-			};
+    if (filteredRowData()[0] && gSearchText()) {
+      const fuseOptions: IFuseOptions<ClothingItem> = {
+        keys: [
+          { name: "name", weight: 5 },
+          { name: "color", weight: 4.5 },
+          { name: "description", weight: 4.5 },
+          { name: "gender", weight: 1.5 },
+          { name: "material", weight: 2.5 },
+          { name: "category", weight: 3.5 },
+          { name: "subCategory", weight: 3.5 },
+          "condition",
+          "brand",
+          "size",
+          "costPrice",
+          "sellingPrice",
+        ],
+        threshold: 0.4,
+        ignoreLocation: true,
+      };
 
-			const fuseSearch = new Fuse(rowsToReturn, fuseOptions);
-			let fuseSearchResult = fuseSearch
-				.search(gSearchText().trim())
-				.map((result) => result.item);
+      const fuseSearch = new Fuse(rowsToReturn, fuseOptions);
+      let fuseSearchResult = fuseSearch
+        .search(gSearchText().trim())
+        .map((result) => result.item);
 
-			if (fuseSearchResult.length / rowsToReturn.length <= 0.2) {
-				// TODO: Display a text saying that the search algorithm expanded its threshold
-				// Try again but with lower threshold
-				fuseSearchResult = new Fuse(rowsToReturn, {
-					...fuseOptions,
-					threshold: 0.53,
-				})
-					.search(gSearchText().trim())
-					.map((result) => result.item);
-			}
+      if (fuseSearchResult.length / rowsToReturn.length <= 0.2) {
+        // TODO: Display a text saying that the search algorithm expanded its threshold
+        // Try again but with lower threshold
+        fuseSearchResult = new Fuse(rowsToReturn, {
+          ...fuseOptions,
+          threshold: 0.53,
+        })
+          .search(gSearchText().trim())
+          .map((result) => result.item);
+      }
 
-			rowsToReturn = fuseSearchResult;
-		} else {
-			rowsToReturn = rowsToReturn.toSorted((a, b) => {
-				const header = selectedHeader();
-				if (selectionDirection() == "asc") {
-					return a[header] < b[header] ? -1 : 1;
-				} else {
-					return a[header] > b[header] ? -1 : 1;
-				}
-			});
-		}
+      rowsToReturn = fuseSearchResult;
+    } else {
+      rowsToReturn = rowsToReturn.toSorted((a, b) => {
+        const header = selectedHeader();
+        if (selectionDirection() == "asc") {
+          return a[header] < b[header] ? -1 : 1;
+        } else {
+          return a[header] > b[header] ? -1 : 1;
+        }
+      });
+    }
 
-		return rowsToReturn;
-	});
+    return rowsToReturn;
+  });
 
-	const tableCheckboxIdentifierClass = `chbox-${generateRandomId()}` as const;
-	const [checkboxes, setCheckboxes] = createSignal<HTMLInputElement[]>([]);
+  const tableCheckboxIdentifierClass = `chbox-${generateRandomId()}` as const;
+  const [checkboxes, setCheckboxes] = createSignal<HTMLInputElement[]>([]);
 
-	return (
-		<>
-			<div class="overflow-x-auto">
-				<table class="table table-zebra">
-					{/* head */}
-					<thead>
-						<tr class="*:text-center">
-							<th>
-								<label>
-									<input
-										type="checkbox"
-										class="checkbox"
-										value="test"
-										// Check/uncheck every other appropriate checkbox
-										onClick={(e) => {
-											const target = e.target as HTMLInputElement;
-											checkboxes().forEach((checkbox) => {
-												checkbox.checked = target.checked;
-											});
-										}}
-									/>
-								</label>
-							</th>
-							<For each={headerKeys}>
-								{(key) => (
-									<th
-										class="cursor-pointer hover:bg-base-200"
-										onClick={() => {
-											batch(() => {
-												setSelectionDirection(
-													selectionDirection() == "asc" ? "desc" : "asc"
-												);
+  let tableRowMenuElement!: HTMLUListElement;
+  const [isTableRowMenuOpen, setIsTableRowMenuOpen] = createSignal(false);
+  const [tableRowMenuCoords, setTableRowMenuCoords] = createStore({
+    x: 0,
+    y: 0,
+  });
 
-												setSelectedHeader(key);
-											});
-										}}
-									>
-										{tableHeaders[key]}
-										<Switch>
-											<Match when={processedRows().length > 0}>
-												<UpArrowIcon
-													classList={{
-														hidden: selectedHeader() != key,
-														"rotate-180": selectionDirection() == "desc",
-														"inline-block absolute w-5 h-5":
-															selectedHeader() == key,
-													}}
-												/>
-											</Match>
-										</Switch>
-									</th>
-								)}
-							</For>
-						</tr>
-					</thead>
-					<tbody>
-						<For each={processedRows()}>
-							{(rowObject, index) => {
-								return (
-									<>
-										<tr
-											class="hover:bg-base-300 *:text-center"
-											onClick={() => {
-												// Open the clothing creation modal
-												setIdOfClothingItemToEdit(rowObject.id);
-												setIsModalOpen(true);
-											}}
-										>
-											<td>
-												{/* {index() + 1}{" "} */}
-												<label>
-													<input
-														type="checkbox"
-														class={"checkbox " + tableCheckboxIdentifierClass}
-														// Store the checkbox element in the checkboxes array
-														ref={(el) => {
-															if (el) {
-																setCheckboxes((prev) => [...prev, el]);
-															}
-														}}
-														onClick={(e) => {
-															e.stopPropagation();
-														}}
-													/>
-												</label>
-											</td>
-											<td class="flex flex-col md:flex-row items-center justify-center gap-2">
-												<div class="avatar">
-													<div class="mask mask-squircle w-16">
-														<img src={rowObject.imgData} />
-													</div>
-												</div>
+  return (
+    <>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          {/* head */}
+          <thead>
+            <tr class="*:text-center">
+              <th>
+                <label>
+                  <input
+                    type="checkbox"
+                    class="checkbox"
+                    value="test"
+                    // Check/uncheck every other appropriate checkbox
+                    onClick={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      checkboxes().forEach((checkbox) => {
+                        checkbox.checked = target.checked;
+                      });
+                    }}
+                  />
+                </label>
+              </th>
+              <For each={headerKeys}>
+                {(key) => (
+                  <th
+                    class="cursor-pointer hover:bg-base-200"
+                    onClick={() => {
+                      batch(() => {
+                        setSelectionDirection(
+                          selectionDirection() == "asc" ? "desc" : "asc",
+                        );
 
-												<div class="mr-auto ml-auto">{rowObject.name}</div>
-											</td>
-											<td>{rowObject.color}</td>
-											<td>{rowObject.category}</td>
-											<td>{rowObject.sellingPrice}</td>
-											<td>{rowObject.size}</td>
-											<td>{rowObject.quantity}</td>
-										</tr>
-									</>
-								);
-							}}
-						</For>
-					</tbody>
-				</table>
-			</div>
+                        setSelectedHeader(key);
+                      });
+                    }}
+                  >
+                    {tableHeaders[key]}
+                    <Switch>
+                      <Match when={processedRows().length > 0}>
+                        <UpArrowIcon
+                          classList={{
+                            hidden: selectedHeader() != key,
+                            "rotate-180": selectionDirection() == "desc",
+                            "inline-block absolute w-5 h-5":
+                              selectedHeader() == key,
+                          }}
+                        />
+                      </Match>
+                    </Switch>
+                  </th>
+                )}
+              </For>
+            </tr>
+          </thead>
+          <tbody>
+            <For each={processedRows()}>
+              {(rowObject, index) => {
+                return (
+                  <>
+                    <tr
+                      class="relative hover:bg-base-300 *:text-center"
+                      onClick={(e) => {
+                        // Open the clothing creation modal
+                        setIdOfClothingItemToEdit(rowObject.id);
+                        // setIsUtilityMenuOpen(true);
+                        setIsTableRowMenuOpen(true);
+                        setTableRowMenuCoords(
+                          produce((state) => {
+                            state.x = e.x;
+                            state.y = e.y;
+                          }),
+                        );
+                      }}
+                    >
+                      <td>
+                        {/* {index() + 1}{" "} */}
+                        <label>
+                          <input
+                            type="checkbox"
+                            class={"checkbox " + tableCheckboxIdentifierClass}
+                            // Store the checkbox element in the checkboxes array
+                            ref={(el) => {
+                              if (el) {
+                                setCheckboxes((prev) => [...prev, el]);
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          />
+                        </label>
+                      </td>
+                      <td class="flex flex-col md:flex-row items-center justify-center gap-2">
+                        <div class="avatar">
+                          <div class="mask mask-squircle w-16">
+                            <img src={rowObject.imgData} />
+                          </div>
+                        </div>
 
-			<CreateClothingModal
-				openState={isModalOpen}
-				setOpenState={setIsModalOpen}
-				clothIdToEdit={idOfClothingItemToEdit()}
-			/>
-		</>
-	);
+                        <div class="mr-auto ml-auto">{rowObject.name}</div>
+                      </td>
+                      <td>{rowObject.color}</td>
+                      <td>{rowObject.category}</td>
+                      <td>{rowObject.sellingPrice}</td>
+                      <td>{rowObject.size}</td>
+                      <td>{rowObject.quantity}</td>
+                    </tr>
+                  </>
+                );
+              }}
+            </For>
+          </tbody>
+        </table>
+      </div>
+
+      <Portal>
+        <Switch>
+          <Match when={isTableRowMenuOpen()}>
+            {/* Menu wrapper */}
+            <div
+              class="inset-0 absolute w-screen h-screen"
+              onClick={() => setIsTableRowMenuOpen(false)}
+            >
+              <ul
+                class="menu menu-sm menu-horizontal bg-base-200 rounded-box w-fit inset-0 absolute max-h-fit"
+                style={{
+                  translate: `${tableRowMenuCoords.x}px ${tableRowMenuCoords.y}px`,
+                }}
+                ref={tableRowMenuElement}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <li>
+                  <a>
+                    <SquarePen />
+                    Edit
+                  </a>
+                </li>
+                <li>
+                  <a>Sell</a>
+                </li>
+                <li>
+                  <a>Restock</a>
+                </li>
+                <li>
+                  <a>Deletee</a>
+                </li>
+              </ul>
+            </div>
+          </Match>
+        </Switch>
+      </Portal>
+
+      <CreateClothingModal
+        openState={isModalOpen}
+        setOpenState={setIsUtilityMenuOpen}
+        clothIdToEdit={idOfClothingItemToEdit()}
+      />
+    </>
+  );
 }
