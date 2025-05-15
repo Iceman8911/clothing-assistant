@@ -97,9 +97,17 @@ export default function InventoryPage() {
 
   let tableRowMenuElement!: HTMLUListElement;
   const [isTableRowMenuOpen, setIsTableRowMenuOpen] = createSignal(false);
-  const [tableRowMenuCoords, setTableRowMenuCoords] = createStore({
+  const [tableRowMenuData, setTableRowMenuData] = createStore<{
+    x: number;
+    y: number;
+    /**
+      The clothing item that the menu would affect
+    */
+    data: ClothingItem | null;
+  }>({
     x: 0,
     y: 0,
+    data: null,
   });
 
   return (
@@ -165,14 +173,19 @@ export default function InventoryPage() {
                     <tr
                       class="relative hover:bg-base-300 *:text-center"
                       onClick={(e) => {
-                        // Open the clothing creation modal
-                        setIdOfClothingItemToEdit(rowObject.id);
-                        // setIsUtilityMenuOpen(true);
+                        // Open the table menu for each row
                         setIsTableRowMenuOpen(true);
-                        setTableRowMenuCoords(
+                        setTableRowMenuData(
                           produce((state) => {
-                            state.x = e.x;
+                            // So the menu doesn't clip out of the screen
+                            state.x =
+                              e.x + tableRowMenuElement.clientWidth <
+                              window.innerWidth
+                                ? e.x
+                                : window.innerWidth -
+                                  tableRowMenuElement.clientWidth;
                             state.y = e.y;
+                            state.data = rowObject;
                           }),
                         );
                       }}
@@ -229,19 +242,24 @@ export default function InventoryPage() {
               <ul
                 class="menu menu-sm menu-horizontal bg-base-200 rounded-box w-fit inset-0 absolute max-h-fit grid grid-cols-2 [&_a]:gap-1 [&_svg]:h-5 [&_svg]:w-5"
                 style={{
-                  translate: `${tableRowMenuCoords.x}px ${tableRowMenuCoords.y}px`,
+                  translate: `${tableRowMenuData.x}px ${tableRowMenuData.y}px`,
                 }}
                 ref={tableRowMenuElement}
-                onClick={(e) => e.stopPropagation()}
               >
-                <li>
+                <li
+                  onClick={(_) => {
+                    // Open the clothing creation modal
+                    setIdOfClothingItemToEdit(tableRowMenuData.data!.id);
+                    setIsUtilityMenuOpen(true);
+                  }}
+                >
                   <a>
                     <SquarePen />
                     Edit
                   </a>
                 </li>
                 <li>
-                  <a>
+                  <a class="text-success">
                     <HandCoins />
                     Sell
                   </a>
@@ -253,7 +271,7 @@ export default function InventoryPage() {
                   </a>
                 </li>
                 <li>
-                  <a>
+                  <a class="text-error">
                     <Trash2 />
                     Delete
                   </a>
