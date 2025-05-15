@@ -1,16 +1,14 @@
 import { compressImage } from "simple-image-compressor";
 import {
-  Accessor,
   createEffect,
   createSignal,
   For,
   Match,
   on,
   onMount,
-  Setter,
   Switch,
 } from "solid-js";
-import { createMutable, createStore, produce, unwrap } from "solid-js/store";
+import { unwrap } from "solid-js/store";
 import {
   AiJsonResponse,
   understandImageWithGemini,
@@ -19,12 +17,9 @@ import {
   gClothingItems,
   generateRandomId,
   gIsUserConnectedToInternet,
-  gSettings,
   SignalProps,
 } from "~/code/shared";
-import { fileToDataURL } from "~/code/utilities";
 import { ClothingItem } from "~/code/classes/clothing";
-import { formatDiagnostic } from "typescript";
 import Sparkles from "lucide-solid/icons/sparkles";
 import { gTriggerAlert } from "./shared/alert-toast";
 import GenericModal from "./shared/modal";

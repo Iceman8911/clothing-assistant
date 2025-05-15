@@ -10,7 +10,6 @@ import { Portal } from "solid-js/web";
 import { type ClothingItem } from "~/code/classes/clothing";
 import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
-import GenericModal from "~/components/shared/modal";
 import DeleteModal from "~/components/shared/delete-modal";
 
 export default function InventoryPage() {
