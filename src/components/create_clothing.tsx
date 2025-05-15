@@ -20,6 +20,7 @@ import {
   generateRandomId,
   gIsUserConnectedToInternet,
   gSettings,
+  SignalProps,
 } from "~/code/shared";
 import { fileToDataURL } from "~/code/utilities";
 import { ClothingItem } from "~/code/classes/clothing";
@@ -28,11 +29,11 @@ import Sparkles from "lucide-solid/icons/sparkles";
 import { gTriggerAlert } from "./shared/alert-toast";
 import GenericModal from "./shared/modal";
 
-export default function CreateClothingModal(prop: {
-  openState: Accessor<boolean>;
-  setOpenState: Setter<boolean>;
-  clothIdToEdit?: string;
-}) {
+export default function CreateClothingModal(
+  prop: SignalProps & {
+    clothIdToEdit?: string;
+  },
+) {
   const clothingSizes: ClothingItem["size"][] = ["XS", "S", "M", "L", "XL"];
   const clothingCondition: ClothingItem["condition"][] = [
     "New",
@@ -167,7 +168,7 @@ export default function CreateClothingModal(prop: {
 
   // Alter some things depending on if we're creating or editing
   createEffect(
-    on([isEditMode, prop.openState], async () => {
+    on([isEditMode, prop.stateAccessor], async () => {
       if (isEditMode()) {
         // clothingItem = new ClothingItem(
         // 	gClothingItems.get(prop.clothIdToEdit!)!
@@ -182,7 +183,7 @@ export default function CreateClothingModal(prop: {
         }
       }
 
-      if (prop.openState() && clothingItem.imgData) {
+      if (prop.stateAccessor() && clothingItem.imgData) {
         // Also set the file input's value
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(clothingItem.imgFile);
@@ -193,8 +194,8 @@ export default function CreateClothingModal(prop: {
 
   return (
     <GenericModal
-      stateAccessor={prop.openState}
-      stateSetter={prop.setOpenState}
+      stateAccessor={prop.stateAccessor}
+      stateSetter={prop.stateSetter}
     >
       <div>
         <form
@@ -698,7 +699,7 @@ export default function CreateClothingModal(prop: {
             form={clothingFormId}
             onClick={(_) => {
               if (isEditMode()) {
-                prop.setOpenState(false);
+                prop.stateSetter(false);
                 gClothingItems.delete(clothingItem.id);
               } else {
                 clothingForm.reset();
@@ -723,7 +724,7 @@ export default function CreateClothingModal(prop: {
                   clothingItem.id,
                   structuredClone(unwrap(clothingItem)),
                 );
-                prop.setOpenState(false);
+                prop.stateSetter(false);
               }
             }}
           >

@@ -1,11 +1,11 @@
-import { Accessor, Setter } from "solid-js";
 import { JSX } from "solid-js";
+import { SignalProps } from "~/code/shared";
 
-export default function GenericModal(props: {
-  children: JSX.Element;
-  stateAccessor: Accessor<boolean>;
-  stateSetter: Setter<boolean>;
-}) {
+export default function GenericModal(
+  props: SignalProps & {
+    children: JSX.Element;
+  },
+) {
   return (
     <dialog
       class="modal modal-bottom sm:modal-middle"

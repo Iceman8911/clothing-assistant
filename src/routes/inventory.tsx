@@ -290,8 +290,8 @@ export default function InventoryPage() {
       </Portal>
 
       <CreateClothingModal
-        openState={isClothingModalOpen}
-        setOpenState={setIsClothingModalOpen}
+        stateAccessor={isClothingModalOpen}
+        stateSetter={setIsClothingModalOpen}
         clothIdToEdit={idOfClothingItemToEdit()}
       />
 
