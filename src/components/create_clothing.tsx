@@ -24,6 +24,7 @@ import Sparkles from "lucide-solid/icons/sparkles";
 import { gTriggerAlert } from "./shared/alert-toast";
 import GenericModal from "./shared/modal";
 import DeleteModal from "./shared/delete-modal";
+import { Show } from "solid-js";
 
 export default function CreateClothingModal(
   prop: SignalProps & {
@@ -217,146 +218,140 @@ export default function CreateClothingModal(
                 }
               }}
             >
-              <Switch>
-                <Match when={clothingItem.imgData}>
-                  <button
-                    type="button"
-                    class={
-                      "btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
-                      (isAiGeneratingData()
-                        ? "cursor-not-allowed opacity-50 pointer-events-none"
-                        : "cursor-pointer")
+              <Show when={clothingItem.imgData}>
+                <button
+                  type="button"
+                  class={
+                    "btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
+                    (isAiGeneratingData()
+                      ? "cursor-not-allowed opacity-50 pointer-events-none"
+                      : "cursor-pointer")
+                  }
+                  onClick={async (e) => {
+                    e.stopPropagation();
+
+                    if (
+                      isAiGeneratingData() ||
+                      !(await gIsUserConnectedToInternet())
+                    ) {
+                      gTriggerAlert(
+                        "error",
+                        "Could not connect to a model. Please check your connection and try again later.",
+                      );
+                      return;
                     }
-                    onClick={async (e) => {
-                      e.stopPropagation();
 
-                      if (
-                        isAiGeneratingData() ||
-                        !(await gIsUserConnectedToInternet())
-                      ) {
-                        gTriggerAlert(
-                          "error",
-                          "Could not connect to a model. Please check your connection and try again later.",
-                        );
-                        return;
-                      }
+                    try {
+                      setIsAiGeneratingData(true);
 
-                      try {
-                        setIsAiGeneratingData(true);
+                      let aiJsonTextResponse =
+                        (await understandImageWithGemini(clothingItem.base64))
+                          .text ?? "";
 
-                        let aiJsonTextResponse =
-                          (await understandImageWithGemini(clothingItem.base64))
-                            .text ?? "";
+                      // Cleanup the opening and closing braces
+                      aiJsonTextResponse = aiJsonTextResponse
+                        .replace("```", "")
+                        .replace("json", "")
+                        .replace("```", "");
 
-                        // Cleanup the opening and closing braces
-                        aiJsonTextResponse = aiJsonTextResponse
-                          .replace("```", "")
-                          .replace("json", "")
-                          .replace("```", "");
+                      const aiJsonResponse: AiJsonResponse =
+                        JSON.parse(aiJsonTextResponse);
 
-                        const aiJsonResponse: AiJsonResponse =
-                          JSON.parse(aiJsonTextResponse);
+                      // Fill up the appropriate fields
+                      for (const i in aiJsonResponse) {
+                        if (
+                          Object.prototype.hasOwnProperty.call(
+                            aiJsonResponse,
+                            i,
+                          )
+                        ) {
+                          const key = i as keyof AiJsonResponse;
+                          const value = aiJsonResponse[key];
 
-                        // Fill up the appropriate fields
-                        for (const i in aiJsonResponse) {
-                          if (
-                            Object.prototype.hasOwnProperty.call(
-                              aiJsonResponse,
-                              i,
-                            )
-                          ) {
-                            const key = i as keyof AiJsonResponse;
-                            const value = aiJsonResponse[key];
+                          const state = clothingItem;
+                          switch (key) {
+                            case "Name":
+                            case "Description":
+                            case "Category":
+                            case "Material":
+                            case "Condition":
+                            case "Gender":
+                            case "Brand":
+                            case "Size":
+                              state[
+                                //@ts-expect-error
+                                key.toLowerCase() as keyof ClothingItem
+                              ] = value;
+                              break;
+                            case "Color":
+                              state.color = (value as string[]).join(", ");
+                              break;
+                            case "Season":
+                              // Just reset it at first
+                              state.season = {
+                                fall: false,
+                                spring: false,
+                                summer: false,
+                                winter: false,
+                              };
 
-                            const state = clothingItem;
-                            switch (key) {
-                              case "Name":
-                              case "Description":
-                              case "Category":
-                              case "Material":
-                              case "Condition":
-                              case "Gender":
-                              case "Brand":
-                              case "Size":
-                                state[
-                                  //@ts-expect-error
-                                  key.toLowerCase() as keyof ClothingItem
-                                ] = value;
-                                break;
-                              case "Color":
-                                state.color = (value as string[]).join(", ");
-                                break;
-                              case "Season":
-                                // Just reset it at first
-                                state.season = {
-                                  fall: false,
-                                  spring: false,
-                                  summer: false,
-                                  winter: false,
-                                };
+                              (value as AiJsonResponse["Season"]).forEach(
+                                (val) => {
+                                  state.season[
+                                    val.toLowerCase() as keyof ClothingItem["season"]
+                                  ] = true;
+                                },
+                              );
+                              break;
+                            case "Occasion":
+                              // Just reset it at first
+                              state.occasion = {
+                                formal: false,
+                                casual: false,
+                                activeWear: false,
+                              };
 
-                                (value as AiJsonResponse["Season"]).forEach(
-                                  (val) => {
-                                    state.season[
-                                      val.toLowerCase() as keyof ClothingItem["season"]
+                              (value as AiJsonResponse["Occasion"]).forEach(
+                                (val) => {
+                                  if (val == "Active Wear") {
+                                    state.occasion.activeWear = true;
+                                  } else {
+                                    state.occasion[
+                                      val.toLowerCase() as keyof ClothingItem["occasion"]
                                     ] = true;
-                                  },
-                                );
-                                break;
-                              case "Occasion":
-                                // Just reset it at first
-                                state.occasion = {
-                                  formal: false,
-                                  casual: false,
-                                  activeWear: false,
-                                };
-
-                                (value as AiJsonResponse["Occasion"]).forEach(
-                                  (val) => {
-                                    if (val == "Active Wear") {
-                                      state.occasion.activeWear = true;
-                                    } else {
-                                      state.occasion[
-                                        val.toLowerCase() as keyof ClothingItem["occasion"]
-                                      ] = true;
-                                    }
-                                  },
-                                );
-                                break;
-                              case "Subcategory":
-                                state.subCategory =
-                                  value as ClothingItem["subCategory"];
-                                break;
-                            }
+                                  }
+                                },
+                              );
+                              break;
+                            case "Subcategory":
+                              state.subCategory =
+                                value as ClothingItem["subCategory"];
+                              break;
                           }
                         }
-
-                        gTriggerAlert(
-                          "success",
-                          "Data generated successfully!",
-                        );
-                      } catch (e) {
-                        const error = e as Error;
-
-                        gTriggerAlert("error", error.message);
                       }
-                      setIsAiGeneratingData(false);
-                    }}
+
+                      gTriggerAlert("success", "Data generated successfully!");
+                    } catch (e) {
+                      const error = e as Error;
+
+                      gTriggerAlert("error", error.message);
+                    }
+                    setIsAiGeneratingData(false);
+                  }}
+                >
+                  <Show
+                    when={isAiGeneratingData()}
+                    fallback={
+                      <p>
+                        Generate Data (AI <Sparkles class="inline-block" />)
+                      </p>
+                    }
                   >
-                    <Switch
-                      fallback={
-                        <p>
-                          Generate Data (AI <Sparkles class="inline-block" />)
-                        </p>
-                      }
-                    >
-                      <Match when={isAiGeneratingData()}>
-                        <span class="loading loading-spinner"></span>
-                      </Match>
-                    </Switch>
-                  </button>
-                </Match>
-              </Switch>
+                    <span class="loading loading-spinner"></span>
+                  </Show>
+                </button>
+              </Show>
             </div>
 
             <fieldset class="fieldset row-start-3 col-span-4">
