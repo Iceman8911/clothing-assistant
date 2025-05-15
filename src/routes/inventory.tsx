@@ -10,7 +10,7 @@ import { Portal } from "solid-js/web";
 import { type ClothingItem } from "~/code/classes/clothing";
 import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
-import Modal from "~/components/shared/modal";
+import GenericModal from "~/components/shared/modal";
 
 export default function InventoryPage() {
   // Filter out only the properties of the clothing that should be displayed
@@ -295,11 +295,12 @@ export default function InventoryPage() {
         clothIdToEdit={idOfClothingItemToEdit()}
       />
 
-      <Show when={isConfirmDeleteModalOpen()}>
-        <Modal>
-          <p>Testing</p>
-        </Modal>
-      </Show>
+      <GenericModal
+        stateAccessor={isConfirmDeleteModalOpen}
+        stateSetter={setIsConfirmDeleteModalOpen}
+      >
+        <p>Testing</p>
+      </GenericModal>
     </>
   );
 }
