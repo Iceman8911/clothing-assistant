@@ -95,7 +95,7 @@ export default function InventoryPage() {
 				<table class="table table-zebra">
 					{/* head */}
 					<thead>
-						<tr>
+						<tr class="*:text-center">
 							<th>
 								<label>
 									<input
@@ -115,7 +115,7 @@ export default function InventoryPage() {
 							<For each={headerKeys}>
 								{(key) => (
 									<th
-										class="text-center cursor-pointer hover:bg-base-200"
+										class="cursor-pointer hover:bg-base-200"
 										onClick={() => {
 											batch(() => {
 												setSelectionDirection(
