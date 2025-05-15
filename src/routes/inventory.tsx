@@ -4,12 +4,13 @@ import Trash2 from "lucide-solid/icons/trash-2";
 import HandCoins from "lucide-solid/icons/hand-coins";
 import Blocks from "lucide-solid/icons/blocks";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
-import { batch, createMemo, createSignal, For, Match, Switch } from "solid-js";
+import { batch, createMemo, createSignal, For, Show } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { Portal } from "solid-js/web";
 import { type ClothingItem } from "~/code/classes/clothing";
 import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
+import Modal from "~/components/shared/modal";
 
 export default function InventoryPage() {
   // Filter out only the properties of the clothing that should be displayed
@@ -110,6 +111,9 @@ export default function InventoryPage() {
     data: null,
   });
 
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] =
+    createSignal(false);
+
   return (
     <>
       <div class="overflow-x-auto">
@@ -148,18 +152,16 @@ export default function InventoryPage() {
                     }}
                   >
                     {tableHeaders[key]}
-                    <Switch>
-                      <Match when={processedRows().length > 0}>
-                        <UpArrowIcon
-                          classList={{
-                            hidden: selectedHeader() != key,
-                            "rotate-180": selectionDirection() == "desc",
-                            "inline-block absolute w-5 h-5":
-                              selectedHeader() == key,
-                          }}
-                        />
-                      </Match>
-                    </Switch>
+                    <Show when={processedRows().length > 0}>
+                      <UpArrowIcon
+                        classList={{
+                          hidden: selectedHeader() != key,
+                          "rotate-180": selectionDirection() == "desc",
+                          "inline-block absolute w-5 h-5":
+                            selectedHeader() == key,
+                        }}
+                      />
+                    </Show>
                   </th>
                 )}
               </For>
@@ -232,56 +234,59 @@ export default function InventoryPage() {
       </div>
 
       <Portal>
-        <Switch>
-          <Match when={isTableRowMenuOpen()}>
-            {/* Menu wrapper */}
-            <div
-              class="inset-0 absolute w-screen h-screen"
-              onClick={() => setIsTableRowMenuOpen(false)}
+        <Show when={isTableRowMenuOpen()}>
+          {/* Menu wrapper */}
+          <div
+            class="inset-0 absolute w-screen h-screen"
+            onClick={() => setIsTableRowMenuOpen(false)}
+          >
+            <ul
+              class="menu menu-sm menu-horizontal border border-neutral bg-base-200 rounded-box w-fit inset-0 absolute max-h-fit grid grid-cols-2 [&_a]:gap-1 [&_svg]:h-5 [&_svg]:w-5"
+              style={{
+                translate: `${tableRowMenuData.x}px ${tableRowMenuData.y}px`,
+              }}
+              ref={tableRowMenuElement}
+              onClick={(_) => {
+                setIdOfClothingItemToEdit(tableRowMenuData.data!.id);
+              }}
             >
-              <ul
-                class="menu menu-sm menu-horizontal border border-neutral bg-base-200 rounded-box w-fit inset-0 absolute max-h-fit grid grid-cols-2 [&_a]:gap-1 [&_svg]:h-5 [&_svg]:w-5"
-                style={{
-                  translate: `${tableRowMenuData.x}px ${tableRowMenuData.y}px`,
-                }}
-                ref={tableRowMenuElement}
+              <li
                 onClick={(_) => {
-                  setIdOfClothingItemToEdit(tableRowMenuData.data!.id);
+                  // Open the clothing creation modal
+                  setIsClothingModalOpen(true);
                 }}
               >
-                <li
-                  onClick={(_) => {
-                    // Open the clothing creation modal
-                    setIsClothingModalOpen(true);
-                  }}
-                >
-                  <a>
-                    <SquarePen />
-                    Edit
-                  </a>
-                </li>
-                <li>
-                  <a class="text-success">
-                    <HandCoins />
-                    Sell
-                  </a>
-                </li>
-                <li>
-                  <a>
-                    <Blocks />
-                    Restock
-                  </a>
-                </li>
-                <li>
-                  <a class="text-error">
-                    <Trash2 />
-                    Delete
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </Match>
-        </Switch>
+                <a>
+                  <SquarePen />
+                  Edit
+                </a>
+              </li>
+              <li>
+                <a class="text-success">
+                  <HandCoins />
+                  Sell
+                </a>
+              </li>
+              <li>
+                <a>
+                  <Blocks />
+                  Restock
+                </a>
+              </li>
+              <li
+                onClick={(_) => {
+                  // Open the delete confirmation modal
+                  setIsConfirmDeleteModalOpen(true);
+                }}
+              >
+                <a class="text-error">
+                  <Trash2 />
+                  Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </Show>
       </Portal>
 
       <CreateClothingModal
@@ -289,6 +294,12 @@ export default function InventoryPage() {
         setOpenState={setIsClothingModalOpen}
         clothIdToEdit={idOfClothingItemToEdit()}
       />
+
+      <Show when={isConfirmDeleteModalOpen()}>
+        <Modal>
+          <p>Testing</p>
+        </Modal>
+      </Show>
     </>
   );
 }
