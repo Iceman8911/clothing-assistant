@@ -11,6 +11,7 @@ import { type ClothingItem } from "~/code/classes/clothing";
 import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
 import GenericModal from "~/components/shared/modal";
+import DeleteModal from "~/components/shared/delete-modal";
 
 export default function InventoryPage() {
   // Filter out only the properties of the clothing that should be displayed
@@ -295,12 +296,13 @@ export default function InventoryPage() {
         clothIdToEdit={idOfClothingItemToEdit()}
       />
 
-      <GenericModal
+      <DeleteModal
         stateAccessor={isConfirmDeleteModalOpen}
         stateSetter={setIsConfirmDeleteModalOpen}
-      >
-        <p>Testing</p>
-      </GenericModal>
+        onDelete={() => {
+          gClothingItems.delete(idOfClothingItemToEdit()!);
+        }}
+      ></DeleteModal>
     </>
   );
 }
