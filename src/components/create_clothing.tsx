@@ -140,7 +140,7 @@ export default function CreateClothingModal(
     season: { fall: false, spring: false, summer: false, winter: false },
     size: "M",
     imgData: "",
-    imgFile: new File([], ""),
+    // imgFile: new File([], ""),
   });
 
   const isEditMode = () => (prop.clothIdToEdit ? true : false);
@@ -183,7 +183,7 @@ export default function CreateClothingModal(
       if (prop.stateAccessor() && clothingItem.imgData) {
         // Also set the file input's value
         const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(clothingItem.imgFile);
+        dataTransfer.items.add(await clothingItem.imgFile());
         clothingImgInput.files = dataTransfer.files;
       }
     }),
