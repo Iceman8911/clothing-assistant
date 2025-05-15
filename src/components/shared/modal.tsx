@@ -20,8 +20,7 @@ export default function GenericModal(
             ✕
           </button>
         </form>
-
-        {props.children}
+        <div class="prose">{props.children}</div>
       </div>
       <form method="dialog" class="modal-backdrop">
         <button></button>
