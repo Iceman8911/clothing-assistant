@@ -258,7 +258,7 @@ export default function InventoryPage() {
               >
                 <a>
                   <SquarePen />
-                  Edit
+                  View/Edit
                 </a>
               </li>
               <li>
