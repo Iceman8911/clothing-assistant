@@ -245,11 +245,13 @@ export default function InventoryPage() {
                   translate: `${tableRowMenuData.x}px ${tableRowMenuData.y}px`,
                 }}
                 ref={tableRowMenuElement}
+                onClick={(_) => {
+                  setIdOfClothingItemToEdit(tableRowMenuData.data!.id);
+                }}
               >
                 <li
                   onClick={(_) => {
                     // Open the clothing creation modal
-                    setIdOfClothingItemToEdit(tableRowMenuData.data!.id);
                     setIsClothingModalOpen(true);
                   }}
                 >
