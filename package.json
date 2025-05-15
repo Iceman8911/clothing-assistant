@@ -5,9 +5,9 @@
 		"dev": "vinxi dev",
 		"build": "vinxi build",
 		"start": "vinxi start",
-		"bun-dev": "bun run --bun vinxi dev",
-		"bun-build": "bun run --bun vinxi build",
-		"bun-start": "bun run --bun vinxi start"
+		"bun-dev": "bun --bun vinxi dev",
+		"bun-build": "bun --bun vinxi build",
+		"bun-start": "bun --bun vinxi start"
 	},
 	"dependencies": {
 		"@google/genai": "^0.13.0",
