@@ -26,7 +26,7 @@ export default function InventoryPage() {
     quantity: "Quantity",
   } as const;
 
-  const [isModalOpen, setIsUtilityMenuOpen] = createSignal(false);
+  const [isClothingModalOpen, setIsClothingModalOpen] = createSignal(false);
   const [idOfClothingItemToEdit, setIdOfClothingItemToEdit] = createSignal<
     string | undefined
   >();
@@ -250,7 +250,7 @@ export default function InventoryPage() {
                   onClick={(_) => {
                     // Open the clothing creation modal
                     setIdOfClothingItemToEdit(tableRowMenuData.data!.id);
-                    setIsUtilityMenuOpen(true);
+                    setIsClothingModalOpen(true);
                   }}
                 >
                   <a>
@@ -283,8 +283,8 @@ export default function InventoryPage() {
       </Portal>
 
       <CreateClothingModal
-        openState={isModalOpen}
-        setOpenState={setIsUtilityMenuOpen}
+        openState={isClothingModalOpen}
+        setOpenState={setIsClothingModalOpen}
         clothIdToEdit={idOfClothingItemToEdit()}
       />
     </>
