@@ -1,5 +1,8 @@
 import Fuse, { type IFuseOptions } from "fuse.js";
 import SquarePen from "lucide-solid/icons/square-pen";
+import Trash2 from "lucide-solid/icons/trash-2";
+import HandCoins from "lucide-solid/icons/hand-coins";
+import Blocks from "lucide-solid/icons/blocks";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
 import { batch, createMemo, createSignal, For, Match, Switch } from "solid-js";
 import { createStore, produce } from "solid-js/store";
@@ -224,7 +227,7 @@ export default function InventoryPage() {
               onClick={() => setIsTableRowMenuOpen(false)}
             >
               <ul
-                class="menu menu-sm menu-horizontal bg-base-200 rounded-box w-fit inset-0 absolute max-h-fit"
+                class="menu menu-sm menu-horizontal bg-base-200 rounded-box w-fit inset-0 absolute max-h-fit grid grid-cols-2 [&_a]:gap-1 [&_svg]:h-5 [&_svg]:w-5"
                 style={{
                   translate: `${tableRowMenuCoords.x}px ${tableRowMenuCoords.y}px`,
                 }}
@@ -238,13 +241,22 @@ export default function InventoryPage() {
                   </a>
                 </li>
                 <li>
-                  <a>Sell</a>
+                  <a>
+                    <HandCoins />
+                    Sell
+                  </a>
                 </li>
                 <li>
-                  <a>Restock</a>
+                  <a>
+                    <Blocks />
+                    Restock
+                  </a>
                 </li>
                 <li>
-                  <a>Deletee</a>
+                  <a>
+                    <Trash2 />
+                    Delete
+                  </a>
                 </li>
               </ul>
             </div>
