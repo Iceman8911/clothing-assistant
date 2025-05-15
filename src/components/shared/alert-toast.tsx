@@ -17,6 +17,9 @@ interface Alert {
 
 const alerts = new ReactiveMap<string, Alert>();
 
+/**
+ * Please don't call this any where else, bar the main `app.tsx`
+ */
 export function AlertToast() {
 	return (
 		<Portal>
