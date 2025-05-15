@@ -113,7 +113,7 @@ export default function InventoryPage() {
   return (
     <>
       <div class="overflow-x-auto">
-        <table class="table table-zebra">
+        <table class="table table-zebra table-sm md:table-md">
           {/* head */}
           <thead>
             <tr class="*:text-center">
