@@ -13,6 +13,7 @@
 		"@google/genai": "^0.13.0",
 		"@solid-primitives/deep": "^0.3.2",
 		"@solid-primitives/map": "^0.7.1",
+		"@solid-primitives/storage": "^4.3.2",
 		"@solidjs/router": "^0.15.0",
 		"@solidjs/start": "^1.1.0",
 		"fuse.js": "^7.1.0",
