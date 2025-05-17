@@ -1,4 +1,4 @@
-import { SignalProps } from "~/code/shared";
+import { SignalProps } from "~/code/types";
 import GenericModal from "./modal";
 
 export default function DeleteModal(

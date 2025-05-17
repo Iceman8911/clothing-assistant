@@ -9,12 +9,9 @@ import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
 import { CustomRoute } from "./code/enums";
 import Dock from "./components/dock";
-import {
-	gDefaultSettings,
-	gSetSettings,
-	gSettings,
-	gSettingsLocalStorageKey,
-} from "./code/shared";
+import { gDefaultSettings } from "./code/variables";
+import { gSetSettings, gSettings } from "./code/variables";
+import { gSettingsLocalStorageKey } from "./code/variables";
 import { AlertToast } from "./components/shared/alert-toast";
 
 export default function App() {

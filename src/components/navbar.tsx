@@ -2,7 +2,7 @@ import SettingsIcon from "lucide-solid/icons/settings";
 import ListFilterIcon from "lucide-solid/icons/list-filter";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import SearchIcon from "lucide-solid/icons/search";
-import { gSearchText, gSetSearchText } from "~/code/shared";
+import { gSearchText, gSetSearchText } from "~/code/variables";
 import { useNavigate } from "@solidjs/router";
 import { CustomRoute } from "~/code/enums";
 import { Match, Switch } from "solid-js";

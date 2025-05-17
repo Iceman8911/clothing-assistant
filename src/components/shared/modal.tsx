@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import { SignalProps } from "~/code/shared";
+import { SignalProps } from "~/code/types";
 
 export default function GenericModal(
   props: SignalProps & {
