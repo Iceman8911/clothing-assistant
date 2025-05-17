@@ -17,6 +17,7 @@ export const gClothingItems = new ReactiveMap<string, ClothingItem>();
 export const [gSearchText, gSetSearchText] = createSignal("");
 
 export const gDefaultSettings = {
+  currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
   apiKeys: {
     // Settings
     /**

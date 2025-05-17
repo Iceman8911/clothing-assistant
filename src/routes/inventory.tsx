@@ -11,6 +11,8 @@ import { type ClothingItem } from "~/code/classes/clothing";
 import { gClothingItems, generateRandomId, gSearchText } from "~/code/shared";
 import CreateClothingModal from "~/components/create_clothing";
 import DeleteModal from "~/components/shared/delete-modal";
+import GenericModal from "~/components/shared/modal";
+import RestockModal from "~/components/shared/restock-modal";
 
 export default function InventoryPage() {
   // Filter out only the properties of the clothing that should be displayed
@@ -31,6 +33,9 @@ export default function InventoryPage() {
   const [idOfClothingItemToEdit, setIdOfClothingItemToEdit] = createSignal<
     string | undefined
   >();
+  const currentClothingItem = createMemo((_) =>
+    gClothingItems.get(idOfClothingItemToEdit() ?? ""),
+  );
 
   const headerKeys = Object.keys(tableHeaders) as (keyof typeof tableHeaders)[];
 
@@ -113,6 +118,7 @@ export default function InventoryPage() {
 
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] =
     createSignal(false);
+  const [isRestockModalOpen, setIsRestockModalOpen] = createSignal(false);
 
   return (
     <>
@@ -267,7 +273,11 @@ export default function InventoryPage() {
                   Sell
                 </a>
               </li>
-              <li>
+              <li
+                onClick={(_) => {
+                  setIsRestockModalOpen(true);
+                }}
+              >
                 <a>
                   <Blocks />
                   Restock
@@ -302,6 +312,12 @@ export default function InventoryPage() {
           gClothingItems.delete(idOfClothingItemToEdit()!);
         }}
       ></DeleteModal>
+
+      <RestockModal
+        stateAccessor={isRestockModalOpen}
+        stateSetter={setIsRestockModalOpen}
+        items={[currentClothingItem()]}
+      ></RestockModal>
     </>
   );
 }
