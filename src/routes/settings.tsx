@@ -3,31 +3,8 @@ import { createEffect, on, onMount } from "solid-js";
 import { produce, unwrap } from "solid-js/store";
 import { gDefaultSettings } from "~/code/variables";
 import { gSetSettings, gSettings } from "~/code/variables";
-import { gSettingsLocalStorageKey } from "~/code/variables";
 
 export default function SettingsPage() {
-  function saveSettings(settings: typeof gSettings) {
-    try {
-      localStorage.setItem(gSettingsLocalStorageKey, JSON.stringify(settings));
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  createEffect(() => {
-    // Track any changes to properties
-    trackStore(gSettings);
-
-    const settings = structuredClone(unwrap(gSettings));
-
-    if (!settings.apiKeys.persist) {
-      // Clear the API Keys
-      settings.apiKeys.gemini = "";
-    }
-
-    saveSettings(settings);
-  });
-
   return (
     <div class="p-4 prose">
       <h2 class="font-bold">Settings</h2>

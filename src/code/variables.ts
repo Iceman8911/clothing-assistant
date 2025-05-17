@@ -1,7 +1,8 @@
 import { ReactiveMap } from "@solid-primitives/map";
 import { ClothingItem } from "./classes/clothing";
 import { createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
+import { makePersisted } from "@solid-primitives/storage";
 
 export const gDefaultSettings = {
   currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
@@ -26,7 +27,19 @@ export const gClothingItems = new ReactiveMap<string, ClothingItem>();
  * Global search text used for filtering
  */
 export const [gSearchText, gSetSearchText] = createSignal("");
-export const gSettingsLocalStorageKey = "settings";
-export const [gSettings, gSetSettings] = createStore(
-  structuredClone(gDefaultSettings),
+export const [gSettings, gSetSettings] = makePersisted(
+  createStore(structuredClone(gDefaultSettings)),
+  {
+    name: "settings",
+    serialize: function (data) {
+      const dataCopy = structuredClone(unwrap(data));
+
+      // don't store the api keys
+      if (!dataCopy.apiKeys.persist) {
+        dataCopy.apiKeys.gemini = "";
+      }
+
+      return JSON.stringify(dataCopy);
+    },
+  },
 );
