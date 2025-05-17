@@ -4,6 +4,7 @@ import Trash2 from "lucide-solid/icons/trash-2";
 import HandCoins from "lucide-solid/icons/hand-coins";
 import Blocks from "lucide-solid/icons/blocks";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
+import HistoryIcon from "lucide-solid/icons/history";
 import { batch, createMemo, createSignal, For, Show } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { Portal } from "solid-js/web";
@@ -292,6 +293,16 @@ export default function InventoryPage() {
                 <a class="text-error">
                   <Trash2 />
                   Delete
+                </a>
+              </li>
+              <li
+                onClick={(_) => {
+                  // setIsConfirmDeleteModalOpen(true);
+                }}
+              >
+                <a class="text-info">
+                  <HistoryIcon />
+                  View History
                 </a>
               </li>
             </ul>
