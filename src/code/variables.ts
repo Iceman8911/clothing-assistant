@@ -27,6 +27,8 @@ export const gClothingItems = new ReactiveMap<string, ClothingItem>();
  * Global search text used for filtering
  */
 export const [gSearchText, gSetSearchText] = createSignal("");
+
+/** Global Settings */
 export const [gSettings, gSetSettings] = makePersisted(
   createStore(structuredClone(gDefaultSettings)),
   {
