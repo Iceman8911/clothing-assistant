@@ -726,7 +726,7 @@ export default function CreateClothingModal(
                 }
 
                 if (clothingForm.reportValidity()) {
-                  gAddClothingItem(structuredClone(unwrap(clothingItem)));
+                  gAddClothingItem(clothingItem.clone(true));
                   prop.stateSetter(false);
                 }
               }}

@@ -1,4 +1,4 @@
-import { createMutable } from "solid-js/store";
+import { createMutable, unwrap } from "solid-js/store";
 import { fileToDataURL } from "../utilities";
 import { Accessor, createMemo } from "solid-js";
 import { generateRandomId } from "../functions";
@@ -121,5 +121,12 @@ export class ClothingItem implements MutableClassProps {
     this.id = generateRandomId();
   }
 
-  clone() {}
+  clone(
+    /** If `true`, the new clone will be unwrapped from it's SolidJS proxy */
+    shouldUnwrap = false,
+  ) {
+    return shouldUnwrap
+      ? unwrap(new ClothingItem(this))
+      : new ClothingItem(this);
+  }
 }
