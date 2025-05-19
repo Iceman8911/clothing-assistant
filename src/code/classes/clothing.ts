@@ -38,63 +38,47 @@ export class ClothingItem implements MutableClassProps {
   /**
    * Generated from `crypto.randomUUID()`
    */
-  readonly id: string;
-  name: string;
-  description: string;
-  brand: string;
-  gender: Capitalize<"male" | "female" | "unisex">;
+  readonly id!: string;
+  name!: string;
+  description!: string;
+  brand!: string;
+  gender!: Capitalize<"male" | "female" | "unisex">;
   /** Too varied for a more specific type */
-  color: string;
-  material: string;
-  category: "Tops" | "Bottoms" | "Outer Wear" | "Inner Wear";
-  subCategory: string;
-  season: {
+  color!: string;
+  material!: string;
+  category!: "Tops" | "Bottoms" | "Outer Wear" | "Inner Wear";
+  subCategory!: string;
+  season!: {
     spring: boolean;
     summer: boolean;
     fall: boolean;
     winter: boolean;
   };
-  occasion: {
+  occasion!: {
     formal: boolean;
     casual: boolean;
     activeWear: boolean;
   };
-  condition: Capitalize<"new" | "used" | "refurbished">;
+  condition!: Capitalize<"new" | "used" | "refurbished">;
 
-  costPrice: number;
-  sellingPrice: number;
-  quantity: number;
-  size: "XS" | "S" | "M" | "L" | "XL";
-  dateBought: Date;
+  costPrice!: number;
+  sellingPrice!: number;
+  quantity!: number;
+  size!: "XS" | "S" | "M" | "L" | "XL";
+  dateBought!: Date;
   /**
    * Base64 encoded string (with the mime type included)
    */
   imgData!: string;
 
   constructor(data: MutableClassProps | ClothingItem) {
-    if (data instanceof ClothingItem) {
-      this.id = data.id;
-    } else {
+    for (const prop in data) {
+      //@ts-expect-error
+      this[prop] = data[prop];
+    }
+    if (!(data instanceof ClothingItem)) {
       this.id = generateRandomId();
     }
-
-    this.name = data.name;
-    this.description = data.description;
-    this.brand = data.brand;
-    this.gender = data.gender;
-    this.color = data.color;
-    this.category = data.category;
-    this.subCategory = data.subCategory;
-    this.material = data.material;
-    this.season = data.season;
-    this.occasion = data.occasion;
-    this.condition = data.condition;
-    this.costPrice = data.costPrice;
-    this.sellingPrice = data.sellingPrice;
-    this.quantity = data.quantity;
-    this.size = data.size;
-    this.dateBought = data.dateBought;
-    this.imgData = data.imgData;
 
     return createMutable(this);
   }
