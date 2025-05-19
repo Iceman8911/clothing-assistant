@@ -250,7 +250,7 @@ export default function InventoryPage() {
             onClick={() => setIsTableRowMenuOpen(false)}
           >
             <ul
-              class="menu menu-sm menu-horizontal border border-neutral bg-base-200 rounded-box w-fit inset-0 absolute max-h-fit grid grid-cols-2 [&_a]:gap-1 [&_svg]:h-5 [&_svg]:w-5"
+              class="menu menu-sm menu-horizontal border border-neutral bg-base-200 rounded-box w-fit inset-0 absolute z-10 max-h-fit grid grid-cols-2 [&_a]:gap-1 [&_svg]:h-5 [&_svg]:w-5"
               style={{
                 translate: `${tableRowMenuData.x}px ${tableRowMenuData.y}px`,
               }}
