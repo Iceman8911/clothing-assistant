@@ -3,6 +3,7 @@ import { ClothingItem } from "./classes/clothing";
 import { gClothingItemPersistentStore, gClothingItems } from "./variables";
 import { createEffect, on } from "solid-js";
 import { trackStore } from "@solid-primitives/deep";
+import { gTriggerAlert } from "~/components/shared/alert-toast";
 
 export const generateRandomId = () => crypto.randomUUID();
 
@@ -20,10 +21,12 @@ export async function gIsUserConnectedToInternet(): Promise<boolean> {
   }
 }
 
+const showSavingAlert = () => gTriggerAlert("info", "Saving Changes… ");
 /**
  * Preferred to `gClothingItems.set`. Only call this in a reactive context
  */
 export function gAddClothingItem(clothing: ClothingItem) {
+  showSavingAlert();
   gClothingItemPersistentStore.setItem(clothing.id, unwrap(clothing));
   gClothingItems.set(clothing.id, clothing);
 }
@@ -32,6 +35,7 @@ export function gAddClothingItem(clothing: ClothingItem) {
  * Preferred to `gClothingItems.delete`. Only call this in a reactive context
  */
 export function gRemoveClothingItem(clothingId: string) {
+  showSavingAlert();
   gClothingItemPersistentStore.removeItem(clothingId);
   gClothingItems.delete(clothingId);
 }
