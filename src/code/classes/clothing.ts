@@ -120,4 +120,6 @@ export class ClothingItem implements MutableClassProps {
     //@ts-expect-error
     this.id = generateRandomId();
   }
+
+  clone() {}
 }
