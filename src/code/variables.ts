@@ -20,7 +20,9 @@ export const gDefaultSettings = {
 };
 
 /**
- * Each clothing item is indexed with it's `id`
+ * Each clothing item is indexed with it's `id`.
+
+ Avoid using `set()` and `delete()` if you care about persistence and other stuff.
  */
 export const gClothingItems = new ReactiveMap<string, ClothingItem>();
 
