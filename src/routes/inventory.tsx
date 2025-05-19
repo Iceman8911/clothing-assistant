@@ -11,7 +11,7 @@ import { Portal } from "solid-js/web";
 import { type ClothingItem } from "~/code/classes/clothing";
 import { gSearchText } from "~/code/variables";
 import { gClothingItems } from "~/code/variables";
-import { generateRandomId } from "~/code/functions";
+import { generateRandomId, gRemoveClothingItem } from "~/code/functions";
 import CreateClothingModal from "~/components/create_clothing";
 import DeleteModal from "~/components/shared/delete-modal";
 import GenericModal from "~/components/shared/modal";
@@ -322,7 +322,7 @@ export default function InventoryPage() {
         stateAccessor={isConfirmDeleteModalOpen}
         stateSetter={setIsConfirmDeleteModalOpen}
         onDelete={() => {
-          gClothingItems.delete(idOfClothingItemToEdit()!);
+          gRemoveClothingItem(idOfClothingItemToEdit()!);
         }}
       ></DeleteModal>
 

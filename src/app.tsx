@@ -9,11 +9,22 @@ import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
 import { CustomRoute } from "./code/enums";
 import Dock from "./components/dock";
-import { gDefaultSettings } from "./code/variables";
+import {
+  gClothingItemPersistentStore,
+  gClothingItems,
+  gDefaultSettings,
+} from "./code/variables";
 import { gSetSettings, gSettings } from "./code/variables";
 import { AlertToast } from "./components/shared/alert-toast";
+import { ClothingItem } from "./code/classes/clothing";
 
 export default function App() {
+  onMount(() => {
+    // load all the clothing from storage
+    gClothingItemPersistentStore.iterate<ClothingItem, void>((clothing) => {
+      gClothingItems.set(clothing.id, clothing);
+    });
+  });
   return (
     <>
       <Router

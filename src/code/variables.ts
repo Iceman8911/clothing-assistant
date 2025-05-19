@@ -3,6 +3,7 @@ import { ClothingItem } from "./classes/clothing";
 import { createSignal } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import { makePersisted } from "@solid-primitives/storage";
+import localforage from "localforage";
 
 export const gDefaultSettings = {
   currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
@@ -45,3 +46,7 @@ export const [gSettings, gSetSettings] = makePersisted(
     },
   },
 );
+
+export const gClothingItemPersistentStore = localforage.createInstance({
+  name: "clothingItems",
+});
