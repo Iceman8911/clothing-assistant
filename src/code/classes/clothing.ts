@@ -31,6 +31,8 @@ interface MutableClassProps {
   quantity: number;
   size: "XS" | "S" | "M" | "L" | "XL";
   dateBought: Date;
+  /** Updated everytime the clothing item is added to `gClothingItem` via `gAddClothingItem`. Used for syncing purposes */
+  dateEdited?: Date;
   imgData: string;
   // imgFile: () => Promise<File>;
 }
@@ -66,6 +68,7 @@ export class ClothingItem implements MutableClassProps {
   quantity!: number;
   size!: "XS" | "S" | "M" | "L" | "XL";
   dateBought!: Date;
+  dateEdited?: Date;
   /**
    * Base64 encoded string (with the mime type included)
    */

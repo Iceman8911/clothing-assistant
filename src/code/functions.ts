@@ -28,6 +28,7 @@ const showSavingAlert = () => gTriggerAlert(gStatus.INFO, "Saving Changes… ");
  */
 export function gAddClothingItem(clothing: ClothingItem) {
   showSavingAlert();
+  clothing.dateEdited = new Date();
   gClothingItemPersistentStore.setItem(clothing.id, unwrap(clothing));
   gClothingItems.set(clothing.id, clothing);
 }
