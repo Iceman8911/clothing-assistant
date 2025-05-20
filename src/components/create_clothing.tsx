@@ -235,6 +235,7 @@ export default function CreateClothingModal(
                 <button
                   type="button"
                   class="btn btn-info btn-soft btn-sm opacity-75 absolute top-0 right-0"
+                  disabled={isAiGeneratingData()}
                   onClick={(ev) => {
                     ev.stopPropagation();
                     setIsThumbnailPreviewOpen(true);
@@ -249,8 +250,8 @@ export default function CreateClothingModal(
                   class={
                     "btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
                     (isAiGeneratingData()
-                      ? "cursor-not-allowed opacity-50 pointer-events-none"
-                      : "cursor-pointer")
+                      ? "cursor-not-allowed pointer-events-none"
+                      : "")
                   }
                   onClick={async (e) => {
                     e.stopPropagation();
