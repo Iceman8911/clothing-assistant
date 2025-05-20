@@ -34,7 +34,7 @@ export function AlertToast() {
                   ? "alert-success"
                   : alert.status == gStatus.INFO
                     ? "alert-info"
-                    : alert.status == gStatus.ERROR
+                    : alert.status == gStatus.WARNING
                       ? "alert-warning"
                       : "alert-error")
               }
