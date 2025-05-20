@@ -29,6 +29,7 @@ import GenericModal from "./shared/modal";
 import DeleteModal from "./shared/delete-modal";
 import { Show } from "solid-js";
 import { gStatus } from "~/code/enums";
+import ImgPreview from "./shared/img-preview";
 
 export default function CreateClothingModal(
   prop: SignalProps & {
@@ -197,6 +198,8 @@ export default function CreateClothingModal(
   );
 
   const [isConfirmingDelete, setIsConfirmingDelete] = createSignal(false);
+  const [isThumbnailPreviewOpen, setIsThumbnailPreviewOpen] =
+    createSignal(false);
 
   return (
     <>
@@ -226,6 +229,19 @@ export default function CreateClothingModal(
               }}
             >
               <Show when={clothingItemBase64Url()}>
+                {/* Button for previewing the chosen clothing */}
+                <button
+                  type="button"
+                  class="btn btn-info btn-soft btn-sm opacity-75 absolute top-0 right-0"
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    setIsThumbnailPreviewOpen(true);
+                  }}
+                >
+                  Preview
+                </button>
+
+                {/* Button for AI-based data generation */}
                 <button
                   type="button"
                   class={
@@ -757,6 +773,12 @@ export default function CreateClothingModal(
           gRemoveClothingItem(clothingItem.id);
         }}
       ></DeleteModal>
+
+      <ImgPreview
+        stateAccessor={isThumbnailPreviewOpen}
+        stateSetter={setIsThumbnailPreviewOpen}
+        img={clothingItemBase64Url() ?? ""}
+      ></ImgPreview>
     </>
   );
 }
