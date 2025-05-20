@@ -166,7 +166,7 @@ export default function CreateClothingModal(
     }
   });
 
-  const [clothingItemBase64Url, { refetch }] = createResource(
+  const [clothingItemBase64Url, { refetch, mutate }] = createResource(
     async () => await clothingItem.base64(),
   );
 
@@ -737,6 +737,8 @@ export default function CreateClothingModal(
                   setIsConfirmingDelete(true);
                 } else {
                   clothingForm.reset();
+                  // Clear the display
+                  mutate("");
                 }
               }}
             >
