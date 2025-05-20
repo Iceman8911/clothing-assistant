@@ -76,7 +76,7 @@ export default function Dock(props: any) {
 
         <button
           onClick={(e) => {
-            (e.target as HTMLButtonElement).querySelector("input")?.click();
+            e.currentTarget.querySelector("input")?.click();
           }}
         >
           <label class="swap swap-rotate">
