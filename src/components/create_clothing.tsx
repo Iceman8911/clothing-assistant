@@ -220,7 +220,9 @@ export default function CreateClothingModal(
               }
               ref={clothingDisplay}
               style={{
-                "background-image": `url(${clothingItemBase64Url()})`,
+                "background-image": clothingItemBase64Url()
+                  ? `url(${clothingItemBase64Url()})`
+                  : "",
               }}
               onClick={() => {
                 if (!isAiGeneratingData()) {
