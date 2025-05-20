@@ -33,8 +33,7 @@ interface MutableClassProps {
   dateBought: Date;
   /** Updated everytime the clothing item is added to `gClothingItem` via `gAddClothingItem`. Used for syncing purposes */
   dateEdited?: Date;
-  imgData: string;
-  // imgFile: () => Promise<File>;
+  imgFile?: File;
 }
 export class ClothingItem implements MutableClassProps {
   /**
@@ -69,54 +68,58 @@ export class ClothingItem implements MutableClassProps {
   size!: "XS" | "S" | "M" | "L" | "XL";
   dateBought!: Date;
   dateEdited?: Date;
-  /**
-   * Base64 encoded string (with the mime type included)
-   */
-  imgData!: string;
+  imgFile?: File;
+  private _imgCache?: string;
 
   constructor(data: MutableClassProps | ClothingItem) {
     for (const prop in data) {
       //@ts-expect-error
       this[prop] = data[prop];
     }
-    if (!(data instanceof ClothingItem)) {
+
+    //@ts-expect-error
+    // If an id is passed, use it as is
+    if (!data?.id) {
       this.id = generateRandomId();
     }
+
+    // Clear private caches
+    this._imgCache = undefined;
 
     return createMutable(this);
   }
 
-  /**
-   * Same as `imgData` but the mime type is removed. Use this for APIs that expect a base64 string.
-   */
-  get base64() {
-    return this.imgData.replace(/^data:image\/\w+;base64,/, "");
+  /** Caches and returns a base64 representation of a the image associated with the clothing */
+  private async _cacheImg() {
+    if (!this.imgFile) {
+      return "";
+    }
+
+    this._imgCache = await fileToDataURL(this.imgFile);
+    return this._imgCache;
   }
 
   async addImg(file: File) {
-    this.imgData = await fileToDataURL(file);
+    this.imgFile = file;
+    await this._cacheImg();
   }
 
   /**
-   *   Take care when calling this since it may be expensive
+   * Base64 encoded string of the image file (with or without the mime type included)
    */
-  async imgFile() {
-    await null;
+  async base64(
+    /** If true, the mime type at the beginning of the string will be removed. */
+    trimMime = false,
+  ) {
+    const trim = (string: string) =>
+      string.replace(/^data:image\/\w+;base64,/, "");
 
-    function base64ToBlob(base64: string, mimeType: string): Blob {
-      const byteChars = atob(base64.split(",")[1]);
-      const byteNumbers = new Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) {
-        byteNumbers[i] = byteChars.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      return new Blob([byteArray], { type: mimeType });
+    // The cache is empty
+    if (!this._imgCache || this._imgCache.endsWith("base64,")) {
+      return trimMime ? trim(await this._cacheImg()) : this._cacheImg();
+    } else {
+      return trimMime ? trim(this._imgCache) : this._imgCache;
     }
-
-    return new File([base64ToBlob(this.imgData, "image/png")], "img.png", {
-      type: "image/png",
-      lastModified: Date.now(),
-    });
   }
 
   randomizeId() {

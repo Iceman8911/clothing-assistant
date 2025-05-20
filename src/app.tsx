@@ -22,7 +22,7 @@ export default function App() {
   onMount(() => {
     // load all the clothing from storage
     gClothingItemPersistentStore.iterate<ClothingItem, void>((clothing) => {
-      gClothingItems.set(clothing.id, clothing);
+      gClothingItems.set(clothing.id, new ClothingItem(clothing));
     });
   });
   return (

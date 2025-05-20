@@ -5,7 +5,14 @@ import HandCoins from "lucide-solid/icons/hand-coins";
 import Blocks from "lucide-solid/icons/blocks";
 import UpArrowIcon from "lucide-solid/icons/chevron-up";
 import HistoryIcon from "lucide-solid/icons/history";
-import { batch, createMemo, createSignal, For, Show } from "solid-js";
+import {
+  batch,
+  createMemo,
+  createResource,
+  createSignal,
+  For,
+  Show,
+} from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { Portal } from "solid-js/web";
 import { type ClothingItem } from "~/code/classes/clothing";
@@ -179,6 +186,10 @@ export default function InventoryPage() {
           <tbody>
             <For each={processedRows()}>
               {(rowObject, index) => {
+                const [base64Img] = createResource(
+                  async () => await rowObject.base64(),
+                );
+
                 return (
                   <>
                     <tr
@@ -222,7 +233,7 @@ export default function InventoryPage() {
                       <td class="flex flex-col md:flex-row items-center justify-center gap-2">
                         <div class="avatar">
                           <div class="mask mask-squircle w-16">
-                            <img src={rowObject.imgData} />
+                            <img src={base64Img()} />
                           </div>
                         </div>
 

@@ -1,6 +1,7 @@
 import { compressImage } from "simple-image-compressor";
 import {
   createEffect,
+  createResource,
   createSignal,
   For,
   Match,
@@ -142,8 +143,6 @@ export default function CreateClothingModal(
     occasion: { casual: false, activeWear: false, formal: false },
     season: { fall: false, spring: false, summer: false, winter: false },
     size: "M",
-    imgData: "",
-    // imgFile: new File([], ""),
   });
 
   const isEditMode = () => (prop.clothIdToEdit ? true : false);
@@ -166,6 +165,10 @@ export default function CreateClothingModal(
     }
   });
 
+  const [clothingItemBase64Url, { refetch }] = createResource(
+    async () => await clothingItem.base64(),
+  );
+
   // Alter some things depending on if we're creating or editing
   createEffect(
     on([isEditMode, prop.stateAccessor], async () => {
@@ -183,11 +186,12 @@ export default function CreateClothingModal(
         }
       }
 
-      if (prop.stateAccessor() && clothingItem.imgData) {
+      if (prop.stateAccessor() && clothingItem.imgFile) {
         // Also set the file input's value
         const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(await clothingItem.imgFile());
+        dataTransfer.items.add(clothingItem.imgFile);
         clothingImgInput.files = dataTransfer.files;
+        await refetch();
       }
     }),
   );
@@ -213,7 +217,7 @@ export default function CreateClothingModal(
               }
               ref={clothingDisplay}
               style={{
-                "background-image": `url(${clothingItem.imgData})`,
+                "background-image": `url(${clothingItemBase64Url()})`,
               }}
               onClick={() => {
                 if (!isAiGeneratingData()) {
@@ -221,7 +225,7 @@ export default function CreateClothingModal(
                 }
               }}
             >
-              <Show when={clothingItem.imgData}>
+              <Show when={clothingItemBase64Url()}>
                 <button
                   type="button"
                   class={
@@ -248,8 +252,11 @@ export default function CreateClothingModal(
                       setIsAiGeneratingData(true);
 
                       let aiJsonTextResponse =
-                        (await understandImageWithGemini(clothingItem.base64))
-                          .text ?? "";
+                        (
+                          await understandImageWithGemini(
+                            await clothingItem.base64(true),
+                          )
+                        ).text ?? "";
 
                       // Cleanup the opening and closing braces
                       aiJsonTextResponse = aiJsonTextResponse
@@ -383,7 +390,12 @@ export default function CreateClothingModal(
                     });
                   }
 
-                  clothingItem.addImg(await compressFile(file));
+                  clothingItem
+                    .addImg(await compressFile(file))
+                    .then(async (_) => {
+                      // Refetch the base64 url whenever a new clothing image is added.
+                      await refetch();
+                    });
                 }}
               />
               <label class="label">Max size 10MB</label>
