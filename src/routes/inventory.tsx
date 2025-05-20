@@ -23,6 +23,7 @@ import CreateClothingModal from "~/components/create_clothing";
 import DeleteModal from "~/components/shared/delete-modal";
 import GenericModal from "~/components/shared/modal";
 import RestockModal from "~/components/shared/restock-modal";
+import ImgPreview from "~/components/shared/img-preview";
 
 export default function InventoryPage() {
   // Filter out only the properties of the clothing that should be displayed
@@ -129,6 +130,9 @@ export default function InventoryPage() {
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] =
     createSignal(false);
   const [isRestockModalOpen, setIsRestockModalOpen] = createSignal(false);
+  const [isThumbnailPreviewOpen, setIsThumbnailPreviewOpen] =
+    createSignal(false);
+  const [thumbnailPreviewImg, setThumbnailPreviewImg] = createSignal("");
 
   return (
     <>
@@ -233,7 +237,15 @@ export default function InventoryPage() {
                       <td class="flex flex-col md:flex-row items-center justify-center gap-2">
                         <div class="avatar">
                           <div class="mask mask-squircle w-16">
-                            <img src={base64Img()} />
+                            <img
+                              src={base64Img()}
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                setThumbnailPreviewImg(base64Img()!);
+                                setIsThumbnailPreviewOpen(true);
+                              }}
+                              class="cursor-pointer"
+                            />
                           </div>
                         </div>
 
@@ -342,6 +354,12 @@ export default function InventoryPage() {
         stateSetter={setIsRestockModalOpen}
         items={[currentClothingItem()]}
       ></RestockModal>
+
+      <ImgPreview
+        stateAccessor={isThumbnailPreviewOpen}
+        stateSetter={setIsThumbnailPreviewOpen}
+        img={thumbnailPreviewImg()}
+      ></ImgPreview>
     </>
   );
 }
