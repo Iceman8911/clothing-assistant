@@ -249,9 +249,8 @@ export default function CreateClothingModal(
                   type="button"
                   class={
                     "btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
-                    (isAiGeneratingData()
-                      ? "cursor-not-allowed pointer-events-none"
-                      : "")
+                    (isAiGeneratingData() &&
+                      "cursor-not-allowed pointer-events-none")
                   }
                   onClick={async (e) => {
                     e.stopPropagation();
