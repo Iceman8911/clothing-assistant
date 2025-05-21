@@ -1,43 +1,47 @@
 {
-	"name": "example-with-tailwindcss",
-	"type": "module",
-	"scripts": {
-		"dev": "vinxi dev",
-		"build": "vinxi build",
-		"start": "vinxi start",
-		"bun-dev": "bun --bun vinxi dev",
-		"bun-build": "bun --bun vinxi build",
-		"bun-start": "bun --bun vinxi start"
-	},
-	"dependencies": {
-		"@google/genai": "^0.13.0",
-		"@solid-primitives/deep": "^0.3.2",
-		"@solid-primitives/map": "^0.7.1",
-		"@solid-primitives/storage": "^4.3.2",
-		"@solidjs/router": "^0.15.0",
-		"@solidjs/start": "^1.1.0",
-		"fuse.js": "^7.1.0",
-		"localforage": "^1.10.0",
-		"lucide-solid": "^0.507.0",
-		"simple-image-compressor": "^1.8.2",
-		"solid-js": "^1.9.5",
-		"vinxi": "^0.5.3"
-	},
-	"devDependencies": {
-		"@tailwindcss/typography": "^0.5.16",
-		"@tailwindcss/vite": "^4.0.7",
-		"@types/bun": "latest",
-		"daisyui": "^5.0.35",
-		"tailwindcss": "^4.0.7"
-	},
-	"engines": {
-		"node": ">=22"
-	},
-	"trustedDependencies": [
-		"@parcel/watcher"
-	],
-	"private": true,
-	"peerDependencies": {
-		"typescript": "^5"
-	}
+  "name": "example-with-tailwindcss",
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start",
+    "bun-dev": "bun --bun vinxi dev",
+    "bun-build": "bun --bun vinxi build",
+    "bun-start": "bun --bun vinxi start"
+  },
+  "dependencies": {
+    "@google/genai": "^0.13.0",
+    "@solid-primitives/deep": "^0.3.2",
+    "@solid-primitives/map": "^0.7.1",
+    "@solid-primitives/storage": "^4.3.2",
+    "@solidjs/router": "^0.15.0",
+    "@solidjs/start": "^1.1.0",
+    "firebase": "^11.8.0",
+    "fuse.js": "^7.1.0",
+    "localforage": "^1.10.0",
+    "lucide-solid": "^0.507.0",
+    "simple-image-compressor": "^1.8.2",
+    "solid-js": "^1.9.5",
+    "vinxi": "^0.5.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/vite": "^4.0.7",
+    "@types/bun": "latest",
+    "daisyui": "^5.0.35",
+    "tailwindcss": "^4.0.7"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "trustedDependencies": [
+    "@firebase/util",
+    "@parcel/watcher",
+    "esbuild",
+    "protobufjs"
+  ],
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  }
 }
