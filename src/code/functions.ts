@@ -10,7 +10,7 @@ export const generateRandomId = () => crypto.randomUUID();
 
 export async function gIsUserConnectedToInternet(): Promise<boolean> {
   try {
-    const response = await fetch("http://www.gstatic.com/generate_204", {
+    const response = await fetch("https://www.gstatic.com/generate_204", {
       method: "POST",
       mode: "no-cors",
     });
