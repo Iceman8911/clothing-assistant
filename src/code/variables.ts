@@ -47,6 +47,7 @@ export const [gSettings, gSetSettings] = makePersisted(
 
       return JSON.stringify(dataCopy);
     },
+    storage: localforage,
   },
 );
 
