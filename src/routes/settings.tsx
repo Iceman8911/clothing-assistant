@@ -1,6 +1,7 @@
 import { trackStore } from "@solid-primitives/deep";
 import { createEffect, on, onMount } from "solid-js";
 import { produce, unwrap } from "solid-js/store";
+import { generateRandomId } from "~/code/functions";
 import { gDefaultSettings } from "~/code/variables";
 import { gSetSettings, gSettings } from "~/code/variables";
 
@@ -8,6 +9,34 @@ export default function SettingsPage() {
   return (
     <div class="p-4 prose">
       <h2 class="font-bold">Settings</h2>
+
+      <section>
+        <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+          <legend class="fieldset-legend">Sync Id</legend>
+          <div class="flex gap-4">
+            <input
+              type="text"
+              class="input"
+              placeholder="Click 'Generate'"
+              disabled={gSettings.syncId ? true : false}
+              value={gSettings.syncId}
+            />
+            <button
+              class="btn btn-soft btn-primary w-20"
+              onClick={(_) => {
+                gSetSettings(
+                  produce((settings) => (settings.syncId = generateRandomId())),
+                );
+              }}
+            >
+              Generate
+            </button>
+          </div>
+          <span class="label text-warning inline-block whitespace-break-spaces">
+            You can generate this only <b class="italic">once</b>!
+          </span>
+        </fieldset>
+      </section>
 
       <section>
         <h3>API Keys</h3>

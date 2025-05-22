@@ -7,6 +7,7 @@ import localforage from "localforage";
 
 export const gDefaultSettings = {
   currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
+  syncId: "",
   apiKeys: {
     // Settings
     /**
