@@ -28,12 +28,14 @@ export default function SettingsPage() {
                   produce((settings) => (settings.syncId = generateRandomId())),
                 );
               }}
+              disabled={gSettings.syncId ? true : false}
             >
               Generate
             </button>
           </div>
           <span class="label text-warning inline-block whitespace-break-spaces">
-            You can generate this only <b class="italic">once</b>!
+            Required for syncing. You can generate this only{" "}
+            <b class="italic">once</b>!
           </span>
         </fieldset>
       </section>
