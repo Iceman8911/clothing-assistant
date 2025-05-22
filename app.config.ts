@@ -1,7 +1,7 @@
 import { defineConfig } from "@solidjs/start/config";
 import { analyzer } from "vite-bundle-analyzer";
 import tailwindcss from "@tailwindcss/vite";
-import visualizer from "rollup-plugin-visualizer";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   vite: {
