@@ -30,7 +30,8 @@
     "@types/bun": "latest",
     "daisyui": "^5.0.35",
     "tailwindcss": "^4.1.7",
-    "vite-bundle-analyzer": "^0.21.0"
+    "vite-bundle-analyzer": "^0.21.0",
+    "rollup-plugin-visualizer": "^5.14.0"
   },
   "engines": {
     "node": ">=22"
