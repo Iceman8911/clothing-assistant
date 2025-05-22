@@ -35,10 +35,14 @@ interface MutableClassProps {
   dateEdited?: Date;
   imgFile?: File;
 }
-export class ClothingItem implements MutableClassProps {
+interface ID {
   /**
    * Generated from `crypto.randomUUID()`
    */
+  readonly id: string;
+}
+
+export class ClothingItem implements MutableClassProps, ID {
   readonly id!: string;
   name!: string;
   description!: string;
@@ -135,4 +139,12 @@ export class ClothingItem implements MutableClassProps {
       ? unwrap(new ClothingItem(this))
       : new ClothingItem(this);
   }
+}
+
+/** The structure of the clothing data in the database */
+export interface ClothingDatabaseItem extends MutableClassProps, ID {
+  /** No longer exists since uploading / serializing a file isn't worth the space it takes up */
+  imgFile: never;
+  /** The image will be uploaded to a seperate file host (i.e Firebase Storage)*/
+  imgUrl: string;
 }
