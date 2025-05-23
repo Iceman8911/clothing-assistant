@@ -32,7 +32,7 @@ interface MutableClassProps {
   size: "XS" | "S" | "M" | "L" | "XL";
   dateBought: Date;
   /** Updated everytime the clothing item is added to `gClothingItem` via `gAddClothingItem`. Used for syncing purposes */
-  dateEdited?: Date;
+  dateEdited: Date;
   imgFile?: File;
 }
 interface ID {
@@ -71,7 +71,7 @@ export class ClothingItem implements MutableClassProps, ID {
   quantity!: number;
   size!: "XS" | "S" | "M" | "L" | "XL";
   dateBought!: Date;
-  dateEdited?: Date;
+  dateEdited: Date;
   imgFile?: File;
   private _imgCache?: string;
 
@@ -86,6 +86,8 @@ export class ClothingItem implements MutableClassProps, ID {
     if (!data?.id) {
       this.id = generateRandomId();
     }
+
+    this.dateEdited = data.dateBought;
 
     // Clear private caches
     this._imgCache = undefined;

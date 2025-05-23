@@ -13,16 +13,35 @@ import {
   gClothingItemPersistentStore,
   gClothingItems,
   gDefaultSettings,
+  gPendingClothingToSync,
 } from "./code/variables";
 import { gSetSettings, gSettings } from "./code/variables";
 import { AlertToast } from "./components/shared/alert-toast";
 import { ClothingItem } from "./code/classes/clothing";
+import {
+  gAddClothingItemToServer,
+  gGetClothingItemFromDatabase,
+} from "./code/database/firebase";
 
 export default function App() {
   onMount(() => {
     // load all the clothing from storage
     gClothingItemPersistentStore.iterate<ClothingItem, void>((clothing) => {
       gClothingItems.set(clothing.id, new ClothingItem(clothing));
+    });
+
+    // TODO: sync any pending clothing items `properly`
+    gPendingClothingToSync.forEach((clothingId) => {
+      const clothing = gClothingItems.get(clothingId)!;
+
+      gGetClothingItemFromDatabase(clothingId).then((clothingDatabaseData) => {
+        if (
+          new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
+          clothing.dateEdited
+        ) {
+          gAddClothingItemToServer(clothing);
+        }
+      });
     });
   });
   return (

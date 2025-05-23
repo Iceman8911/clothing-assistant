@@ -54,3 +54,9 @@ export const [gSettings, gSetSettings] = makePersisted(
 export const gClothingItemPersistentStore = localforage.createInstance({
   name: "clothingItems",
 });
+
+/** Filled when changes occur to clothing but the user lacks a stable connection.
+
+    Emptied when connection is back. */
+export const [gPendingClothingToSync, gSetPendingClothingToSync] =
+  makePersisted(createStore<string[]>([]));
