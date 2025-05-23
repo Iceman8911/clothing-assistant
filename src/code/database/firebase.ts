@@ -1,4 +1,4 @@
-// import { type FirebaseOptions, initializeApp } from "firebase/app";
+"use server";
 import { gTriggerAlert } from "~/components/shared/alert-toast";
 import { type ClothingItem } from "../classes/clothing";
 import { gIsUserConnectedToInternet } from "../functions";
@@ -90,7 +90,7 @@ interface ClothingDatabaseEntry extends FirestoreDocument {
 
 const DATABASE_LAST_UPDATED_COLLECTION_NAME = "last_updated";
 const PROJECT_ID = "clothing-assistant-b7ae8";
-const API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
+const API_KEY: string = process.env.FIREBASE_API_KEY;
 const BASE_URL =
   `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/` as const;
 const AUTH_TOKEN: Promise<AnonSignUpResponse> = fetch(
