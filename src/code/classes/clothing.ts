@@ -141,12 +141,21 @@ export class ClothingItem implements MutableClassProps, ID {
       ? unwrap(new ClothingItem(this))
       : new ClothingItem(this);
   }
+
+  /** Returns a plain object copy that can be easily used in server side code. */
+  get safeForServer(): Promise<SerializableClothingDatabaseItem> {
+    const clone = this.clone();
+    // TODO: Upload image file
+    return Promise.resolve({ ...clone, imgUrl: "", imgFile: undefined });
+  }
 }
 
-/** The structure of the clothing data in the database */
-export interface ClothingDatabaseItem extends MutableClassProps, ID {
-  /** No longer exists since uploading / serializing a file isn't worth the space it takes up */
-  imgFile: never;
+/** The serializable structure of the clothing data that will then be converted to a form the database will accept. Since the database code is ran on the server, we need to get rid of anything not easily serializable */
+export interface SerializableClothingDatabaseItem
+  extends MutableClassProps,
+    ID {
+  /** No longer exists since uploading / serializing a file isn't worth the space it takes up. Besides, Seroval can't serialize them :p */
+  imgFile: undefined | never;
   /** The image will be uploaded to a seperate file host (i.e Firebase Storage)*/
   imgUrl: string;
 }

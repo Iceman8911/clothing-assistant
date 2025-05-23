@@ -1,10 +1,52 @@
-"use server";
 import { gTriggerAlert } from "~/components/shared/alert-toast";
-import { type ClothingItem } from "../classes/clothing";
+import {
+  SerializableClothingDatabaseItem,
+  type ClothingItem,
+} from "../classes/clothing";
 import { gIsUserConnectedToInternet } from "../functions";
-import { gSetPendingClothingToSync, gSettings } from "../variables";
+import {
+  gPendingClothingToSync,
+  gSetPendingClothingToSync,
+  gSettings,
+} from "../variables";
 import { gStatus } from "../enums";
-import { produce } from "solid-js/store";
+import { produce, unwrap } from "solid-js/store";
+
+const LAST_UPDATED_COLLECTION = "last_updated";
+const PROJECT_ID = "clothing-assistant-b7ae8";
+const BASE_URL =
+  `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/` as const;
+const AUTH_TOKEN: Promise<AnonSignUpResponse> = (() => {
+  "use server";
+  const API_KEY = process.env.FIREBASE_API_KEY;
+
+  return fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
+    {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify({
+        returnSecureToken: true,
+      }),
+    },
+  ).then((res) => res.json());
+})();
+const SHARED_HEADERS = async () => {
+  return {
+    Authorization: `Bearer ${(await AUTH_TOKEN).idToken}`,
+    "Content-Type": "application/json",
+  } as const;
+};
+
+interface AnonSignUpResponse {
+  kind: string;
+  /** What we're looking for */
+  idToken: string;
+  refreshToken: string;
+  /** A number (in seconds) string, "3600" */
+  expiresIn: string;
+  localId: string;
+}
 
 /**
  * Represents a Firestore document data structure for REST API operations.
@@ -88,38 +130,6 @@ interface ClothingDatabaseEntry extends FirestoreDocument {
   };
 }
 
-const DATABASE_LAST_UPDATED_COLLECTION_NAME = "last_updated";
-const PROJECT_ID = "clothing-assistant-b7ae8";
-const API_KEY: string = process.env.FIREBASE_API_KEY;
-const BASE_URL =
-  `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/` as const;
-const AUTH_TOKEN: Promise<AnonSignUpResponse> = fetch(
-  `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
-  {
-    headers: { "Content-Type": "application/json" },
-    method: "POST",
-    body: JSON.stringify({
-      returnSecureToken: true,
-    }),
-  },
-).then((res) => res.json());
-const SHARED_HEADERS = async () => {
-  return {
-    Authorization: `Bearer ${(await AUTH_TOKEN).idToken}`,
-    "Content-Type": "application/json",
-  } as const;
-};
-
-interface AnonSignUpResponse {
-  kind: string;
-  /** What we're looking for */
-  idToken: string;
-  refreshToken: string;
-  /** A number (in seconds) string, "3600" */
-  expiresIn: string;
-  localId: string;
-}
-
 /** It goes like `collection`/`document`/`collection`/`document`, etc */
 const createDocumentPath = (...collectionOrDocument: string[]) =>
   collectionOrDocument.reduce((acc, curr) => {
@@ -138,7 +148,9 @@ const endpoint = (path: string) =>
 
 async function getDoc(path: string) {
   return (
-    await fetch(endpoint(path), { headers: await SHARED_HEADERS() })
+    await fetch(endpoint(path), {
+      headers: await SHARED_HEADERS(),
+    })
   ).json();
 }
 
@@ -155,11 +167,9 @@ async function addClothingItemDoc(
 ) {
   if (!gIsUserConnectedToInternet()) {
     gTriggerAlert(gStatus.INFO, "Sync scheduled for when next connected.");
-    gSetPendingClothingToSync(
-      produce((state) => {
-        if (!state.find((val) => val == clothingId)) state.push(clothingId);
-      }),
-    );
+
+    if (!gPendingClothingToSync.find((val) => val == clothingId))
+      gSetPendingClothingToSync([...gPendingClothingToSync, clothingId]);
   }
 
   const resJson = (
@@ -172,12 +182,12 @@ async function addClothingItemDoc(
 
   // Update the last time the db was modified.
   // I know that Firestore auto-saves when it was modified but due to latency and stuff, it's not reliable for my use case (it's normally around a second or 2 off)
-  await fetch(endpoint(DATABASE_LAST_UPDATED_COLLECTION_NAME), {
+  await fetch(endpoint(LAST_UPDATED_COLLECTION), {
     headers: await SHARED_HEADERS(),
     method: "PATCH",
     body: JSON.stringify({
       fields: {
-        [DATABASE_LAST_UPDATED_COLLECTION_NAME]: fieldsToAdd.fields.dateEdited,
+        [LAST_UPDATED_COLLECTION]: fieldsToAdd.fields.dateEdited,
       },
     } as FirestoreDocument),
   });
@@ -195,48 +205,53 @@ async function deleteDoc(path: string) {
   ).ok;
 }
 
-export async function gAddClothingItemToServer(clothingItem: ClothingItem) {
+export async function gAddClothingItemToServer(
+  clothingItem: SerializableClothingDatabaseItem,
+) {
   try {
-    const resJson = await addClothingItemDoc(clothingItem.id, {
-      fields: {
-        brand: { stringValue: clothingItem.brand },
-        category: { stringValue: clothingItem.category },
-        color: { stringValue: clothingItem.color },
-        condition: { stringValue: clothingItem.condition },
-        costPrice: { integerValue: `${clothingItem.costPrice}` },
-        dateBought: { timestampValue: clothingItem.dateBought.toISOString() },
-        dateEdited: {
-          timestampValue: clothingItem.dateEdited.toISOString(),
-        },
-        description: { stringValue: clothingItem.description },
-        gender: { stringValue: clothingItem.gender },
-        material: { stringValue: clothingItem.material },
-        name: { stringValue: clothingItem.name },
-        occasion: {
-          mapValue: {
-            fields: {
-              activeWear: { booleanValue: clothingItem.occasion.activeWear },
-              casual: { booleanValue: clothingItem.occasion.casual },
-              formal: { booleanValue: clothingItem.occasion.formal },
+    const resJson: ClothingDatabaseEntry = await addClothingItemDoc(
+      clothingItem.id,
+      {
+        fields: {
+          brand: { stringValue: clothingItem.brand },
+          category: { stringValue: clothingItem.category },
+          color: { stringValue: clothingItem.color },
+          condition: { stringValue: clothingItem.condition },
+          costPrice: { integerValue: `${clothingItem.costPrice}` },
+          dateBought: { timestampValue: clothingItem.dateBought.toISOString() },
+          dateEdited: {
+            timestampValue: clothingItem.dateEdited.toISOString(),
+          },
+          description: { stringValue: clothingItem.description },
+          gender: { stringValue: clothingItem.gender },
+          material: { stringValue: clothingItem.material },
+          name: { stringValue: clothingItem.name },
+          occasion: {
+            mapValue: {
+              fields: {
+                activeWear: { booleanValue: clothingItem.occasion.activeWear },
+                casual: { booleanValue: clothingItem.occasion.casual },
+                formal: { booleanValue: clothingItem.occasion.formal },
+              },
             },
           },
-        },
-        quantity: { integerValue: `${clothingItem.quantity}` },
-        season: {
-          mapValue: {
-            fields: {
-              fall: { booleanValue: clothingItem.season.fall },
-              spring: { booleanValue: clothingItem.season.spring },
-              summer: { booleanValue: clothingItem.season.summer },
-              winter: { booleanValue: clothingItem.season.winter },
+          quantity: { integerValue: `${clothingItem.quantity}` },
+          season: {
+            mapValue: {
+              fields: {
+                fall: { booleanValue: clothingItem.season.fall },
+                spring: { booleanValue: clothingItem.season.spring },
+                summer: { booleanValue: clothingItem.season.summer },
+                winter: { booleanValue: clothingItem.season.winter },
+              },
             },
           },
+          sellingPrice: { integerValue: `${clothingItem.sellingPrice}` },
+          size: { stringValue: clothingItem.size },
+          subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
         },
-        sellingPrice: { integerValue: `${clothingItem.sellingPrice}` },
-        size: { stringValue: clothingItem.size },
-        subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
       },
-    });
+    );
 
     console.log("Document written. Response JSON is: ", resJson);
   } catch (e) {
