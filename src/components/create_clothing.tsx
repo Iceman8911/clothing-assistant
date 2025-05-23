@@ -269,21 +269,9 @@ export default function CreateClothingModal(
                     try {
                       setIsAiGeneratingData(true);
 
-                      let aiJsonTextResponse =
-                        (
-                          await understandImageWithGemini(
-                            await clothingItem.base64(true),
-                          )
-                        ).text ?? "";
-
-                      // Cleanup the opening and closing braces
-                      aiJsonTextResponse = aiJsonTextResponse
-                        .replace("```", "")
-                        .replace("json", "")
-                        .replace("```", "");
-
-                      const aiJsonResponse: AiJsonResponse =
-                        JSON.parse(aiJsonTextResponse);
+                      const aiJsonResponse = await understandImageWithGemini(
+                        await clothingItem.base64(true),
+                      );
 
                       // Fill up the appropriate fields
                       for (const i in aiJsonResponse) {

@@ -1,10 +1,7 @@
 import { type ClothingItem } from "../classes/clothing";
 import { gSettings } from "../variables";
-import { type ContentListUnion, GoogleGenAI } from "@google/genai";
 
 const geminiModels = [
-  // Too slow
-  // "gemini-2.5-flash-preview-04-17",
   "gemini-2.0-flash",
   "gemini-2.0-flash-lite",
   "gemini-1.5-flash",
@@ -12,36 +9,61 @@ const geminiModels = [
   "gemini-1.5-pro",
 ] as const;
 
-function initGoogleGenAI(apiKey: string) {
-  return new GoogleGenAI({ apiKey });
-}
-
 async function tryGenerateContent(
-  ai: GoogleGenAI,
-  contents: ContentListUnion,
+  contents: any,
   modelIndex = 0,
-) {
-  if (modelIndex + 1 > geminiModels.length) {
+): Promise<AiJsonResponse> {
+  if (modelIndex >= geminiModels.length) {
     throw new Error("No more models available. Please try again later");
   }
 
+  const model = geminiModels[modelIndex];
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${gSettings.apiKeys.gemini}`;
+
   try {
-    return await ai.models.generateContent({
-      model: geminiModels[modelIndex],
-      contents,
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              contents[0], // Image data
+              { text: contents[1].text }, // Prompt
+            ],
+          },
+        ],
+      }),
     });
-  } catch (_) {
-    return await tryGenerateContent(ai, contents, modelIndex + 1);
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error.message);
+    }
+
+    const data = await response.json();
+    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!textResponse) {
+      throw new Error("No valid response from Gemini");
+    }
+
+    // Clean up the text before parsing
+    return JSON.parse(
+      textResponse.replace("```", "").replace("json", "").replace("```", ""),
+    ) as AiJsonResponse;
+  } catch (error) {
+    console.warn(`Failed with ${model} because: `, error, `Trying others...`);
+    return tryGenerateContent(contents, modelIndex + 1);
   }
 }
 
 export async function understandImageWithGemini(
   /** Base64 encoded image */
   imageData: string,
-  model = geminiModels[0],
-) {
-  const ai = initGoogleGenAI(gSettings.apiKeys.gemini);
-
+): Promise<AiJsonResponse> {
   const contents = [
     {
       inlineData: {
@@ -68,7 +90,7 @@ export async function understandImageWithGemini(
     },
   ];
 
-  return await tryGenerateContent(ai, contents);
+  return tryGenerateContent(contents);
 }
 
 /**
