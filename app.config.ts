@@ -13,11 +13,11 @@ export default defineConfig({
   },
   server: {
     preset: "cloudflare_pages",
-    compatibilityDate: "2025-05-23",
-    cloudflare: {
-      deployConfig: true,
-      nodeCompat: true,
-    },
+    // compatibilityDate: "2025-05-23",
+    // cloudflare: {
+    //   deployConfig: true,
+    //   nodeCompat: true,
+    // },
   },
   ssr: false,
 });
