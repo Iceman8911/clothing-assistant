@@ -14,12 +14,8 @@ import {
   AiJsonResponse,
   understandImageWithGemini,
 } from "./../code/image-recognition/ai-api";
-import {
-  gAddClothingItem,
-  gIsUserConnectedToInternet,
-  gRemoveClothingItem,
-} from "~/code/functions";
-import { gClothingItems, gSettings } from "~/code/variables";
+import { gIsUserConnectedToInternet } from "~/code/functions";
+import { gClothingItemStore, gSettings } from "~/code/variables";
 import { generateRandomId } from "~/code/functions";
 import { SignalProps } from "~/code/types";
 import { ClothingItem } from "~/code/classes/clothing";
@@ -175,10 +171,7 @@ export default function CreateClothingModal(
   createEffect(
     on([isEditMode, prop.stateAccessor], async () => {
       if (isEditMode()) {
-        // clothingItem = new ClothingItem(
-        // 	gClothingItems.get(prop.clothIdToEdit!)!
-        // );
-        const clothingData = gClothingItems.get(prop.clothIdToEdit!)!;
+        const clothingData = gClothingItemStore.items.get(prop.clothIdToEdit!)!;
         for (const k in clothingData) {
           if (Object.prototype.hasOwnProperty.call(clothingData, k)) {
             const key = k as keyof ClothingItem;
@@ -748,7 +741,7 @@ export default function CreateClothingModal(
                 }
 
                 if (clothingForm.reportValidity()) {
-                  gAddClothingItem(clothingItem.clone(true));
+                  gClothingItemStore.addItem(clothingItem.clone(true));
                   prop.stateSetter(false);
                 }
               }}
@@ -764,7 +757,7 @@ export default function CreateClothingModal(
         stateSetter={setIsConfirmingDelete}
         onDelete={() => {
           prop.stateSetter(false);
-          gRemoveClothingItem(clothingItem.id);
+          gClothingItemStore.removeItem(clothingItem.id);
         }}
       ></DeleteModal>
 

@@ -5,6 +5,8 @@ import { createStore, unwrap } from "solid-js/store";
 import { makePersisted } from "@solid-primitives/storage";
 import localforage from "localforage";
 import { isServer } from "solid-js/web";
+import gFirebaseFunctions from "./database/firebase";
+import { gShowSavingAlert } from "./functions";
 
 export const gDefaultSettings = {
   currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
@@ -21,12 +23,54 @@ export const gDefaultSettings = {
   },
 };
 
-/**
- * Each clothing item is indexed with it's `id`.
+/** Contains the stores (in-memory and persistent) for clothing items */
+export const gClothingItemStore = {
+  /**
+   * In-memory store for clothing. Each clothing item is indexed with it's `id`.
 
- Avoid using `set()` and `delete()` if you care about persistence and other stuff.
- */
-export const gClothingItems = new ReactiveMap<string, ClothingItem>();
+   Avoid using `set()` and `delete()` if you care about persistence and other stuff.
+   */
+  items: new ReactiveMap<string, ClothingItem>(),
+  /** Last time a clothing item was added / removed */
+  lastEdited: new Date(),
+
+  /**
+   * Preferred to `gClothingItems.set`. Only call this in a reactive context
+   */
+  addItem(clothing: ClothingItem) {
+    gShowSavingAlert();
+
+    this.lastEdited = clothing.dateEdited = new Date();
+
+    const unwrapped = unwrap(clothing);
+    this.items.set(clothing.id, clothing);
+
+    this.store.setItem(clothing.id, unwrapped).then((_) => {
+      clothing.safeForServer.then((data) => {
+        gFirebaseFunctions.addClothing(data);
+      });
+    });
+  },
+
+  /**
+   * Preferred to `gClothingItems.delete`. Only call this in a reactive context
+   */
+  removeItem(clothingId: string) {
+    gShowSavingAlert();
+
+    this.items.delete(clothingId);
+    this.store.removeItem(clothingId).then((_) => {
+      gFirebaseFunctions.removeClothing(clothingId);
+    });
+  },
+
+  /** Localforage instance for persisting `items` */
+  store: !isServer
+    ? localforage.createInstance({
+        name: "clothingItems",
+      })
+    : ({} as LocalForage), // Provide a fallback on the server
+};
 
 /**
  * Global search text used for filtering
@@ -51,12 +95,6 @@ export const [gSettings, gSetSettings] = !isServer
       storage: localforage,
     })
   : createStore(structuredClone(gDefaultSettings)); // Provide a fallback on the server
-
-export const gClothingItemPersistentStore = !isServer
-  ? localforage.createInstance({
-      name: "clothingItems",
-    })
-  : ({} as LocalForage); // Provide a fallback on the server
 
 /** Filled when changes occur to clothing but the user lacks a stable connection.
 

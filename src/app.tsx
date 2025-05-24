@@ -10,8 +10,7 @@ import NavBar from "~/components/navbar";
 import { gCustomRouteEnum } from "./code/enums";
 import Dock from "./components/dock";
 import {
-  gClothingItemPersistentStore,
-  gClothingItems,
+  gClothingItemStore,
   gDefaultSettings,
   gPendingClothingToSync,
 } from "./code/variables";
@@ -23,13 +22,13 @@ import gFirebaseFunctions from "./code/database/firebase";
 export default function App() {
   onMount(() => {
     // load all the clothing from storage
-    gClothingItemPersistentStore.iterate<ClothingItem, void>((clothing) => {
-      gClothingItems.set(clothing.id, new ClothingItem(clothing));
+    gClothingItemStore.store.iterate<ClothingItem, void>((clothing) => {
+      gClothingItemStore.items.set(clothing.id, new ClothingItem(clothing));
     });
 
     // TODO: sync any pending clothing items `properly`
     gPendingClothingToSync.forEach((clothingId) => {
-      const clothing = gClothingItems.get(clothingId)!;
+      const clothing = gClothingItemStore.items.get(clothingId)!;
 
       gFirebaseFunctions
         .getClothing(clothingId)

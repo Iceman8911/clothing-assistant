@@ -1,6 +1,5 @@
 import { unwrap } from "solid-js/store";
 import { type ClothingItem } from "./classes/clothing";
-import { gClothingItemPersistentStore, gClothingItems } from "./variables";
 import { createEffect, on } from "solid-js";
 import { trackStore } from "@solid-primitives/deep";
 import { gTriggerAlert } from "~/components/shared/alert-toast";
@@ -23,29 +22,5 @@ export async function gIsUserConnectedToInternet(): Promise<boolean> {
   }
 }
 
-const showSavingAlert = () =>
+export const gShowSavingAlert = () =>
   gTriggerAlert(gStatusEnum.INFO, "Saving Changes… ");
-/**
- * Preferred to `gClothingItems.set`. Only call this in a reactive context
- */
-export function gAddClothingItem(clothing: ClothingItem) {
-  showSavingAlert();
-  clothing.dateEdited = new Date();
-  const unwrapped = unwrap(clothing);
-  gClothingItemPersistentStore.setItem(clothing.id, unwrapped);
-  gClothingItems.set(clothing.id, clothing);
-
-  clothing.safeForServer.then((data) => {
-    gFirebaseFunctions.addClothing(data);
-  });
-}
-
-/**
- * Preferred to `gClothingItems.delete`. Only call this in a reactive context
- */
-export function gRemoveClothingItem(clothingId: string) {
-  showSavingAlert();
-  gClothingItemPersistentStore.removeItem(clothingId);
-  gClothingItems.delete(clothingId);
-  gFirebaseFunctions.removeClothing(clothingId);
-}
