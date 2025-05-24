@@ -4,6 +4,7 @@ import { createSignal } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import { makePersisted } from "@solid-primitives/storage";
 import localforage from "localforage";
+import { isServer } from "solid-js/web";
 
 export const gDefaultSettings = {
   currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
@@ -33,30 +34,33 @@ export const gClothingItems = new ReactiveMap<string, ClothingItem>();
 export const [gSearchText, gSetSearchText] = createSignal("");
 
 /** Global Settings */
-export const [gSettings, gSetSettings] = makePersisted(
-  createStore(structuredClone(gDefaultSettings)),
-  {
-    name: "settings",
-    serialize: function (data) {
-      const dataCopy = structuredClone(unwrap(data));
+// Only initialize makePersisted on the client
+export const [gSettings, gSetSettings] = !isServer
+  ? makePersisted(createStore(structuredClone(gDefaultSettings)), {
+      name: "settings",
+      serialize: function (data) {
+        const dataCopy = structuredClone(unwrap(data));
 
-      // don't store the api keys
-      if (!dataCopy.apiKeys.persist) {
-        dataCopy.apiKeys.gemini = "";
-      }
+        // don't store the api keys
+        if (!dataCopy.apiKeys.persist) {
+          dataCopy.apiKeys.gemini = "";
+        }
 
-      return JSON.stringify(dataCopy);
-    },
-    storage: localforage,
-  },
-);
+        return JSON.stringify(dataCopy);
+      },
+      storage: localforage,
+    })
+  : createStore(structuredClone(gDefaultSettings)); // Provide a fallback on the server
 
-export const gClothingItemPersistentStore = localforage.createInstance({
-  name: "clothingItems",
-});
+export const gClothingItemPersistentStore = !isServer
+  ? localforage.createInstance({
+      name: "clothingItems",
+    })
+  : ({} as LocalForage); // Provide a fallback on the server
 
 /** Filled when changes occur to clothing but the user lacks a stable connection.
 
     Emptied when connection is back. */
-export const [gPendingClothingToSync, gSetPendingClothingToSync] =
-  makePersisted(createStore<string[]>([]));
+export const [gPendingClothingToSync, gSetPendingClothingToSync] = !isServer
+  ? makePersisted(createStore<string[]>([]))
+  : createStore<string[]>([]); // Provide a fallback on the server

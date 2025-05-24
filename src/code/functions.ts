@@ -1,5 +1,5 @@
 import { unwrap } from "solid-js/store";
-import { ClothingItem } from "./classes/clothing";
+import { type ClothingItem } from "./classes/clothing";
 import { gClothingItemPersistentStore, gClothingItems } from "./variables";
 import { createEffect, on } from "solid-js";
 import { trackStore } from "@solid-primitives/deep";

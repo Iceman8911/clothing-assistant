@@ -1,3 +1,4 @@
+"use server";
 import { gTriggerAlert } from "~/components/shared/alert-toast";
 import { type ClothingItem } from "../classes/clothing";
 import { gStatusEnum } from "../enums";
@@ -15,7 +16,6 @@ async function tryGenerateContent(
   contents: any,
   modelIndex = 0,
 ): Promise<AiJsonResponse> {
-  "use server";
   if (modelIndex >= GEMINI_MODELS.length) {
     throw new Error("No more models available. Please try again later");
   }
@@ -66,7 +66,7 @@ async function tryGenerateContent(
   }
 }
 
-export async function understandImageWithGemini(
+export function understandImageWithGemini(
   apiKey: string,
   /** Base64 encoded image */
   imageData: string,
