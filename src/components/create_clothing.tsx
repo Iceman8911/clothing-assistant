@@ -144,6 +144,7 @@ export default function CreateClothingModal(
     occasion: { casual: false, activeWear: false, formal: false },
     season: { fall: false, spring: false, summer: false, winter: false },
     size: "M",
+    dateEdited: new Date(),
   });
 
   const isEditMode = () => (prop.clothIdToEdit ? true : false);
