@@ -18,10 +18,7 @@ import {
 import { gSetSettings, gSettings } from "./code/variables";
 import { AlertToast } from "./components/shared/alert-toast";
 import { ClothingItem } from "./code/classes/clothing";
-import {
-  gAddClothingItemToServer,
-  gGetClothingItemFromDatabase,
-} from "./code/database/firebase";
+import gFirebaseFunctions from "./code/database/firebase";
 
 export default function App() {
   onMount(() => {
@@ -34,14 +31,18 @@ export default function App() {
     gPendingClothingToSync.forEach((clothingId) => {
       const clothing = gClothingItems.get(clothingId)!;
 
-      gGetClothingItemFromDatabase(clothingId).then((clothingDatabaseData) => {
-        if (
-          new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
-          clothing.dateEdited
-        ) {
-          clothing.safeForServer.then((data) => gAddClothingItemToServer(data));
-        }
-      });
+      gFirebaseFunctions
+        .getClothingFromDatabase(clothingId)
+        .then((clothingDatabaseData) => {
+          if (
+            new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
+            clothing.dateEdited
+          ) {
+            clothing.safeForServer.then((data) =>
+              gFirebaseFunctions.addClothingToDatabase(data),
+            );
+          }
+        });
     });
   });
   return (

@@ -5,10 +5,7 @@ import { createEffect, on } from "solid-js";
 import { trackStore } from "@solid-primitives/deep";
 import { gTriggerAlert } from "~/components/shared/alert-toast";
 import { gStatusEnum } from "./enums";
-import {
-  gAddClothingItemToServer,
-  gRemoveClothingItemFromServer,
-} from "./database/firebase";
+import gFirebaseFunctions from "./database/firebase";
 
 export const generateRandomId = () => crypto.randomUUID();
 
@@ -39,7 +36,7 @@ export function gAddClothingItem(clothing: ClothingItem) {
   gClothingItems.set(clothing.id, clothing);
 
   clothing.safeForServer.then((data) => {
-    gAddClothingItemToServer(data);
+    gFirebaseFunctions.addClothingToDatabase(data);
   });
 }
 
@@ -50,5 +47,5 @@ export function gRemoveClothingItem(clothingId: string) {
   showSavingAlert();
   gClothingItemPersistentStore.removeItem(clothingId);
   gClothingItems.delete(clothingId);
-  gRemoveClothingItemFromServer(clothingId);
+  gFirebaseFunctions.removeClothingFromDatabase(clothingId);
 }

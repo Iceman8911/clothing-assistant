@@ -154,9 +154,7 @@ async function getDoc(path: string) {
   ).json();
 }
 
-export function gGetClothingItemFromDatabase(
-  id: string,
-): Promise<ClothingDatabaseEntry> {
+function getClothingFromDatabase(id: string): Promise<ClothingDatabaseEntry> {
   return getDoc(id);
 }
 
@@ -205,7 +203,7 @@ async function deleteDoc(path: string) {
   ).ok;
 }
 
-export async function gAddClothingItemToServer(
+async function addClothingToDatabase(
   clothingItem: SerializableClothingDatabaseItem,
 ) {
   try {
@@ -259,6 +257,15 @@ export async function gAddClothingItemToServer(
   }
 }
 
-export function gRemoveClothingItemFromServer(id: string) {
+function removeClothingFromDatabase(id: string) {
   return deleteDoc(id);
 }
+
+/** Global methods solely for interacting with Firebase FireStore */
+const gFirebaseFunctions = {
+  getClothingFromDatabase,
+  addClothingToDatabase,
+  removeClothingFromDatabase,
+} as const;
+
+export default gFirebaseFunctions;
