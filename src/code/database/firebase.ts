@@ -159,14 +159,23 @@ async function addClothingItemDoc(
   fieldsToAdd: ClothingDatabaseEntry,
   shouldUpdate = false,
 ) {
-  if (!gIsUserConnectedToInternet()) {
-    gTriggerAlert(gEnumStatus.INFO, "Sync scheduled for when next connected.");
+  if (!(await gIsUserConnectedToInternet())) {
+    setTimeout(
+      () =>
+        gTriggerAlert(
+          gEnumStatus.INFO,
+          "No connection detected. Sync scheduled for when next connected.",
+        ),
+      1000,
+    );
 
     if (!gClothingItemStore.pendingSync[0].find((val) => val == clothingId))
       gClothingItemStore.pendingSync[1]([
         ...gClothingItemStore.pendingSync[0],
         clothingId,
       ]);
+
+    return;
   }
 
   const resJson = (
