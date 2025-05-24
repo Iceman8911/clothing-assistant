@@ -9,20 +9,28 @@ import gFirebaseFunctions from "./database/firebase";
 import { gShowSavingAlert } from "./functions";
 import { gEnumReactiveMember } from "./enums";
 
-export const gDefaultSettings = {
-  currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
-  syncId: "",
+type Settings = {
+  currency: "$" | "€" | "£" | "¥" | "₦";
+  syncId: string;
   apiKeys: {
-    // Settings
     /**
      * Whether API keys should be persisted in the browser's local storage
      */
-    persist: false,
+    persist: boolean;
 
     // AI Models
+    gemini: string;
+  };
+};
+
+export const gDefaultSettings = {
+  currency: "₦",
+  syncId: "",
+  apiKeys: {
+    persist: false,
     gemini: "",
   },
-};
+} as const satisfies Settings;
 
 /** Contains the stores (in-memory and persistent) for clothing items */
 export const gClothingItemStore = {
@@ -105,7 +113,7 @@ export const [gSearchText, gSetSearchText] = createSignal("");
 /** Global Settings */
 // Only initialize makePersisted on the client
 export const [gSettings, gSetSettings] = makePersisted(
-  createStore(structuredClone(gDefaultSettings)),
+  createStore<Settings>(structuredClone(gDefaultSettings)),
   {
     name: "settings",
     serialize: function (data) {
