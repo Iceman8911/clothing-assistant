@@ -39,7 +39,7 @@ export default function App() {
           new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
           clothing.dateEdited
         ) {
-          gAddClothingItemToServer(clothing);
+          clothing.safeForServer.then((data) => gAddClothingItemToServer(data));
         }
       });
     });
