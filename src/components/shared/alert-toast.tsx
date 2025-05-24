@@ -7,11 +7,11 @@ import WarningIcon from "lucide-solid/icons/circle-alert";
 import ErrorIcon from "lucide-solid/icons/circle-x";
 import CopyIcon from "lucide-solid/icons/copy";
 import { generateRandomId } from "~/code/functions";
-import { gStatus } from "~/code/enums";
+import { gStatusEnum } from "~/code/enums";
 
 interface Alert {
   id: string;
-  status: gStatus;
+  status: gStatusEnum;
   message: string;
   duration?: number;
 }
@@ -30,11 +30,11 @@ export function AlertToast() {
             <div
               class={
                 `alert alert-soft ` +
-                (alert.status == gStatus.SUCCESS
+                (alert.status == gStatusEnum.SUCCESS
                   ? "alert-success"
-                  : alert.status == gStatus.INFO
+                  : alert.status == gStatusEnum.INFO
                     ? "alert-info"
-                    : alert.status == gStatus.WARNING
+                    : alert.status == gStatusEnum.WARNING
                       ? "alert-warning"
                       : "alert-error")
               }
@@ -50,16 +50,16 @@ export function AlertToast() {
               onClick={() => alerts.delete(alert.id)}
             >
               <Switch>
-                <Match when={alert.status == gStatus.SUCCESS}>
+                <Match when={alert.status == gStatusEnum.SUCCESS}>
                   <SuccessIcon />
                 </Match>
-                <Match when={alert.status == gStatus.INFO}>
+                <Match when={alert.status == gStatusEnum.INFO}>
                   <InfoIcon />
                 </Match>
-                <Match when={alert.status == gStatus.WARNING}>
+                <Match when={alert.status == gStatusEnum.WARNING}>
                   <WarningIcon />
                 </Match>
-                <Match when={alert.status == gStatus.ERROR}>
+                <Match when={alert.status == gStatusEnum.ERROR}>
                   <ErrorIcon />
                 </Match>
               </Switch>
@@ -88,7 +88,7 @@ export function AlertToast() {
  * @returns The ID of the alert
  */
 export function gTriggerAlert(
-  status: gStatus,
+  status: gStatusEnum,
   message: string,
   /**
    * Defaults to ~3 seconds
@@ -100,7 +100,7 @@ export function gTriggerAlert(
     id,
     status,
     message,
-    duration: status == gStatus.ERROR ? duration * 1.5 : duration,
+    duration: status == gStatusEnum.ERROR ? duration * 1.5 : duration,
   });
   return id;
 }

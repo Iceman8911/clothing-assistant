@@ -28,7 +28,7 @@ import { gTriggerAlert } from "./shared/alert-toast";
 import GenericModal from "./shared/modal";
 import DeleteModal from "./shared/delete-modal";
 import { Show } from "solid-js";
-import { gStatus } from "~/code/enums";
+import { gStatusEnum } from "~/code/enums";
 import ImgPreview from "./shared/img-preview";
 
 export default function CreateClothingModal(
@@ -260,7 +260,7 @@ export default function CreateClothingModal(
                       !(await gIsUserConnectedToInternet())
                     ) {
                       gTriggerAlert(
-                        gStatus.ERROR,
+                        gStatusEnum.ERROR,
                         "Could not connect to a model. Please check your connection and try again later.",
                       );
                       return;
@@ -349,13 +349,13 @@ export default function CreateClothingModal(
                       }
 
                       gTriggerAlert(
-                        gStatus.SUCCESS,
+                        gStatusEnum.SUCCESS,
                         "Data generated successfully!",
                       );
                     } catch (e) {
                       const error = e as Error;
 
-                      gTriggerAlert(gStatus.ERROR, error.message);
+                      gTriggerAlert(gStatusEnum.ERROR, error.message);
                     }
                     setIsAiGeneratingData(false);
                   }}

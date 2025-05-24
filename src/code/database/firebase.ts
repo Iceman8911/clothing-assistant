@@ -9,7 +9,7 @@ import {
   gSetPendingClothingToSync,
   gSettings,
 } from "../variables";
-import { gStatus } from "../enums";
+import { gStatusEnum } from "../enums";
 import { produce, unwrap } from "solid-js/store";
 
 const LAST_UPDATED_COLLECTION = "last_updated";
@@ -166,7 +166,7 @@ async function addClothingItemDoc(
   shouldUpdate = false,
 ) {
   if (!gIsUserConnectedToInternet()) {
-    gTriggerAlert(gStatus.INFO, "Sync scheduled for when next connected.");
+    gTriggerAlert(gStatusEnum.INFO, "Sync scheduled for when next connected.");
 
     if (!gPendingClothingToSync.find((val) => val == clothingId))
       gSetPendingClothingToSync([...gPendingClothingToSync, clothingId]);

@@ -8,19 +8,19 @@ import { createSignal, onMount } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import CirclePlusIcon from "lucide-solid/icons/circle-plus";
 import CreateClothingModal from "./create_clothing";
-import { CustomRoute } from "~/code/enums";
+import { gCustomRouteEnum } from "~/code/enums";
 
 export default function Dock(props: any) {
-  const [activeBtn, setActiveBtn] = createSignal(CustomRoute.HOME);
+  const [activeBtn, setActiveBtn] = createSignal(gCustomRouteEnum.HOME);
   const navigate = useNavigate();
 
-  const handleBtnClick = (btn: CustomRoute) => {
+  const handleBtnClick = (btn: gCustomRouteEnum) => {
     setActiveBtn(btn);
     navigate(btn);
   };
 
   onMount(() => {
-    navigate(CustomRoute.HOME);
+    navigate(gCustomRouteEnum.HOME);
   });
 
   const [prefersDarkTheme, setPrefersDarkTheme] = createSignal(false);
@@ -38,16 +38,16 @@ export default function Dock(props: any) {
     <>
       <div class="dock dock-lg">
         <button
-          class={activeBtn() == CustomRoute.HOME ? "dock-active" : ""}
-          onClick={() => handleBtnClick(CustomRoute.HOME)}
+          class={activeBtn() == gCustomRouteEnum.HOME ? "dock-active" : ""}
+          onClick={() => handleBtnClick(gCustomRouteEnum.HOME)}
         >
           <HomeIcon />
           <span class="dock-label">Home</span>
         </button>
 
         <button
-          class={activeBtn() == CustomRoute.STOCK ? "dock-active" : ""}
-          onClick={() => handleBtnClick(CustomRoute.STOCK)}
+          class={activeBtn() == gCustomRouteEnum.STOCK ? "dock-active" : ""}
+          onClick={() => handleBtnClick(gCustomRouteEnum.STOCK)}
         >
           <StockIcon />
           <span class="dock-label">Stock</span>
@@ -59,8 +59,8 @@ export default function Dock(props: any) {
         </button>
 
         <button
-          class={activeBtn() == CustomRoute.REPORTS ? "dock-active" : ""}
-          onClick={() => handleBtnClick(CustomRoute.REPORTS)}
+          class={activeBtn() == gCustomRouteEnum.REPORTS ? "dock-active" : ""}
+          onClick={() => handleBtnClick(gCustomRouteEnum.REPORTS)}
         >
           <ReportsIcon />
           <span class="dock-label">Reports</span>

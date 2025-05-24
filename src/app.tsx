@@ -7,7 +7,7 @@ import InventoryPage from "./routes/inventory";
 import ReportPage from "./routes/reports";
 import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
-import { CustomRoute } from "./code/enums";
+import { gCustomRouteEnum } from "./code/enums";
 import Dock from "./components/dock";
 import {
   gClothingItemPersistentStore,
@@ -58,10 +58,10 @@ export default function App() {
           </>
         )}
       >
-        <Route path={CustomRoute.HOME} component={HomePage} />
-        <Route path={CustomRoute.STOCK} component={InventoryPage} />
-        <Route path={CustomRoute.REPORTS} component={ReportPage} />
-        <Route path={CustomRoute.SETTINGS} component={SettingsPage} />
+        <Route path={gCustomRouteEnum.HOME} component={HomePage} />
+        <Route path={gCustomRouteEnum.STOCK} component={InventoryPage} />
+        <Route path={gCustomRouteEnum.REPORTS} component={ReportPage} />
+        <Route path={gCustomRouteEnum.SETTINGS} component={SettingsPage} />
       </Router>
     </>
   );

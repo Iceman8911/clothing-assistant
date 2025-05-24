@@ -1,6 +1,6 @@
 import { gTriggerAlert } from "~/components/shared/alert-toast";
 import { type ClothingItem } from "../classes/clothing";
-import { gStatus } from "../enums";
+import { gStatusEnum } from "../enums";
 
 const GEMINI_MODELS = [
   "gemini-2.0-flash",
@@ -59,7 +59,7 @@ async function tryGenerateContent(
     ) as AiJsonResponse;
   } catch (error) {
     gTriggerAlert(
-      gStatus.ERROR,
+      gStatusEnum.ERROR,
       `Failed with ${model} because: ${error}. Trying others...`,
     );
     return tryGenerateContent(apiKey, contents, modelIndex + 1);

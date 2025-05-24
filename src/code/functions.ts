@@ -4,7 +4,7 @@ import { gClothingItemPersistentStore, gClothingItems } from "./variables";
 import { createEffect, on } from "solid-js";
 import { trackStore } from "@solid-primitives/deep";
 import { gTriggerAlert } from "~/components/shared/alert-toast";
-import { gStatus } from "./enums";
+import { gStatusEnum } from "./enums";
 import {
   gAddClothingItemToServer,
   gRemoveClothingItemFromServer,
@@ -26,7 +26,8 @@ export async function gIsUserConnectedToInternet(): Promise<boolean> {
   }
 }
 
-const showSavingAlert = () => gTriggerAlert(gStatus.INFO, "Saving Changes… ");
+const showSavingAlert = () =>
+  gTriggerAlert(gStatusEnum.INFO, "Saving Changes… ");
 /**
  * Preferred to `gClothingItems.set`. Only call this in a reactive context
  */
