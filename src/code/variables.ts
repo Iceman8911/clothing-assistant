@@ -91,22 +91,23 @@ export const [gSearchText, gSetSearchText] = createSignal("");
 
 /** Global Settings */
 // Only initialize makePersisted on the client
-export const [gSettings, gSetSettings] = !isServer
-  ? makePersisted(createStore(structuredClone(gDefaultSettings)), {
-      name: "settings",
-      serialize: function (data) {
-        const dataCopy = structuredClone(unwrap(data));
+export const [gSettings, gSetSettings] = makePersisted(
+  createStore(structuredClone(gDefaultSettings)),
+  {
+    name: "settings",
+    serialize: function (data) {
+      const dataCopy = structuredClone(unwrap(data));
 
-        // don't store the api keys
-        if (!dataCopy.apiKeys.persist) {
-          dataCopy.apiKeys.gemini = "";
-        }
+      // don't store the api keys
+      if (!dataCopy.apiKeys.persist) {
+        dataCopy.apiKeys.gemini = "";
+      }
 
-        return JSON.stringify(dataCopy);
-      },
-      storage: localforage,
-    })
-  : createStore(structuredClone(gDefaultSettings)); // Provide a fallback on the server
+      return JSON.stringify(dataCopy);
+    },
+    storage: !isServer ? localforage : undefined,
+  },
+);
 
 /** Filled when changes occur to clothing but the user lacks a stable connection.
 
