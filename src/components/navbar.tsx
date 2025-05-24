@@ -4,7 +4,7 @@ import ShirtIcon from "lucide-solid/icons/shirt";
 import SearchIcon from "lucide-solid/icons/search";
 import { gSearchText, gSetSearchText } from "~/code/variables";
 import { useNavigate } from "@solidjs/router";
-import { gCustomRouteEnum } from "~/code/enums";
+import { gEnumCustomRoute } from "~/code/enums";
 import { Match, Switch } from "solid-js";
 export default function NavBar() {
   const navigate = useNavigate();
@@ -96,7 +96,7 @@ export default function NavBar() {
 
         <button
           class="btn btn-ghost btn-circle"
-          onclick={(_) => navigate(gCustomRouteEnum.SETTINGS)}
+          onclick={(_) => navigate(gEnumCustomRoute.SETTINGS)}
         >
           <div class="indicator">
             <SettingsIcon />

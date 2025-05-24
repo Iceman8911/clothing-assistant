@@ -7,7 +7,7 @@ import InventoryPage from "./routes/inventory";
 import ReportPage from "./routes/reports";
 import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
-import { gCustomRouteEnum, gReactiveMemberEnum } from "./code/enums";
+import { gEnumCustomRoute, gEnumReactiveMember } from "./code/enums";
 import Dock from "./components/dock";
 import { gClothingItemStore, gDefaultSettings } from "./code/variables";
 import { gSetSettings, gSettings } from "./code/variables";
@@ -24,10 +24,10 @@ export default function App() {
 
     // set the accurate `lastEdited` timestamp
     gClothingItemStore.lastEdited =
-      gClothingItemStore.storeLastEdited[gReactiveMemberEnum.ACCESSOR]();
+      gClothingItemStore.storeLastEdited[gEnumReactiveMember.ACCESSOR]();
 
     // TODO: sync any pending clothing items `properly`
-    gClothingItemStore.pendingSync[gReactiveMemberEnum.ACCESSOR].forEach(
+    gClothingItemStore.pendingSync[gEnumReactiveMember.ACCESSOR].forEach(
       (clothingId) => {
         const clothing = gClothingItemStore.items.get(clothingId)!;
 
@@ -61,10 +61,10 @@ export default function App() {
           </>
         )}
       >
-        <Route path={gCustomRouteEnum.HOME} component={HomePage} />
-        <Route path={gCustomRouteEnum.STOCK} component={InventoryPage} />
-        <Route path={gCustomRouteEnum.REPORTS} component={ReportPage} />
-        <Route path={gCustomRouteEnum.SETTINGS} component={SettingsPage} />
+        <Route path={gEnumCustomRoute.HOME} component={HomePage} />
+        <Route path={gEnumCustomRoute.STOCK} component={InventoryPage} />
+        <Route path={gEnumCustomRoute.REPORTS} component={ReportPage} />
+        <Route path={gEnumCustomRoute.SETTINGS} component={SettingsPage} />
       </Router>
     </>
   );

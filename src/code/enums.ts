@@ -1,11 +1,11 @@
-export const enum gCustomRouteEnum {
+export const enum gEnumCustomRoute {
   HOME = "/",
   STOCK = "/inventory",
   REPORTS = "/reports",
   SETTINGS = "/settings",
 }
 
-export const enum gStatusEnum {
+export const enum gEnumStatus {
   // NEUTRAL,
   SUCCESS,
   INFO,
@@ -16,7 +16,7 @@ export const enum gStatusEnum {
 /**
  * Represents the type of a signal, store, etc
  */
-export const enum gReactiveMemberEnum {
+export const enum gEnumReactiveMember {
   /**
    * Represents an accessor (getter) member.
    */
