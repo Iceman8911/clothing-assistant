@@ -35,7 +35,7 @@ export const gClothingItemStore = {
   lastEdited: new Date(),
 
   /**
-   * Preferred to `gClothingItems.set`. Only call this in a reactive context
+   * Preferred to `gClothingItemStore.items.set`. Only call this in a reactive context
    */
   addItem(clothing: ClothingItem) {
     gShowSavingAlert();
@@ -53,10 +53,12 @@ export const gClothingItemStore = {
   },
 
   /**
-   * Preferred to `gClothingItems.delete`. Only call this in a reactive context
+   * Preferred to `gClothingItemStore.items.delete`. Only call this in a reactive context
    */
   removeItem(clothingId: string) {
     gShowSavingAlert();
+
+    this.lastEdited = new Date();
 
     this.items.delete(clothingId);
     this.store.removeItem(clothingId).then((_) => {
