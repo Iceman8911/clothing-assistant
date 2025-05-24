@@ -40,7 +40,10 @@ export const gClothingItemStore = {
   addItem(clothing: ClothingItem) {
     gShowSavingAlert();
 
-    this.lastEdited = clothing.dateEdited = new Date();
+    /** Set the timestamps */
+    this.storeLastEdited[1](
+      (this.lastEdited = clothing.dateEdited = new Date()),
+    );
 
     const unwrapped = unwrap(clothing);
     this.items.set(clothing.id, clothing);
@@ -58,7 +61,8 @@ export const gClothingItemStore = {
   removeItem(clothingId: string) {
     gShowSavingAlert();
 
-    this.lastEdited = new Date();
+    /** Set the timestamps */
+    this.storeLastEdited[1]((this.lastEdited = new Date()));
 
     this.items.delete(clothingId);
     this.store.removeItem(clothingId).then((_) => {
@@ -72,6 +76,12 @@ export const gClothingItemStore = {
         name: "clothingItems",
       })
     : ({} as LocalForage), // Provide a fallback on the server
+  /** `this.lastEdited` but a persistent signal.
+
+      **NOTE**: `makePersisted` will serialize the date, so ensure to rebuild it back when calling the accessor. */
+  storeLastEdited: makePersisted(createSignal(new Date()), {
+    name: "storeLastEdited",
+  }),
 };
 
 /**

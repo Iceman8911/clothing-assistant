@@ -26,6 +26,16 @@ export default function App() {
       gClothingItemStore.items.set(clothing.id, new ClothingItem(clothing));
     });
 
+    console.log(gClothingItemStore.storeLastEdited[0]());
+    console.log(gClothingItemStore.lastEdited);
+
+    // set the accurate `lastEdited` timestamp
+    gClothingItemStore.lastEdited = new Date(
+      gClothingItemStore.storeLastEdited[0](),
+    );
+
+    console.log(gClothingItemStore.lastEdited);
+
     // TODO: sync any pending clothing items `properly`
     gPendingClothingToSync.forEach((clothingId) => {
       const clothing = gClothingItemStore.items.get(clothingId)!;
@@ -33,6 +43,7 @@ export default function App() {
       gFirebaseFunctions
         .getClothing(clothingId)
         .then((clothingDatabaseData) => {
+          console.log(clothingDatabaseData);
           if (
             new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
             clothing.dateEdited
