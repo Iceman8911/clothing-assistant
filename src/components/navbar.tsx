@@ -4,11 +4,13 @@ import ListFilterIcon from "lucide-solid/icons/list-filter";
 import SearchIcon from "lucide-solid/icons/search";
 import SettingsIcon from "lucide-solid/icons/settings";
 import ShirtIcon from "lucide-solid/icons/shirt";
-import { Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { gEnumCustomRoute } from "~/code/enums";
 import { gSearchText, gSetSearchText } from "~/code/variables";
 export default function NavBar() {
   const navigate = useNavigate();
+
+  const [isSyncing, setIsSyncing] = createSignal(false);
 
   let searchBar!: HTMLInputElement;
 
@@ -75,9 +77,23 @@ export default function NavBar() {
           </label>
         </div>
 
-        <button class="btn btn-ghost btn-circle">
+        <button
+          class="btn btn-ghost btn-circle"
+          onClick={(_) => {
+            // TODO: Do manual sync
+            setIsSyncing(true);
+            setTimeout(() => {
+              setIsSyncing(false);
+            }, 2000);
+          }}
+        >
           <div class="indicator">
-            <SyncIcon />
+            <Show
+              when={!isSyncing()}
+              fallback={<span class="loading loading-spinner"></span>}
+            >
+              <SyncIcon />
+            </Show>
           </div>
         </button>
 
