@@ -1,6 +1,5 @@
 import { gTriggerAlert } from "~/components/shared/alert-toast";
 import { type ClothingItem } from "../classes/clothing";
-import { gSettings } from "../variables";
 import { gStatus } from "../enums";
 
 const GEMINI_MODELS = [
