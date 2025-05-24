@@ -203,9 +203,7 @@ async function deleteDoc(path: string) {
   ).ok;
 }
 
-async function addClothingToDatabase(
-  clothingItem: SerializableClothingDatabaseItem,
-) {
+async function addClothing(clothingItem: SerializableClothingDatabaseItem) {
   try {
     const resJson: ClothingDatabaseEntry = await addClothingItemDoc(
       clothingItem.id,
@@ -257,15 +255,15 @@ async function addClothingToDatabase(
   }
 }
 
-function removeClothingFromDatabase(id: string) {
+function removeClothing(id: string) {
   return deleteDoc(id);
 }
 
 /** Global methods solely for interacting with Firebase FireStore */
 const gFirebaseFunctions = {
   getClothing,
-  addClothing: addClothingToDatabase,
-  removeClothing: removeClothingFromDatabase,
+  addClothing,
+  removeClothing,
 } as const;
 
 export default gFirebaseFunctions;
