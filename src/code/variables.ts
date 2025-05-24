@@ -91,7 +91,7 @@ export const gClothingItemStore = {
   /** Filled clothing ids when changes occur to clothing but the user lacks a stable connection.
 
       Emptied when connection is back. */
-  pendingSync: makePersisted(createStore<string[]>([]), {
+  pendingUpload: makePersisted(createStore<string[]>([]), {
     name: "pending-sync",
     storage: !isServer ? localforage : undefined,
   }),

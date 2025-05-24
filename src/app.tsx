@@ -33,7 +33,7 @@ export default function App() {
 
     const uploadPendingClothing = () => {
       // Use map to create an array of promises
-      const uploadPromises = gClothingItemStore.pendingSync[
+      const uploadPromises = gClothingItemStore.pendingUpload[
         gEnumReactiveMember.ACCESSOR
       ].map((clothingId, index) => {
         const clothing = gClothingItemStore.items.get(clothingId)!;
@@ -69,7 +69,7 @@ export default function App() {
       // Use Promise.all to wait for all promises to complete
       Promise.all(uploadPromises).finally(() => {
         // Once all the promises are done, empty the original array.
-        gClothingItemStore.pendingSync[gEnumReactiveMember.SETTER]([]);
+        gClothingItemStore.pendingUpload[gEnumReactiveMember.SETTER]([]);
       });
       // .then(() => {
       //   // This block will execute only after ALL promises in uploadPromises have resolved

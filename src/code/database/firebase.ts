@@ -169,9 +169,9 @@ async function addClothingItemDoc(
       1000,
     );
 
-    if (!gClothingItemStore.pendingSync[0].find((val) => val == clothingId))
-      gClothingItemStore.pendingSync[1]([
-        ...gClothingItemStore.pendingSync[0],
+    if (!gClothingItemStore.pendingUpload[0].find((val) => val == clothingId))
+      gClothingItemStore.pendingUpload[1]([
+        ...gClothingItemStore.pendingUpload[0],
         clothingId,
       ]);
 
