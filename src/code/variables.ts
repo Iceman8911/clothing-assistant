@@ -7,6 +7,7 @@ import localforage from "localforage";
 import { isServer } from "solid-js/web";
 import gFirebaseFunctions from "./database/firebase";
 import { gShowSavingAlert } from "./functions";
+import { gReactiveMemberEnum } from "./enums";
 
 export const gDefaultSettings = {
   currency: "₦" as "$" | "€" | "£" | "¥" | "₦",
@@ -41,7 +42,7 @@ export const gClothingItemStore = {
     gShowSavingAlert();
 
     /** Set the timestamps */
-    this.storeLastEdited[1](
+    this.storeLastEdited[gReactiveMemberEnum.SETTER](
       (this.lastEdited = clothing.dateEdited = new Date()),
     );
 
@@ -62,7 +63,9 @@ export const gClothingItemStore = {
     gShowSavingAlert();
 
     /** Set the timestamps */
-    this.storeLastEdited[1]((this.lastEdited = new Date()));
+    this.storeLastEdited[gReactiveMemberEnum.SETTER](
+      (this.lastEdited = new Date()),
+    );
 
     this.items.delete(clothingId);
     this.store.removeItem(clothingId).then((_) => {

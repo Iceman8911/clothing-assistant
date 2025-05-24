@@ -12,3 +12,17 @@ export const enum gStatusEnum {
   WARNING,
   ERROR,
 }
+
+/**
+ * Represents the type of a signal, store, etc
+ */
+export const enum gReactiveMemberEnum {
+  /**
+   * Represents an accessor (getter) member.
+   */
+  ACCESSOR = 0,
+  /**
+   * Represents a setter member.
+   */
+  SETTER,
+}

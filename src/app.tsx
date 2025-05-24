@@ -7,7 +7,7 @@ import InventoryPage from "./routes/inventory";
 import ReportPage from "./routes/reports";
 import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
-import { gCustomRouteEnum } from "./code/enums";
+import { gCustomRouteEnum, gReactiveMemberEnum } from "./code/enums";
 import Dock from "./components/dock";
 import { gClothingItemStore, gDefaultSettings } from "./code/variables";
 import { gSetSettings, gSettings } from "./code/variables";
@@ -23,26 +23,29 @@ export default function App() {
     });
 
     // set the accurate `lastEdited` timestamp
-    gClothingItemStore.lastEdited = gClothingItemStore.storeLastEdited[0]();
+    gClothingItemStore.lastEdited =
+      gClothingItemStore.storeLastEdited[gReactiveMemberEnum.ACCESSOR]();
 
     // TODO: sync any pending clothing items `properly`
-    gClothingItemStore.pendingSync[0].forEach((clothingId) => {
-      const clothing = gClothingItemStore.items.get(clothingId)!;
+    gClothingItemStore.pendingSync[gReactiveMemberEnum.ACCESSOR].forEach(
+      (clothingId) => {
+        const clothing = gClothingItemStore.items.get(clothingId)!;
 
-      gFirebaseFunctions
-        .getClothing(clothingId)
-        .then((clothingDatabaseData) => {
-          console.log(clothingDatabaseData);
-          if (
-            new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
-            clothing.dateEdited
-          ) {
-            clothing.safeForServer.then((data) =>
-              gFirebaseFunctions.addClothing(data),
-            );
-          }
-        });
-    });
+        gFirebaseFunctions
+          .getClothing(clothingId)
+          .then((clothingDatabaseData) => {
+            console.log(clothingDatabaseData);
+            if (
+              new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
+              clothing.dateEdited
+            ) {
+              clothing.safeForServer.then((data) =>
+                gFirebaseFunctions.addClothing(data),
+              );
+            }
+          });
+      },
+    );
   });
   return (
     <>
