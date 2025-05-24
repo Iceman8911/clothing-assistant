@@ -13,6 +13,10 @@ export default defineConfig({
   },
   server: {
     preset: "cloudflare_pages",
+    prerender: {
+      crawlLinks: true,
+    },
+    compressPublicAssets: { gzip: true, brotli: true },
     // compatibilityDate: "2025-05-23",
     // cloudflare: {
     //   deployConfig: true,
