@@ -1,12 +1,12 @@
-import SettingsIcon from "lucide-solid/icons/settings";
-import ListFilterIcon from "lucide-solid/icons/list-filter";
-import ShirtIcon from "lucide-solid/icons/shirt";
-import SearchIcon from "lucide-solid/icons/search";
-import SyncIcon from "lucide-solid/icons/folder-sync";
-import { gSearchText, gSetSearchText } from "~/code/variables";
 import { useNavigate } from "@solidjs/router";
+import SyncIcon from "lucide-solid/icons/folder-sync";
+import ListFilterIcon from "lucide-solid/icons/list-filter";
+import SearchIcon from "lucide-solid/icons/search";
+import SettingsIcon from "lucide-solid/icons/settings";
+import ShirtIcon from "lucide-solid/icons/shirt";
+import { Show } from "solid-js";
 import { gEnumCustomRoute } from "~/code/enums";
-import { Match, Switch } from "solid-js";
+import { gSearchText, gSetSearchText } from "~/code/variables";
 export default function NavBar() {
   const navigate = useNavigate();
 
@@ -51,14 +51,15 @@ export default function NavBar() {
         >
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
             {/* Display an indicator so the user knows that a search term / text is active */}
-            <Switch fallback={<SearchIcon class="w-5 h-5" />}>
-              <Match when={gSearchText()}>
-                <div class="indicator">
-                  <span class="indicator-item status status-warning "></span>
-                  <SearchIcon class="w-5 h-5" />
-                </div>
-              </Match>
-            </Switch>
+            <Show
+              when={gSearchText()}
+              fallback={<SearchIcon class="w-5 h-5" />}
+            >
+              <div class="indicator">
+                <span class="indicator-item status status-warning "></span>
+                <SearchIcon class="w-5 h-5" />
+              </div>
+            </Show>
           </div>
 
           <label class="input input-primary dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm -right-15 md:-right-10 -bottom-10">
