@@ -26,15 +26,8 @@ export default function App() {
       gClothingItemStore.items.set(clothing.id, new ClothingItem(clothing));
     });
 
-    console.log(gClothingItemStore.storeLastEdited[0]());
-    console.log(gClothingItemStore.lastEdited);
-
     // set the accurate `lastEdited` timestamp
-    gClothingItemStore.lastEdited = new Date(
-      gClothingItemStore.storeLastEdited[0](),
-    );
-
-    console.log(gClothingItemStore.lastEdited);
+    gClothingItemStore.lastEdited = gClothingItemStore.storeLastEdited[0]();
 
     // TODO: sync any pending clothing items `properly`
     gPendingClothingToSync.forEach((clothingId) => {

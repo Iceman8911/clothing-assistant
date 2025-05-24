@@ -76,11 +76,12 @@ export const gClothingItemStore = {
         name: "clothingItems",
       })
     : ({} as LocalForage), // Provide a fallback on the server
-  /** `this.lastEdited` but a persistent signal.
-
-      **NOTE**: `makePersisted` will serialize the date, so ensure to rebuild it back when calling the accessor. */
+  /** `this.lastEdited` but a persistent signal. */
   storeLastEdited: makePersisted(createSignal(new Date()), {
     name: "storeLastEdited",
+    deserialize(data) {
+      return new Date();
+    },
   }),
 };
 
