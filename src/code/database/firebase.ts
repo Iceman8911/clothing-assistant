@@ -154,7 +154,7 @@ async function getDoc(path: string) {
   ).json();
 }
 
-function getClothingFromDatabase(id: string): Promise<ClothingDatabaseEntry> {
+function getClothing(id: string): Promise<ClothingDatabaseEntry> {
   return getDoc(id);
 }
 
@@ -263,9 +263,9 @@ function removeClothingFromDatabase(id: string) {
 
 /** Global methods solely for interacting with Firebase FireStore */
 const gFirebaseFunctions = {
-  getClothingFromDatabase,
-  addClothingToDatabase,
-  removeClothingFromDatabase,
+  getClothing,
+  addClothing: addClothingToDatabase,
+  removeClothing: removeClothingFromDatabase,
 } as const;
 
 export default gFirebaseFunctions;

@@ -36,7 +36,7 @@ export function gAddClothingItem(clothing: ClothingItem) {
   gClothingItems.set(clothing.id, clothing);
 
   clothing.safeForServer.then((data) => {
-    gFirebaseFunctions.addClothingToDatabase(data);
+    gFirebaseFunctions.addClothing(data);
   });
 }
 
@@ -47,5 +47,5 @@ export function gRemoveClothingItem(clothingId: string) {
   showSavingAlert();
   gClothingItemPersistentStore.removeItem(clothingId);
   gClothingItems.delete(clothingId);
-  gFirebaseFunctions.removeClothingFromDatabase(clothingId);
+  gFirebaseFunctions.removeClothing(clothingId);
 }

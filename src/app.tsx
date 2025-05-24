@@ -32,14 +32,14 @@ export default function App() {
       const clothing = gClothingItems.get(clothingId)!;
 
       gFirebaseFunctions
-        .getClothingFromDatabase(clothingId)
+        .getClothing(clothingId)
         .then((clothingDatabaseData) => {
           if (
             new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
             clothing.dateEdited
           ) {
             clothing.safeForServer.then((data) =>
-              gFirebaseFunctions.addClothingToDatabase(data),
+              gFirebaseFunctions.addClothing(data),
             );
           }
         });
