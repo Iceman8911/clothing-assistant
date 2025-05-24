@@ -19,7 +19,7 @@ import {
   gIsUserConnectedToInternet,
   gRemoveClothingItem,
 } from "~/code/functions";
-import { gClothingItems } from "~/code/variables";
+import { gClothingItems, gSettings } from "~/code/variables";
 import { generateRandomId } from "~/code/functions";
 import { SignalProps } from "~/code/types";
 import { ClothingItem } from "~/code/classes/clothing";
@@ -270,6 +270,7 @@ export default function CreateClothingModal(
                       setIsAiGeneratingData(true);
 
                       const aiJsonResponse = await understandImageWithGemini(
+                        gSettings.apiKeys.gemini,
                         await clothingItem.base64(true),
                       );
 

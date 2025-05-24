@@ -1,7 +1,7 @@
 import { type ClothingItem } from "../classes/clothing";
 import { gSettings } from "../variables";
 
-const geminiModels = [
+const GEMINI_MODELS = [
   "gemini-2.0-flash",
   "gemini-2.0-flash-lite",
   "gemini-1.5-flash",
@@ -10,15 +10,17 @@ const geminiModels = [
 ] as const;
 
 async function tryGenerateContent(
+  apiKey: string,
   contents: any,
   modelIndex = 0,
 ): Promise<AiJsonResponse> {
-  if (modelIndex >= geminiModels.length) {
+  "use server";
+  if (modelIndex >= GEMINI_MODELS.length) {
     throw new Error("No more models available. Please try again later");
   }
 
-  const model = geminiModels[modelIndex];
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${gSettings.apiKeys.gemini}`;
+  const model = GEMINI_MODELS[modelIndex];
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   try {
     const response = await fetch(url, {
@@ -56,11 +58,12 @@ async function tryGenerateContent(
     ) as AiJsonResponse;
   } catch (error) {
     console.warn(`Failed with ${model} because: `, error, `Trying others...`);
-    return tryGenerateContent(contents, modelIndex + 1);
+    return tryGenerateContent(apiKey, contents, modelIndex + 1);
   }
 }
 
 export async function understandImageWithGemini(
+  apiKey: string,
   /** Base64 encoded image */
   imageData: string,
 ): Promise<AiJsonResponse> {
@@ -90,7 +93,7 @@ export async function understandImageWithGemini(
     },
   ];
 
-  return tryGenerateContent(contents);
+  return tryGenerateContent(apiKey, contents);
 }
 
 /**
