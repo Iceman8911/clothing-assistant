@@ -4,11 +4,7 @@ import {
   type ClothingItem,
 } from "../classes/clothing";
 import { gIsUserConnectedToInternet } from "../functions";
-import {
-  gPendingClothingToSync,
-  gSetPendingClothingToSync,
-  gSettings,
-} from "../variables";
+import { gClothingItemStore, gSettings } from "../variables";
 import { gStatusEnum } from "../enums";
 import { produce, unwrap } from "solid-js/store";
 
@@ -166,8 +162,11 @@ async function addClothingItemDoc(
   if (!gIsUserConnectedToInternet()) {
     gTriggerAlert(gStatusEnum.INFO, "Sync scheduled for when next connected.");
 
-    if (!gPendingClothingToSync.find((val) => val == clothingId))
-      gSetPendingClothingToSync([...gPendingClothingToSync, clothingId]);
+    if (!gClothingItemStore.pendingSync[0].find((val) => val == clothingId))
+      gClothingItemStore.pendingSync[1]([
+        ...gClothingItemStore.pendingSync[0],
+        clothingId,
+      ]);
   }
 
   const resJson = (

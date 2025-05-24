@@ -9,11 +9,7 @@ import SettingsPage from "./routes/settings";
 import NavBar from "~/components/navbar";
 import { gCustomRouteEnum } from "./code/enums";
 import Dock from "./components/dock";
-import {
-  gClothingItemStore,
-  gDefaultSettings,
-  gPendingClothingToSync,
-} from "./code/variables";
+import { gClothingItemStore, gDefaultSettings } from "./code/variables";
 import { gSetSettings, gSettings } from "./code/variables";
 import { AlertToast } from "./components/shared/alert-toast";
 import { ClothingItem } from "./code/classes/clothing";
@@ -30,7 +26,7 @@ export default function App() {
     gClothingItemStore.lastEdited = gClothingItemStore.storeLastEdited[0]();
 
     // TODO: sync any pending clothing items `properly`
-    gPendingClothingToSync.forEach((clothingId) => {
+    gClothingItemStore.pendingSync[0].forEach((clothingId) => {
       const clothing = gClothingItemStore.items.get(clothingId)!;
 
       gFirebaseFunctions

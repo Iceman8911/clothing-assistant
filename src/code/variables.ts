@@ -79,9 +79,18 @@ export const gClothingItemStore = {
   /** `this.lastEdited` but a persistent signal. */
   storeLastEdited: makePersisted(createSignal(new Date()), {
     name: "storeLastEdited",
+    storage: !isServer ? localforage : undefined,
     deserialize(data) {
       return new Date();
     },
+  }),
+
+  /** Filled when changes occur to clothing but the user lacks a stable connection.
+
+      Emptied when connection is back. */
+  pendingSync: makePersisted(createStore<string[]>([]), {
+    name: "pending-sync",
+    storage: !isServer ? localforage : undefined,
   }),
 };
 
@@ -109,10 +118,3 @@ export const [gSettings, gSetSettings] = makePersisted(
     storage: !isServer ? localforage : undefined,
   },
 );
-
-/** Filled when changes occur to clothing but the user lacks a stable connection.
-
-    Emptied when connection is back. */
-export const [gPendingClothingToSync, gSetPendingClothingToSync] = !isServer
-  ? makePersisted(createStore<string[]>([]))
-  : createStore<string[]>([]); // Provide a fallback on the server
