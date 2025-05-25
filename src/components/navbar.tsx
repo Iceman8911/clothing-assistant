@@ -5,6 +5,7 @@ import SearchIcon from "lucide-solid/icons/search";
 import SettingsIcon from "lucide-solid/icons/settings";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import { createSignal, Show } from "solid-js";
+import gFirebaseFunctions from "~/code/database/firebase";
 import { gEnumCustomRoute } from "~/code/enums";
 import { gSearchText, gSetSearchText } from "~/code/variables";
 export default function NavBar() {
@@ -82,9 +83,10 @@ export default function NavBar() {
           onClick={(_) => {
             // TODO: Do manual sync
             setIsSyncing(true);
-            setTimeout(() => {
+
+            gFirebaseFunctions.getClothingUpdates().finally(() => {
               setIsSyncing(false);
-            }, 2000);
+            });
           }}
         >
           <div class="indicator">

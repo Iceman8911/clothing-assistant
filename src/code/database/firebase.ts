@@ -8,6 +8,7 @@ import { gClothingItemStore, gSettings } from "../variables";
 import { gEnumStatus } from "../enums";
 import { produce, unwrap } from "solid-js/store";
 
+const SYNC_ID = () => gSettings.syncId;
 const LAST_UPDATED_COLLECTION = "last_updated";
 const PROJECT_ID = "clothing-assistant-b7ae8";
 const BASE_URL =
@@ -126,6 +127,34 @@ interface ClothingDatabaseEntry extends FirestoreDocument {
   };
 }
 
+interface StructuredQuery<TFirestoreDocument extends FirestoreDocument> {
+  from: CollectionSelector[];
+  where?: Filter<TFirestoreDocument>;
+  orderBy?: Order<TFirestoreDocument>[];
+  limit?: number;
+}
+
+interface CollectionSelector {
+  collectionId: string;
+  /** Perfom the query on all descendants of the given collection */
+  allDescendants?: boolean;
+}
+
+interface Filter<TFirestoreDocument extends FirestoreDocument> {
+  fieldFilter?: FieldFilter<TFirestoreDocument>;
+}
+
+interface FieldFilter<TFirestoreDocument extends FirestoreDocument> {
+  field: { fieldPath: keyof TFirestoreDocument["fields"] };
+  op: "GREATER_THAN" | "LESS_THAN" | "EQUAL" | "ARRAY_CONTAINS";
+  value: FirestoreFieldValue;
+}
+
+interface Order<TFirestoreDocument extends FirestoreDocument> {
+  field: { fieldPath: keyof TFirestoreDocument["fields"] };
+  direction: "ASCENDING" | "DESCENDING";
+}
+
 /** It goes like `collection`/`document`/`collection`/`document`, etc */
 const createDocumentPath = (...collectionOrDocument: string[]) =>
   collectionOrDocument.reduce((acc, curr) => {
@@ -136,11 +165,13 @@ const createDocumentPath = (...collectionOrDocument: string[]) =>
 
 /** Path to the collection where the user's clothing would be stored */
 const userClothingPath = (clothingId: string) =>
-  createDocumentPath(gSettings.syncId, clothingId);
+  createDocumentPath(SYNC_ID(), clothingId);
 
 /** The actual endpoint we'll be pinging */
-const endpoint = (path: string) =>
-  `${BASE_URL}${userClothingPath(path)}` as const;
+const endpoint = (path?: string) =>
+  path
+    ? (`${BASE_URL}${userClothingPath(path)}` as const)
+    : (`${BASE_URL}${SYNC_ID()}` as const);
 
 async function getDoc(path: string) {
   return (
@@ -148,6 +179,13 @@ async function getDoc(path: string) {
       headers: await SHARED_HEADERS(),
     })
   ).json();
+}
+
+/** Returns all the data within the firebase collection for the current sync id, i.e [ClothingDatabaseEntry, ClothingDatabaseEntry, ClothingDatabaseEntry, ..., {fields:lastUpdated:{timestampValue:...}}] */
+async function getEntireClothingCollection(): Promise<
+  (ClothingDatabaseEntry | FirestoreDocument)[]
+> {
+  return await getDoc("");
 }
 
 function getClothing(id: string): Promise<ClothingDatabaseEntry> {
@@ -267,11 +305,46 @@ function removeClothing(id: string) {
   return deleteDoc(id);
 }
 
+/** Compares the last time the clothing (in the in-memory) store was updated against the server database's and retrieves every clothing item that has been added, removed, or edited. */
+async function getClothingUpdates() {
+  if (await gIsUserConnectedToInternet()) {
+    const query: StructuredQuery<ClothingDatabaseEntry> = {
+      from: [{ collectionId: SYNC_ID(), allDescendants: true }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: "dateEdited" },
+          op: "GREATER_THAN",
+          value: {
+            timestampValue: gClothingItemStore.lastEdited.toISOString(),
+          },
+        },
+      },
+      orderBy: [
+        {
+          field: { fieldPath: "dateEdited" },
+          direction: "DESCENDING",
+        },
+      ],
+    };
+
+    fetch(`${endpoint()}:runQuery`, {
+      method: "POST",
+      headers: await SHARED_HEADERS(),
+      body: JSON.stringify(query),
+    }).then(async (response) =>
+      console.log(`Query result is: `, await response.json()),
+    );
+
+    console.log(`Entire collection is: `, await getDoc(""));
+  }
+}
+
 /** Global methods solely for interacting with Firebase FireStore */
 const gFirebaseFunctions = {
   getClothing,
   addClothing,
   removeClothing,
+  getClothingUpdates,
 } as const;
 
 export default gFirebaseFunctions;
