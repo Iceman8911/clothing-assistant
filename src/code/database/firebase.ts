@@ -7,6 +7,7 @@ import { gIsUserConnectedToInternet } from "../functions";
 import { gClothingItemStore, gSettings } from "../variables";
 import { gEnumStatus } from "../enums";
 import { produce, unwrap } from "solid-js/store";
+import { UUID } from "../types";
 
 interface AnonSignUpResponse {
   kind: string;
@@ -129,10 +130,25 @@ interface Order<TFirestoreDocument extends FirestoreDocument> {
 }
 
 const SYNC_ID = () => gSettings.syncId;
-const LAST_UPDATED_COLLECTION = "last_updated";
+const LAST_UPDATED_FIELD_NAME = "last_updated";
 const PROJECT_ID = "clothing-assistant-b7ae8";
 const BASE_URL =
-  `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/` as const;
+  `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents` as const;
+/** Points to the database data for a user */
+const USER_URL = (syncId: UUID) =>
+  `${BASE_URL}/users/${encodeURIComponent(syncId)}` as const;
+
+/** Contains all the documents representing the stored clothing data */
+const USER_CLOTHING_COLLECTION_URL = (syncId: UUID) =>
+  `${USER_URL(syncId)}/clothing` as const;
+/** Contains fields like `last_edited`, etc */
+const USER_METADATA_DOCUMENT_URL = (syncId: UUID) =>
+  `${USER_CLOTHING_COLLECTION_URL(syncId)}/metadata` as const;
+
+/** Each clothing item is stored as a document here */
+const USER_CLOTHING_DOCUMENT_URL = (syncId: UUID, clothingId: UUID) =>
+  `${USER_CLOTHING_COLLECTION_URL(syncId)}/${encodeURIComponent(clothingId)}` as const;
+
 const AUTH_TOKEN: Promise<AnonSignUpResponse> = (() => {
   "use server";
   const API_KEY = process.env.FIREBASE_API_KEY;
@@ -155,48 +171,36 @@ const SHARED_HEADERS = async () => {
   } as const;
 };
 
-/** It goes like `collection`/`document`/`collection`/`document`, etc */
-const createDocumentPath = (...collectionOrDocument: string[]) =>
-  collectionOrDocument.reduce((acc, curr) => {
-    return acc
-      ? `${acc}/${encodeURIComponent(curr)}`
-      : encodeURIComponent(curr);
-  }, "");
-
-/** Path to the collection where the user's clothing would be stored */
-const userClothingPath = (clothingId: string) =>
-  createDocumentPath(SYNC_ID(), clothingId);
-
-/** The actual endpoint we'll be pinging */
-const endpoint = (path?: string) =>
-  path
-    ? (`${BASE_URL}${userClothingPath(path)}` as const)
-    : (`${BASE_URL}${SYNC_ID()}` as const);
-
-async function getDoc(path: string) {
+/** Returns all the clothing data within the database for the current sync id, i.e [ClothingDatabaseEntry, ClothingDatabaseEntry, ClothingDatabaseEntry, etc */
+async function getAllClothingDocuments(
+  syncId: UUID,
+): Promise<(ClothingDatabaseEntry | FirestoreDocument)[]> {
   return (
-    await fetch(endpoint(path), {
+    await fetch(USER_CLOTHING_COLLECTION_URL(syncId), {
       headers: await SHARED_HEADERS(),
     })
   ).json();
 }
 
-/** Returns all the data within the firebase collection for the current sync id, i.e [ClothingDatabaseEntry, ClothingDatabaseEntry, ClothingDatabaseEntry, ..., {fields:lastUpdated:{timestampValue:...}}] */
-async function getEntireClothingCollection(): Promise<
-  (ClothingDatabaseEntry | FirestoreDocument)[]
-> {
-  return await getDoc("");
+async function getClothing(
+  syncId: UUID,
+  clothingId: UUID,
+): Promise<ClothingDatabaseEntry> {
+  return (
+    await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
+      headers: await SHARED_HEADERS(),
+    })
+  ).json();
 }
 
-function getClothing(id: string): Promise<ClothingDatabaseEntry> {
-  return getDoc(id);
-}
+async function addClothingItemDoc(args: {
+  syncId: UUID;
+  clothingId: UUID;
+  fieldsToAdd: ClothingDatabaseEntry;
+  shouldUpdate?: boolean;
+}) {
+  const { syncId, clothingId, fieldsToAdd, shouldUpdate } = args;
 
-async function addClothingItemDoc(
-  clothingId: string,
-  fieldsToAdd: ClothingDatabaseEntry,
-  shouldUpdate = false,
-) {
   if (!(await gIsUserConnectedToInternet())) {
     setTimeout(
       () =>
@@ -217,7 +221,7 @@ async function addClothingItemDoc(
   }
 
   const resJson = (
-    await fetch(endpoint(clothingId), {
+    await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
       method: !shouldUpdate ? "PATCH" : "POST",
       body: JSON.stringify(fieldsToAdd),
@@ -226,12 +230,12 @@ async function addClothingItemDoc(
 
   // Update the last time the db was modified.
   // I know that Firestore auto-saves when it was modified but due to latency and stuff, it's not reliable for my use case (it's normally around a second or 2 off)
-  await fetch(endpoint(LAST_UPDATED_COLLECTION), {
+  await fetch(USER_METADATA_DOCUMENT_URL(syncId), {
     headers: await SHARED_HEADERS(),
     method: "PATCH",
     body: JSON.stringify({
       fields: {
-        [LAST_UPDATED_COLLECTION]: fieldsToAdd.fields.dateEdited,
+        [LAST_UPDATED_FIELD_NAME]: fieldsToAdd.fields.dateEdited,
       },
     } as FirestoreDocument),
   });
@@ -239,21 +243,15 @@ async function addClothingItemDoc(
   return resJson;
 }
 
-/** Returns `true` if the document has been deleted. */
-async function deleteDoc(path: string) {
-  return (
-    await fetch(endpoint(path), {
-      headers: await SHARED_HEADERS(),
-      method: "DELETE",
-    })
-  ).ok;
-}
-
-async function addClothing(clothingItem: SerializableClothingDatabaseItem) {
+async function addClothing(
+  syncId: UUID,
+  clothingItem: SerializableClothingDatabaseItem,
+) {
   try {
-    const resJson: ClothingDatabaseEntry = await addClothingItemDoc(
-      clothingItem.id,
-      {
+    const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
+      syncId,
+      clothingId: clothingItem.id,
+      fieldsToAdd: {
         fields: {
           brand: { stringValue: clothingItem.brand },
           category: { stringValue: clothingItem.category },
@@ -293,7 +291,7 @@ async function addClothing(clothingItem: SerializableClothingDatabaseItem) {
           subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
         },
       },
-    );
+    });
 
     console.log("Document written. Response JSON is: ", resJson);
   } catch (e) {
@@ -301,12 +299,18 @@ async function addClothing(clothingItem: SerializableClothingDatabaseItem) {
   }
 }
 
-function removeClothing(id: string) {
-  return deleteDoc(id);
+/** Returns `true` if the document has been deleted. */
+async function removeClothing(syncId: UUID, clothingId: UUID) {
+  return (
+    await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
+      headers: await SHARED_HEADERS(),
+      method: "DELETE",
+    })
+  ).ok;
 }
 
 /** Compares the last time the clothing (in the in-memory) store was updated against the server database's and retrieves every clothing item that has been added, removed, or edited. */
-async function getClothingUpdates() {
+async function getClothingUpdates(syncId: UUID) {
   if (await gIsUserConnectedToInternet()) {
     const query: StructuredQuery<ClothingDatabaseEntry> = {
       from: [{ collectionId: SYNC_ID(), allDescendants: true }],
@@ -327,7 +331,7 @@ async function getClothingUpdates() {
       ],
     };
 
-    fetch(`${endpoint()}:runQuery`, {
+    fetch(`${BASE_URL}:runQuery`, {
       method: "POST",
       headers: await SHARED_HEADERS(),
       body: JSON.stringify(query),
@@ -335,7 +339,10 @@ async function getClothingUpdates() {
       console.log(`Query result is: `, await response.json()),
     );
 
-    console.log(`Entire collection is: `, await getDoc(""));
+    console.log(
+      `Entire collection is: `,
+      await getAllClothingDocuments(syncId),
+    );
   }
 }
 

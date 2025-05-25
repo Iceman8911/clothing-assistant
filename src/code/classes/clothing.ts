@@ -2,6 +2,7 @@ import { createMutable, unwrap } from "solid-js/store";
 import { fileToDataURL } from "../utilities";
 import { Accessor, createMemo } from "solid-js";
 import { generateRandomId } from "../functions";
+import { UUID } from "../types";
 
 interface MutableClassProps {
   name: string;
@@ -39,11 +40,11 @@ interface ID {
   /**
    * Generated from `crypto.randomUUID()`
    */
-  readonly id: string;
+  readonly id: UUID;
 }
 
 export class ClothingItem implements MutableClassProps, ID {
-  readonly id!: string;
+  readonly id!: UUID;
   name!: string;
   description!: string;
   brand!: string;

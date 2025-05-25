@@ -7,7 +7,7 @@ import ShirtIcon from "lucide-solid/icons/shirt";
 import { createSignal, Show } from "solid-js";
 import gFirebaseFunctions from "~/code/database/firebase";
 import { gEnumCustomRoute } from "~/code/enums";
-import { gSearchText, gSetSearchText } from "~/code/variables";
+import { gSearchText, gSetSearchText, gSettings } from "~/code/variables";
 export default function NavBar() {
   const navigate = useNavigate();
 
@@ -84,9 +84,11 @@ export default function NavBar() {
             // TODO: Do manual sync
             setIsSyncing(true);
 
-            gFirebaseFunctions.getClothingUpdates().finally(() => {
-              setIsSyncing(false);
-            });
+            gFirebaseFunctions
+              .getClothingUpdates(gSettings.syncId)
+              .finally(() => {
+                setIsSyncing(false);
+              });
           }}
         >
           <div class="indicator">

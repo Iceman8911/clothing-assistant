@@ -6,12 +6,13 @@ import { makePersisted } from "@solid-primitives/storage";
 import localforage from "localforage";
 import { isServer } from "solid-js/web";
 import gFirebaseFunctions from "./database/firebase";
-import { gShowSavingAlert } from "./functions";
+import { generateRandomId, gShowSavingAlert } from "./functions";
 import { gEnumReactiveMember } from "./enums";
+import { UUID } from "./types";
 
 type Settings = {
   currency: "$" | "€" | "£" | "¥" | "₦";
-  syncId: string;
+  syncId: UUID;
   apiKeys: {
     /**
      * Whether API keys should be persisted in the browser's local storage
@@ -25,7 +26,7 @@ type Settings = {
 
 export const gDefaultSettings = {
   currency: "₦",
-  syncId: "",
+  syncId: generateRandomId(),
   apiKeys: {
     persist: false,
     gemini: "",
@@ -59,7 +60,7 @@ export const gClothingItemStore = {
 
     this.store.setItem(clothing.id, unwrapped).then((_) => {
       clothing.safeForServer.then((data) => {
-        gFirebaseFunctions.addClothing(data);
+        gFirebaseFunctions.addClothing(gSettings.syncId, data);
       });
     });
   },
@@ -67,7 +68,7 @@ export const gClothingItemStore = {
   /**
    * Preferred to `gClothingItemStore.items.delete`. Only call this in a reactive context
    */
-  removeItem(clothingId: string) {
+  removeItem(clothingId: UUID) {
     gShowSavingAlert();
 
     /** Set the timestamps */
@@ -77,7 +78,7 @@ export const gClothingItemStore = {
 
     this.items.delete(clothingId);
     this.store.removeItem(clothingId).then((_) => {
-      gFirebaseFunctions.removeClothing(clothingId);
+      gFirebaseFunctions.removeClothing(gSettings.syncId, clothingId);
     });
   },
 
@@ -99,7 +100,7 @@ export const gClothingItemStore = {
   /** Filled clothing ids when changes occur to clothing but the user lacks a stable connection.
 
       Emptied when connection is back. */
-  pendingUpload: makePersisted(createStore<string[]>([]), {
+  pendingUpload: makePersisted(createStore<UUID[]>([]), {
     name: "pending-sync",
     storage: !isServer ? localforage : undefined,
   }),
