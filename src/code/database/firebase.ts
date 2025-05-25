@@ -165,7 +165,6 @@ const AUTH_TOKEN = (): Promise<AnonSignUpResponse> => {
 
 const SHARED_HEADERS = async () => {
   "use server";
-  console.log(`Auth token data is: `, await AUTH_TOKEN());
 
   return {
     Authorization: `Bearer ${(await AUTH_TOKEN()).idToken}`,
@@ -245,7 +244,6 @@ async function addClothingItemDoc(args: {
 async function addClothing(clothingItem: SerializableClothingDatabaseItem) {
   "use server";
   try {
-    console.log(`Clothing Item is:`, clothingItem);
     const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
       clothingId: clothingItem.id,
       fieldsToAdd: {
