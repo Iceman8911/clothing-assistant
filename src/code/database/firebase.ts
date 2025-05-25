@@ -1,7 +1,7 @@
 import { gTriggerAlert } from "~/components/shared/alert-toast";
-import {
+import type {
   SerializableClothingDatabaseItem,
-  type ClothingItem,
+  ClothingItem,
 } from "../classes/clothing";
 import { gIsUserConnectedToInternet } from "../functions";
 import { gClothingItemStore, gSettings } from "../variables";
