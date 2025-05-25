@@ -4,7 +4,7 @@ import type {
   ClothingItem,
 } from "../classes/clothing";
 import { gIsUserConnectedToInternet } from "../functions";
-import { gClothingItemStore, gSettings } from "../variables";
+import { gClothingItemStore } from "../variables";
 import { gEnumStatus } from "../enums";
 import { produce, unwrap } from "solid-js/store";
 import { UUID } from "../types";
@@ -129,7 +129,6 @@ interface Order<TFirestoreDocument extends FirestoreDocument> {
   direction: "ASCENDING" | "DESCENDING";
 }
 
-const SYNC_ID = () => gSettings.syncId;
 const LAST_UPDATED_FIELD_NAME = "last_updated";
 const PROJECT_ID = "clothing-assistant-b7ae8";
 const BASE_URL =
@@ -149,8 +148,7 @@ const USER_METADATA_DOCUMENT_URL = (syncId: UUID) =>
 const USER_CLOTHING_DOCUMENT_URL = (syncId: UUID, clothingId: UUID) =>
   `${USER_CLOTHING_COLLECTION_URL(syncId)}/${encodeURIComponent(clothingId)}` as const;
 
-const AUTH_TOKEN: Promise<AnonSignUpResponse> = (() => {
-  "use server";
+const AUTH_TOKEN = (): Promise<AnonSignUpResponse> => {
   const API_KEY = process.env.FIREBASE_API_KEY;
 
   return fetch(
@@ -163,10 +161,14 @@ const AUTH_TOKEN: Promise<AnonSignUpResponse> = (() => {
       }),
     },
   ).then((res) => res.json());
-})();
+};
+
 const SHARED_HEADERS = async () => {
+  "use server";
+  console.log(`Auth token data is: `, await AUTH_TOKEN());
+
   return {
-    Authorization: `Bearer ${(await AUTH_TOKEN).idToken}`,
+    Authorization: `Bearer ${(await AUTH_TOKEN()).idToken}`,
     "Content-Type": "application/json",
   } as const;
 };
@@ -186,6 +188,7 @@ async function getClothing(
   syncId: UUID,
   clothingId: UUID,
 ): Promise<ClothingDatabaseEntry> {
+  "use server";
   return (
     await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
@@ -247,6 +250,7 @@ async function addClothing(
   syncId: UUID,
   clothingItem: SerializableClothingDatabaseItem,
 ) {
+  "use server";
   try {
     const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
       syncId,
@@ -301,6 +305,7 @@ async function addClothing(
 
 /** Returns `true` if the document has been deleted. */
 async function removeClothing(syncId: UUID, clothingId: UUID) {
+  "use server";
   return (
     await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
@@ -311,9 +316,10 @@ async function removeClothing(syncId: UUID, clothingId: UUID) {
 
 /** Compares the last time the clothing (in the in-memory) store was updated against the server database's and retrieves every clothing item that has been added, removed, or edited. */
 async function getClothingUpdates(syncId: UUID) {
+  "use server";
   if (await gIsUserConnectedToInternet()) {
     const query: StructuredQuery<ClothingDatabaseEntry> = {
-      from: [{ collectionId: SYNC_ID(), allDescendants: true }],
+      from: [{ collectionId: syncId, allDescendants: true }],
       where: {
         fieldFilter: {
           field: { fieldPath: "dateEdited" },
