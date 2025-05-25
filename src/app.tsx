@@ -40,7 +40,7 @@ export default function App() {
 
         // Return the promise chain for each item
         return gFirebaseFunctions
-          .getClothing(gSettings.syncId, clothingId)
+          .getClothing(clothingId)
           .then((clothingDatabaseData) => {
             if (
               new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
@@ -48,7 +48,7 @@ export default function App() {
             ) {
               // Return the promise from the nested action if the condition is met
               return clothing.safeForServer.then((data) => {
-                gFirebaseFunctions.addClothing(gSettings.syncId, data);
+                gFirebaseFunctions.addClothing(data);
               });
             }
             // If the condition is not met, the outer .then() will implicitly return undefined,

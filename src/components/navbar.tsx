@@ -84,11 +84,9 @@ export default function NavBar() {
             // TODO: Do manual sync
             setIsSyncing(true);
 
-            gFirebaseFunctions
-              .getClothingUpdates(gSettings.syncId)
-              .finally(() => {
-                setIsSyncing(false);
-              });
+            gFirebaseFunctions.getClothingUpdates().finally(() => {
+              setIsSyncing(false);
+            });
           }}
         >
           <div class="indicator">

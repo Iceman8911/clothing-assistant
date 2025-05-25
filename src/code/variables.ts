@@ -60,7 +60,7 @@ export const gClothingItemStore = {
 
     this.store.setItem(clothing.id, unwrapped).then((_) => {
       clothing.safeForServer.then((data) => {
-        gFirebaseFunctions.addClothing(gSettings.syncId, data);
+        gFirebaseFunctions.addClothing(data);
       });
     });
   },
@@ -78,7 +78,7 @@ export const gClothingItemStore = {
 
     this.items.delete(clothingId);
     this.store.removeItem(clothingId).then((_) => {
-      gFirebaseFunctions.removeClothing(gSettings.syncId, clothingId);
+      gFirebaseFunctions.removeClothing(clothingId);
     });
   },
 
