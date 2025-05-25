@@ -8,33 +8,6 @@ import { gClothingItemStore, gSettings } from "../variables";
 import { gEnumStatus } from "../enums";
 import { produce, unwrap } from "solid-js/store";
 
-const SYNC_ID = () => gSettings.syncId;
-const LAST_UPDATED_COLLECTION = "last_updated";
-const PROJECT_ID = "clothing-assistant-b7ae8";
-const BASE_URL =
-  `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/` as const;
-const AUTH_TOKEN: Promise<AnonSignUpResponse> = (() => {
-  "use server";
-  const API_KEY = process.env.FIREBASE_API_KEY;
-
-  return fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
-    {
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-      body: JSON.stringify({
-        returnSecureToken: true,
-      }),
-    },
-  ).then((res) => res.json());
-})();
-const SHARED_HEADERS = async () => {
-  return {
-    Authorization: `Bearer ${(await AUTH_TOKEN).idToken}`,
-    "Content-Type": "application/json",
-  } as const;
-};
-
 interface AnonSignUpResponse {
   kind: string;
   /** What we're looking for */
@@ -154,6 +127,33 @@ interface Order<TFirestoreDocument extends FirestoreDocument> {
   field: { fieldPath: keyof TFirestoreDocument["fields"] };
   direction: "ASCENDING" | "DESCENDING";
 }
+
+const SYNC_ID = () => gSettings.syncId;
+const LAST_UPDATED_COLLECTION = "last_updated";
+const PROJECT_ID = "clothing-assistant-b7ae8";
+const BASE_URL =
+  `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/` as const;
+const AUTH_TOKEN: Promise<AnonSignUpResponse> = (() => {
+  "use server";
+  const API_KEY = process.env.FIREBASE_API_KEY;
+
+  return fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
+    {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify({
+        returnSecureToken: true,
+      }),
+    },
+  ).then((res) => res.json());
+})();
+const SHARED_HEADERS = async () => {
+  return {
+    Authorization: `Bearer ${(await AUTH_TOKEN).idToken}`,
+    "Content-Type": "application/json",
+  } as const;
+};
 
 /** It goes like `collection`/`document`/`collection`/`document`, etc */
 const createDocumentPath = (...collectionOrDocument: string[]) =>
