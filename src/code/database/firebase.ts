@@ -163,26 +163,48 @@ const USER_METADATA_DOCUMENT_URL = (syncId: UUID) =>
 const USER_CLOTHING_DOCUMENT_URL = (syncId: UUID, clothingId: UUID) =>
   `${USER_CLOTHING_COLLECTION_URL(syncId)}/${encodeURIComponent(clothingId)}` as const;
 
-const AUTH_TOKEN = (): Promise<AnonSignUpResponse> => {
-  const API_KEY = process.env.FIREBASE_API_KEY;
+const Auth: { _res: AnonSignUpResponse | null; token: Promise<string> } = {
+  /** Cached response */
+  _res: null,
+  get token() {
+    const fetcher = async (): Promise<AnonSignUpResponse> => {
+      const API_KEY = process.env.FIREBASE_API_KEY;
 
-  return fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
-    {
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-      body: JSON.stringify({
-        returnSecureToken: true,
-      }),
-    },
-  ).then((res) => res.json());
+      return fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
+        {
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          body: JSON.stringify({
+            returnSecureToken: true,
+          }),
+        },
+      ).then((res) => res.json());
+    };
+    if (!this._res) {
+      return fetcher().then((data) => {
+        this._res = data;
+
+        setTimeout(
+          () => {
+            // Remove the cache when the token expires
+            this._res = null;
+          },
+          parseInt(data.expiresIn) * 1000,
+        );
+
+        return data.idToken;
+      });
+    } else {
+      return Promise.resolve(this._res.idToken);
+    }
+  },
 };
 
 const SHARED_HEADERS = async () => {
   "use server";
-
   return {
-    Authorization: `Bearer ${(await AUTH_TOKEN()).idToken}`,
+    Authorization: `Bearer ${await Auth.token}`,
     "Content-Type": "application/json",
   } as const;
 };
