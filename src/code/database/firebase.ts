@@ -4,7 +4,7 @@ import type {
   ClothingItem,
 } from "../classes/clothing";
 import { gIsUserConnectedToInternet } from "../functions";
-import { gClothingItemStore, gSettings } from "../variables";
+import { gClothingItemStore } from "../variables";
 import { gEnumStatus } from "../enums";
 import { produce, unwrap } from "solid-js/store";
 import { UUID } from "../types";
@@ -129,24 +129,24 @@ interface Order<TFirestoreDocument extends FirestoreDocument> {
   direction: "ASCENDING" | "DESCENDING";
 }
 
-const SYNC_ID = () => gSettings.syncId;
 const LAST_UPDATED_FIELD_NAME = "last_updated";
 const PROJECT_ID = "clothing-assistant-b7ae8";
 const BASE_URL =
   `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents` as const;
 /** Points to the database data for a user */
-const USER_URL = () =>
-  `${BASE_URL}/users/${encodeURIComponent(SYNC_ID())}` as const;
+const USER_URL = (syncId: UUID) =>
+  `${BASE_URL}/users/${encodeURIComponent(syncId)}` as const;
 
 /** Contains all the documents representing the stored clothing data */
-const USER_CLOTHING_COLLECTION_URL = () => `${USER_URL()}/clothing` as const;
+const USER_CLOTHING_COLLECTION_URL = (syncId: UUID) =>
+  `${USER_URL(syncId)}/clothing` as const;
 /** Contains fields like `last_edited`, etc */
-const USER_METADATA_DOCUMENT_URL = () =>
-  `${USER_CLOTHING_COLLECTION_URL()}/metadata` as const;
+const USER_METADATA_DOCUMENT_URL = (syncId: UUID) =>
+  `${USER_CLOTHING_COLLECTION_URL(syncId)}/metadata` as const;
 
 /** Each clothing item is stored as a document here */
-const USER_CLOTHING_DOCUMENT_URL = (clothingId: UUID) =>
-  `${USER_CLOTHING_COLLECTION_URL()}/${encodeURIComponent(clothingId)}` as const;
+const USER_CLOTHING_DOCUMENT_URL = (syncId: UUID, clothingId: UUID) =>
+  `${USER_CLOTHING_COLLECTION_URL(syncId)}/${encodeURIComponent(clothingId)}` as const;
 
 const AUTH_TOKEN = (): Promise<AnonSignUpResponse> => {
   const API_KEY = process.env.FIREBASE_API_KEY;
@@ -173,31 +173,35 @@ const SHARED_HEADERS = async () => {
 };
 
 /** Returns all the clothing data within the database for the current sync id, i.e [ClothingDatabaseEntry, ClothingDatabaseEntry, ClothingDatabaseEntry, etc */
-async function getAllClothingDocuments(): Promise<
-  (ClothingDatabaseEntry | FirestoreDocument)[]
-> {
+async function getAllClothingDocuments(
+  syncId: UUID,
+): Promise<(ClothingDatabaseEntry | FirestoreDocument)[]> {
   return (
-    await fetch(USER_CLOTHING_COLLECTION_URL(), {
+    await fetch(USER_CLOTHING_COLLECTION_URL(syncId), {
       headers: await SHARED_HEADERS(),
     })
   ).json();
 }
 
-async function getClothing(clothingId: UUID): Promise<ClothingDatabaseEntry> {
+async function getClothing(
+  syncId: UUID,
+  clothingId: UUID,
+): Promise<ClothingDatabaseEntry> {
   "use server";
   return (
-    await fetch(USER_CLOTHING_DOCUMENT_URL(clothingId), {
+    await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
     })
   ).json();
 }
 
 async function addClothingItemDoc(args: {
+  syncId: UUID;
   clothingId: UUID;
   fieldsToAdd: ClothingDatabaseEntry;
   shouldUpdate?: boolean;
 }) {
-  const { clothingId, fieldsToAdd, shouldUpdate } = args;
+  const { syncId, clothingId, fieldsToAdd, shouldUpdate } = args;
 
   if (!(await gIsUserConnectedToInternet())) {
     setTimeout(
@@ -219,7 +223,7 @@ async function addClothingItemDoc(args: {
   }
 
   const resJson = (
-    await fetch(USER_CLOTHING_DOCUMENT_URL(clothingId), {
+    await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
       method: !shouldUpdate ? "PATCH" : "POST",
       body: JSON.stringify(fieldsToAdd),
@@ -228,7 +232,7 @@ async function addClothingItemDoc(args: {
 
   // Update the last time the db was modified.
   // I know that Firestore auto-saves when it was modified but due to latency and stuff, it's not reliable for my use case (it's normally around a second or 2 off)
-  await fetch(USER_METADATA_DOCUMENT_URL(), {
+  await fetch(USER_METADATA_DOCUMENT_URL(syncId), {
     headers: await SHARED_HEADERS(),
     method: "PATCH",
     body: JSON.stringify({
@@ -241,10 +245,14 @@ async function addClothingItemDoc(args: {
   return resJson;
 }
 
-async function addClothing(clothingItem: SerializableClothingDatabaseItem) {
+async function addClothing(
+  syncId: UUID,
+  clothingItem: SerializableClothingDatabaseItem,
+) {
   "use server";
   try {
     const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
+      syncId,
       clothingId: clothingItem.id,
       fieldsToAdd: {
         fields: {
@@ -295,10 +303,10 @@ async function addClothing(clothingItem: SerializableClothingDatabaseItem) {
 }
 
 /** Returns `true` if the document has been deleted. */
-async function removeClothing(clothingId: UUID) {
+async function removeClothing(syncId: UUID, clothingId: UUID) {
   "use server";
   return (
-    await fetch(USER_CLOTHING_DOCUMENT_URL(clothingId), {
+    await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
       method: "DELETE",
     })
@@ -306,11 +314,11 @@ async function removeClothing(clothingId: UUID) {
 }
 
 /** Compares the last time the clothing (in the in-memory) store was updated against the server database's and retrieves every clothing item that has been added, removed, or edited. */
-async function getClothingUpdates() {
+async function getClothingUpdates(syncId: UUID) {
   "use server";
   if (await gIsUserConnectedToInternet()) {
     const query: StructuredQuery<ClothingDatabaseEntry> = {
-      from: [{ collectionId: SYNC_ID(), allDescendants: true }],
+      from: [{ collectionId: syncId, allDescendants: true }],
       where: {
         fieldFilter: {
           field: { fieldPath: "dateEdited" },
@@ -336,7 +344,10 @@ async function getClothingUpdates() {
       console.log(`Query result is: `, await response.json()),
     );
 
-    console.log(`Entire collection is: `, await getAllClothingDocuments());
+    console.log(
+      `Entire collection is: `,
+      await getAllClothingDocuments(syncId),
+    );
   }
 }
 
