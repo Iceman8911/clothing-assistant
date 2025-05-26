@@ -1,13 +1,12 @@
-import { gTriggerAlert } from "~/components/shared/alert-toast";
 import type {
   SerializableClothingDatabaseItem,
   ClothingItem,
 } from "../classes/clothing";
 import { gIsUserConnectedToInternet } from "../functions";
-import { gClothingItemStore } from "../variables";
-import { gEnumStatus } from "../enums";
-import { produce, unwrap } from "solid-js/store";
+import { type gClothingItemStore } from "../variables";
+import { gEnumClothingConflictReason, gEnumStatus } from "../enums";
 import { UUID } from "../types";
+import { gTriggerAlert } from "~/components/shared/alert-toast";
 
 interface AnonSignUpResponse {
   kind: string;
@@ -20,13 +19,28 @@ interface AnonSignUpResponse {
 }
 
 /**
- * Represents a Firestore document data structure for REST API operations.
- * Mirrors the Firestore API's Document object.
+ * Represents a Firestore document data structure for uploads in for REST API operations.
  */
-interface FirestoreDocument {
+interface FirestoreDocumentUpload {
   fields: {
     [fieldName: string]: FirestoreFieldValue;
   };
+}
+
+/** The format we receive when getting a document from firestore */
+interface FirestoreDocumentDownload<
+  TFirestorDocumentUploadType extends
+    FirestoreDocumentUpload = FirestoreDocumentUpload,
+> {
+  /** The path that leads to the document
+
+  e.g `projects/clothing-assistant-b7ae8/databases/(default)/documents/users/2c95386d-47c1-49ea-851d-874ef5f63b22/clothing/023b0e15-45ef-4964-aa45-71ed4269e69e` */
+  name: string;
+  fields: TFirestorDocumentUploadType["fields"];
+  /** Date ISO string */
+  createTime: string;
+  /** Date ISO string */
+  updateTime: string;
 }
 
 /**
@@ -53,7 +67,7 @@ type DoubleValue<TType = number> = { doubleValue: TType };
 type BooleanValue<TType = boolean> = { booleanValue: TType };
 /** ISO 8601 format */
 type TimestampValue<TType = string> = { timestampValue: TType };
-type MapValue = { mapValue: FirestoreDocument };
+type MapValue = { mapValue: FirestoreDocumentUpload };
 type ArrayValue = { arrayValue: { values: FirestoreFieldValue[] } };
 type NullValue = { nullValue: null };
 /** Base64-encoded string */
@@ -77,7 +91,7 @@ interface OccasionValue extends MapValue {
 }
 
 /** Each of this will be a collection under a document created from their `id` */
-interface ClothingDatabaseEntry extends FirestoreDocument {
+interface ClothingDatabaseEntry extends FirestoreDocumentUpload {
   fields: {
     name: StringValue;
     description: StringValue;
@@ -101,7 +115,7 @@ interface ClothingDatabaseEntry extends FirestoreDocument {
   };
 }
 
-interface StructuredQuery<TFirestoreDocument extends FirestoreDocument> {
+interface StructuredQuery<TFirestoreDocument extends FirestoreDocumentUpload> {
   from: CollectionSelector[];
   where?: Filter<TFirestoreDocument>;
   orderBy?: Order<TFirestoreDocument>[];
@@ -109,27 +123,28 @@ interface StructuredQuery<TFirestoreDocument extends FirestoreDocument> {
 }
 
 interface CollectionSelector {
-  collectionId: string;
+  collectionId?: string;
   /** Perfom the query on all descendants of the given collection */
   allDescendants?: boolean;
 }
 
-interface Filter<TFirestoreDocument extends FirestoreDocument> {
+interface Filter<TFirestoreDocument extends FirestoreDocumentUpload> {
   fieldFilter?: FieldFilter<TFirestoreDocument>;
 }
 
-interface FieldFilter<TFirestoreDocument extends FirestoreDocument> {
+interface FieldFilter<TFirestoreDocument extends FirestoreDocumentUpload> {
   field: { fieldPath: keyof TFirestoreDocument["fields"] };
   op: "GREATER_THAN" | "LESS_THAN" | "EQUAL" | "ARRAY_CONTAINS";
   value: FirestoreFieldValue;
 }
 
-interface Order<TFirestoreDocument extends FirestoreDocument> {
+interface Order<TFirestoreDocument extends FirestoreDocumentUpload> {
   field: { fieldPath: keyof TFirestoreDocument["fields"] };
   direction: "ASCENDING" | "DESCENDING";
 }
 
 const LAST_UPDATED_FIELD_NAME = "last_updated";
+const METADATA_DOCUMENT_NAME = "metadata";
 const PROJECT_ID = "clothing-assistant-b7ae8";
 const BASE_URL =
   `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents` as const;
@@ -142,7 +157,7 @@ const USER_CLOTHING_COLLECTION_URL = (syncId: UUID) =>
   `${USER_URL(syncId)}/clothing` as const;
 /** Contains fields like `last_edited`, etc */
 const USER_METADATA_DOCUMENT_URL = (syncId: UUID) =>
-  `${USER_CLOTHING_COLLECTION_URL(syncId)}/metadata` as const;
+  `${USER_CLOTHING_COLLECTION_URL(syncId)}/${METADATA_DOCUMENT_NAME}` as const;
 
 /** Each clothing item is stored as a document here */
 const USER_CLOTHING_DOCUMENT_URL = (syncId: UUID, clothingId: UUID) =>
@@ -173,9 +188,9 @@ const SHARED_HEADERS = async () => {
 };
 
 /** Returns all the clothing data within the database for the current sync id, i.e [ClothingDatabaseEntry, ClothingDatabaseEntry, ClothingDatabaseEntry, etc */
-async function getAllClothingDocuments(
-  syncId: UUID,
-): Promise<(ClothingDatabaseEntry | FirestoreDocument)[]> {
+async function getAllClothingDocuments(syncId: UUID): Promise<{
+  documents: FirestoreDocumentDownload<ClothingDatabaseEntry>[];
+}> {
   return (
     await fetch(USER_CLOTHING_COLLECTION_URL(syncId), {
       headers: await SHARED_HEADERS(),
@@ -201,26 +216,8 @@ async function addClothingItemDoc(args: {
   fieldsToAdd: ClothingDatabaseEntry;
   shouldUpdate?: boolean;
 }) {
+  "use server";
   const { syncId, clothingId, fieldsToAdd, shouldUpdate } = args;
-
-  if (!(await gIsUserConnectedToInternet())) {
-    setTimeout(
-      () =>
-        gTriggerAlert(
-          gEnumStatus.INFO,
-          "No connection detected. Sync scheduled for when next connected.",
-        ),
-      1000,
-    );
-
-    if (!gClothingItemStore.pendingUpload[0].find((val) => val == clothingId))
-      gClothingItemStore.pendingUpload[1]([
-        ...gClothingItemStore.pendingUpload[0],
-        clothingId,
-      ]);
-
-    return;
-  }
 
   const resJson = (
     await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
@@ -239,7 +236,7 @@ async function addClothingItemDoc(args: {
       fields: {
         [LAST_UPDATED_FIELD_NAME]: fieldsToAdd.fields.dateEdited,
       },
-    } as FirestoreDocument),
+    } as FirestoreDocumentUpload),
   });
 
   return resJson;
@@ -248,57 +245,83 @@ async function addClothingItemDoc(args: {
 async function addClothing(
   syncId: UUID,
   clothingItem: SerializableClothingDatabaseItem,
+  clothingStore: typeof gClothingItemStore,
 ) {
-  "use server";
-  try {
-    const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
-      syncId,
-      clothingId: clothingItem.id,
-      fieldsToAdd: {
-        fields: {
-          brand: { stringValue: clothingItem.brand },
-          category: { stringValue: clothingItem.category },
-          color: { stringValue: clothingItem.color },
-          condition: { stringValue: clothingItem.condition },
-          costPrice: { integerValue: `${clothingItem.costPrice}` },
-          dateBought: { timestampValue: clothingItem.dateBought.toISOString() },
-          dateEdited: {
-            timestampValue: clothingItem.dateEdited.toISOString(),
-          },
-          description: { stringValue: clothingItem.description },
-          gender: { stringValue: clothingItem.gender },
-          material: { stringValue: clothingItem.material },
-          name: { stringValue: clothingItem.name },
-          occasion: {
-            mapValue: {
-              fields: {
-                activeWear: { booleanValue: clothingItem.occasion.activeWear },
-                casual: { booleanValue: clothingItem.occasion.casual },
-                formal: { booleanValue: clothingItem.occasion.formal },
-              },
-            },
-          },
-          quantity: { integerValue: `${clothingItem.quantity}` },
-          season: {
-            mapValue: {
-              fields: {
-                fall: { booleanValue: clothingItem.season.fall },
-                spring: { booleanValue: clothingItem.season.spring },
-                summer: { booleanValue: clothingItem.season.summer },
-                winter: { booleanValue: clothingItem.season.winter },
-              },
-            },
-          },
-          sellingPrice: { integerValue: `${clothingItem.sellingPrice}` },
-          size: { stringValue: clothingItem.size },
-          subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
-        },
-      },
-    });
+  if (!(await gIsUserConnectedToInternet())) {
+    setTimeout(
+      () =>
+        gTriggerAlert(
+          gEnumStatus.INFO,
+          "No connection detected. Sync scheduled for when next connected.",
+        ),
+      1000,
+    );
 
-    console.log("Document written. Response JSON is: ", resJson);
-  } catch (e) {
-    console.error("Error adding document: ", e);
+    if (!clothingStore.pendingUpload[0].find((val) => val == clothingItem.id))
+      clothingStore.pendingUpload[1]([
+        ...clothingStore.pendingUpload[0],
+        clothingItem.id,
+      ]);
+
+    return;
+  } else {
+    (async () => {
+      // "use server";
+      try {
+        const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
+          syncId,
+          clothingId: clothingItem.id,
+          fieldsToAdd: {
+            fields: {
+              brand: { stringValue: clothingItem.brand },
+              category: { stringValue: clothingItem.category },
+              color: { stringValue: clothingItem.color },
+              condition: { stringValue: clothingItem.condition },
+              costPrice: { integerValue: `${clothingItem.costPrice}` },
+              dateBought: {
+                timestampValue: clothingItem.dateBought.toISOString(),
+              },
+              dateEdited: {
+                timestampValue: clothingItem.dateEdited.toISOString(),
+              },
+              description: { stringValue: clothingItem.description },
+              gender: { stringValue: clothingItem.gender },
+              material: { stringValue: clothingItem.material },
+              name: { stringValue: clothingItem.name },
+              occasion: {
+                mapValue: {
+                  fields: {
+                    activeWear: {
+                      booleanValue: clothingItem.occasion.activeWear,
+                    },
+                    casual: { booleanValue: clothingItem.occasion.casual },
+                    formal: { booleanValue: clothingItem.occasion.formal },
+                  },
+                },
+              },
+              quantity: { integerValue: `${clothingItem.quantity}` },
+              season: {
+                mapValue: {
+                  fields: {
+                    fall: { booleanValue: clothingItem.season.fall },
+                    spring: { booleanValue: clothingItem.season.spring },
+                    summer: { booleanValue: clothingItem.season.summer },
+                    winter: { booleanValue: clothingItem.season.winter },
+                  },
+                },
+              },
+              sellingPrice: { integerValue: `${clothingItem.sellingPrice}` },
+              size: { stringValue: clothingItem.size },
+              subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
+            },
+          },
+        });
+
+        console.log("Document written. Response JSON is: ", resJson);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
+    })();
   }
 }
 
@@ -313,42 +336,105 @@ async function removeClothing(syncId: UUID, clothingId: UUID) {
   ).ok;
 }
 
+type ClothingConflict = {
+  clothing: ClothingDatabaseEntry | SerializableClothingDatabaseItem;
+  reason: gEnumClothingConflictReason;
+};
+type ClothingConflictMap = Map<UUID, ClothingConflict>;
 /** Compares the last time the clothing (in the in-memory) store was updated against the server database's and retrieves every clothing item that has been added, removed, or edited. */
-async function getClothingUpdates(syncId: UUID) {
+async function getClothingUpdates(
+  syncId: UUID,
+  clientSideClothingItems: Map<UUID, Promise<SerializableClothingDatabaseItem>>,
+): Promise<ClothingConflictMap> {
   "use server";
   if (await gIsUserConnectedToInternet()) {
-    const query: StructuredQuery<ClothingDatabaseEntry> = {
-      from: [{ collectionId: syncId, allDescendants: true }],
-      where: {
-        fieldFilter: {
-          field: { fieldPath: "dateEdited" },
-          op: "GREATER_THAN",
-          value: {
-            timestampValue: gClothingItemStore.lastEdited.toISOString(),
-          },
-        },
-      },
-      orderBy: [
-        {
-          field: { fieldPath: "dateEdited" },
-          direction: "DESCENDING",
-        },
-      ],
-    };
+    // REVIEW: Looks like I have to manually create indexes via the Firebase dashboard so that the queries would work but that's an issue for future me. The other workaround though, would just be to fetch all the clothing items and do comparisons, I believe that 4000 items shouldn't amount to >300~400kb if I'm lucky.
+    // const query: StructuredQuery<ClothingDatabaseEntry> = {
+    //   // from: [{ collectionId: syncId, allDescendants: true }],
+    //   from: [{ allDescendants: true }],
+    //   where: {
+    //     fieldFilter: {
+    //       field: { fieldPath: "dateEdited" },
+    //       // op: "GREATER_THAN",
+    //       op: "LESS_THAN",
+    //       value: {
+    //         timestampValue: timeStampToCompare,
+    //       },
+    //     },
+    //   },
+    //   orderBy: [
+    //     {
+    //       field: { fieldPath: "dateEdited" },
+    //       direction: "DESCENDING",
+    //     },
+    //   ],
+    // };
+    // fetch(`${BASE_URL}:runQuery`, {
+    //   method: "POST",
+    //   headers: await SHARED_HEADERS(),
+    //   body: JSON.stringify({
+    //     structuredQuery: query,
+    //   }),
+    // }).then(async (response) =>
+    //   console.log(`Query result is: `, await response.json()),
+    // );
 
-    fetch(`${BASE_URL}:runQuery`, {
-      method: "POST",
-      headers: await SHARED_HEADERS(),
-      body: JSON.stringify(query),
-    }).then(async (response) =>
-      console.log(`Query result is: `, await response.json()),
-    );
+    /** We can get the orignal clothing ids by using the ending string (after the last forward slash). Note that one of the documents represents "metadata" so it should be ignored */
+    const fetchedDocuments = (await getAllClothingDocuments(syncId)).documents;
 
-    console.log(
-      `Entire collection is: `,
-      await getAllClothingDocuments(syncId),
-    );
+    const conflictingClothingItems: ClothingConflictMap = new Map();
+
+    for (let i = 0, len = fetchedDocuments.length; i < len; i++) {
+      const doc = fetchedDocuments[i];
+      const possibleId = doc.name.slice(doc.name.lastIndexOf("/") + 1);
+
+      if (possibleId != METADATA_DOCUMENT_NAME) {
+        // Now we're sure that this is our ID
+        const id = possibleId as UUID;
+        const localClothingItem = await clientSideClothingItems.get(id);
+
+        // Remove the item so that at the end we can get all the items missing on the server
+        clientSideClothingItems.delete(id);
+
+        // Server has data not in the client
+        if (!localClothingItem) {
+          conflictingClothingItems.set(id, {
+            clothing: doc,
+            reason: gEnumClothingConflictReason.MISSING_ON_CLIENT,
+          });
+          continue;
+        }
+
+        const serverClothingItemDate = new Date(
+          doc.fields.dateEdited.timestampValue,
+        );
+
+        // Compare the local clothing with the data from the server
+        if (localClothingItem.dateEdited > serverClothingItemDate) {
+          conflictingClothingItems.set(id, {
+            clothing: doc,
+            reason: gEnumClothingConflictReason.CLIENT_HAS_NEWER,
+          });
+        } else if (localClothingItem.dateEdited < serverClothingItemDate) {
+          conflictingClothingItems.set(id, {
+            clothing: doc,
+            reason: gEnumClothingConflictReason.SERVER_HAS_NEWER,
+          });
+        }
+      }
+    }
+
+    clientSideClothingItems.forEach(async (data, id) => {
+      conflictingClothingItems.set(id, {
+        clothing: await data,
+        reason: gEnumClothingConflictReason.MISSING_ON_SERVER,
+      });
+    });
+
+    return conflictingClothingItems;
   }
+
+  return new Map();
 }
 
 /** Global methods solely for interacting with Firebase FireStore */

@@ -40,7 +40,7 @@ export const gClothingItemStore = {
 
    Avoid using `set()` and `delete()` if you care about persistence and other stuff.
    */
-  items: new ReactiveMap<string, ClothingItem>(),
+  items: new ReactiveMap<UUID, ClothingItem>(),
   /** Last time a clothing item was added / removed */
   lastEdited: new Date(),
 
@@ -60,7 +60,11 @@ export const gClothingItemStore = {
 
     this.store.setItem(clothing.id, unwrapped).then((_) => {
       clothing.safeForServer.then((data) => {
-        gFirebaseFunctions.addClothing(gSettings.syncId, data);
+        gFirebaseFunctions.addClothing(
+          gSettings.syncId,
+          data,
+          gClothingItemStore,
+        );
       });
     });
   },

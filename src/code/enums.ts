@@ -26,3 +26,17 @@ export const enum gEnumReactiveMember {
    */
   SETTER,
 }
+
+export const enum gEnumClothingConflictReason {
+  /** Both client and server have the same clothing item albeit, the server has an updated version */
+  SERVER_HAS_NEWER = 0,
+
+  /** Both client and server have the same clothing item albeit, the client has an updated version */
+  CLIENT_HAS_NEWER,
+
+  /** Only the client has the clothing item */
+  MISSING_ON_SERVER,
+
+  /** Only the server has the clothing item */
+  MISSING_ON_CLIENT,
+}

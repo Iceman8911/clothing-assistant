@@ -5,9 +5,15 @@ import SearchIcon from "lucide-solid/icons/search";
 import SettingsIcon from "lucide-solid/icons/settings";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import { createSignal, Show } from "solid-js";
+import { SerializableClothingDatabaseItem } from "~/code/classes/clothing";
 import gFirebaseFunctions from "~/code/database/firebase";
 import { gEnumCustomRoute } from "~/code/enums";
-import { gSearchText, gSetSearchText, gSettings } from "~/code/variables";
+import {
+  gClothingItemStore,
+  gSearchText,
+  gSetSearchText,
+  gSettings,
+} from "~/code/variables";
 export default function NavBar() {
   const navigate = useNavigate();
 
@@ -80,12 +86,24 @@ export default function NavBar() {
 
         <button
           class="btn btn-ghost btn-circle"
-          onClick={(_) => {
+          onClick={async (_) => {
             // TODO: Do manual sync
             setIsSyncing(true);
 
+            const serverReadyClothingStore = gClothingItemStore.items
+              .entries()
+              .map(([id, val]) => [id, val.safeForServer]);
+
             gFirebaseFunctions
-              .getClothingUpdates(gSettings.syncId)
+              .getClothingUpdates(
+                gSettings.syncId,
+                // gClothingItemStore.lastEdited.toISOString(),
+                //@ts-expect-error
+                new Map(serverReadyClothingStore),
+              )
+              .then((data) => {
+                console.log("Updates are: ", data);
+              })
               .finally(() => {
                 setIsSyncing(false);
               });
