@@ -234,7 +234,7 @@ async function addClothingItemDoc(args: {
   // I know that Firestore auto-saves when it was modified but due to latency and stuff, it's not reliable for my use case (it's normally around a second or 2 off)
   await fetch(USER_METADATA_DOCUMENT_URL(syncId), {
     headers: await SHARED_HEADERS(),
-    method: "PATCH",
+    method: !shouldUpdate ? "PATCH" : "POST",
     body: JSON.stringify({
       fields: {
         [LAST_UPDATED_FIELD_NAME]: fieldsToAdd.fields.dateEdited,

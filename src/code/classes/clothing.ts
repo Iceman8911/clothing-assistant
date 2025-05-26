@@ -77,6 +77,8 @@ export class ClothingItem implements MutableClassProps, ID {
   private _imgCache?: string;
 
   constructor(data: MutableClassProps | ClothingItem) {
+    this.dateEdited = data.dateBought;
+
     for (const prop in data) {
       //@ts-expect-error
       this[prop] = data[prop];
@@ -87,8 +89,6 @@ export class ClothingItem implements MutableClassProps, ID {
     if (!data?.id) {
       this.id = generateRandomId();
     }
-
-    this.dateEdited = data.dateBought;
 
     // Clear private caches
     this._imgCache = undefined;
