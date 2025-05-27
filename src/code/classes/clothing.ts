@@ -44,54 +44,74 @@ interface ID {
 }
 
 export class ClothingItem implements MutableClassProps, ID {
-  readonly id!: UUID;
-  name!: string;
-  description!: string;
-  brand!: string;
-  gender!: Capitalize<"male" | "female" | "unisex">;
+  readonly id: UUID;
+  name: string;
+  description: string;
+  brand: string;
+  gender: Capitalize<"male" | "female" | "unisex">;
   /** Too varied for a more specific type */
-  color!: string;
-  material!: string;
-  category!: "Tops" | "Bottoms" | "Outer Wear" | "Inner Wear";
-  subCategory!: string;
-  season!: {
+  color: string;
+  material: string;
+  category: "Tops" | "Bottoms" | "Outer Wear" | "Inner Wear";
+  subCategory: string;
+  season: {
     spring: boolean;
     summer: boolean;
     fall: boolean;
     winter: boolean;
   };
-  occasion!: {
+  occasion: {
     formal: boolean;
     casual: boolean;
     activeWear: boolean;
   };
-  condition!: Capitalize<"new" | "used" | "refurbished">;
+  condition: Capitalize<"new" | "used" | "refurbished">;
 
-  costPrice!: number;
-  sellingPrice!: number;
-  quantity!: number;
-  size!: "XS" | "S" | "M" | "L" | "XL";
-  dateBought!: Date;
+  costPrice: number;
+  sellingPrice: number;
+  quantity: number;
+  size: "XS" | "S" | "M" | "L" | "XL";
+  dateBought: Date;
   dateEdited: Date;
   imgFile?: File;
   private _imgCache?: string;
 
-  constructor(data: MutableClassProps | ClothingItem) {
+  constructor(
+    data: MutableClassProps | ClothingItem | SerializableClothingDatabaseItem,
+  ) {
     this.dateEdited = data.dateBought;
-
-    for (const prop in data) {
-      //@ts-expect-error
-      this[prop] = data[prop];
-    }
-
+    this.name = data.name;
+    this.description = data.description;
+    this.brand = data.brand;
+    this.gender = data.gender;
+    this.color = data.color;
+    this.material = data.material;
+    this.category = data.category;
+    this.subCategory = data.subCategory;
+    this.season = data.season;
+    this.occasion = data.occasion;
+    this.condition = data.condition;
+    this.costPrice = data.costPrice;
+    this.sellingPrice = data.sellingPrice;
+    this.quantity = data.quantity;
+    this.size = data.size;
+    this.dateBought = data.dateBought;
     //@ts-expect-error
     // If an id is passed, use it as is
     if (!data?.id) {
       this.id = generateRandomId();
+    } else {
+      //@ts-expect-error
+      this.id = data.id;
     }
 
-    // Clear private caches
-    this._imgCache = undefined;
+    if (data.imgFile) {
+      this.addImg(data.imgFile);
+    }
+    //@ts-expect-error
+    else if (data.imgUrl) {
+      // TODO: Get image from the server
+    }
 
     return createMutable(this);
   }
