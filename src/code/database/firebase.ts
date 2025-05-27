@@ -358,7 +358,7 @@ async function removeClothing(syncId: UUID, clothingId: UUID) {
   ).ok;
 }
 
-type ClothingConflict = {
+export type ClothingConflict = {
   clothing: ClothingDatabaseEntry | SerializableClothingDatabaseItem;
   reason: gEnumClothingConflictReason;
 };
