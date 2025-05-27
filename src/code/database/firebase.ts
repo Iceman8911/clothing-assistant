@@ -358,10 +358,23 @@ async function removeClothing(syncId: UUID, clothingId: UUID) {
   ).ok;
 }
 
-export type ClothingConflict = {
-  clothing: ClothingDatabaseEntry | SerializableClothingDatabaseItem;
-  reason: gEnumClothingConflictReason;
-};
+export type ClothingConflict =
+  | {
+      client: SerializableClothingDatabaseItem;
+      server: ClothingDatabaseEntry;
+      reason:
+        | gEnumClothingConflictReason.CLIENT_HAS_NEWER
+        | gEnumClothingConflictReason.SERVER_HAS_NEWER;
+    }
+  | {
+      client: SerializableClothingDatabaseItem;
+      reason: gEnumClothingConflictReason.MISSING_ON_SERVER;
+    }
+  | {
+      server: ClothingDatabaseEntry;
+      reason: gEnumClothingConflictReason.MISSING_ON_CLIENT;
+    };
+
 type ClothingConflictMap = Map<UUID, ClothingConflict>;
 /** Compares the last time the clothing (in the in-memory) store was updated against the server database's and retrieves every clothing item that has been added, removed, or edited. */
 async function getClothingUpdates(
@@ -421,7 +434,7 @@ async function getClothingUpdates(
         // Server has data not in the client
         if (!localClothingItem) {
           conflictingClothingItems.set(id, {
-            clothing: doc,
+            server: doc,
             reason: gEnumClothingConflictReason.MISSING_ON_CLIENT,
           });
           continue;
@@ -434,12 +447,14 @@ async function getClothingUpdates(
         // Compare the local clothing with the data from the server
         if (localClothingItem.dateEdited > serverClothingItemDate) {
           conflictingClothingItems.set(id, {
-            clothing: doc,
+            server: doc,
+            client: localClothingItem,
             reason: gEnumClothingConflictReason.CLIENT_HAS_NEWER,
           });
         } else if (localClothingItem.dateEdited < serverClothingItemDate) {
           conflictingClothingItems.set(id, {
-            clothing: doc,
+            server: doc,
+            client: localClothingItem,
             reason: gEnumClothingConflictReason.SERVER_HAS_NEWER,
           });
         }
@@ -448,7 +463,7 @@ async function getClothingUpdates(
 
     clientSideClothingItems.forEach(async (data, id) => {
       conflictingClothingItems.set(id, {
-        clothing: await data,
+        client: await data,
         reason: gEnumClothingConflictReason.MISSING_ON_SERVER,
       });
     });

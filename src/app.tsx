@@ -48,7 +48,11 @@ export default function App() {
             ) {
               // Return the promise from the nested action if the condition is met
               return clothing.safeForServer.then((data) => {
-                gFirebaseFunctions.addClothing(gSettings.syncId, data);
+                gFirebaseFunctions.addClothing(
+                  gSettings.syncId,
+                  data,
+                  gClothingItemStore,
+                );
               });
             }
             // If the condition is not met, the outer .then() will implicitly return undefined,
