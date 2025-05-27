@@ -23,6 +23,7 @@ import DeleteModal from "~/components/shared/delete-modal";
 import GenericModal from "~/components/shared/modal";
 import RestockModal from "~/components/shared/restock-modal";
 import ImgPreview from "~/components/shared/img-preview";
+import { UUID } from "~/code/types";
 
 export default function InventoryPage() {
   // Filter out only the properties of the clothing that should be displayed
@@ -41,7 +42,7 @@ export default function InventoryPage() {
 
   const [isClothingModalOpen, setIsClothingModalOpen] = createSignal(false);
   const [idOfClothingItemToEdit, setIdOfClothingItemToEdit] = createSignal<
-    string | undefined
+    UUID | undefined
   >();
   const currentClothingItem = createMemo((_) =>
     gClothingItemStore.items.get(idOfClothingItemToEdit() ?? ""),

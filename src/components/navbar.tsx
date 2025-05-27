@@ -4,10 +4,13 @@ import ListFilterIcon from "lucide-solid/icons/list-filter";
 import SearchIcon from "lucide-solid/icons/search";
 import SettingsIcon from "lucide-solid/icons/settings";
 import ShirtIcon from "lucide-solid/icons/shirt";
+import UploadIcon from "lucide-solid/icons/upload-cloud";
+import DownloadIcon from "lucide-solid/icons/download-cloud";
+import TrashIcon from "lucide-solid/icons/trash-2";
 import { createSignal, Show } from "solid-js";
 import { SerializableClothingDatabaseItem } from "~/code/classes/clothing";
 import gFirebaseFunctions, { ClothingConflict } from "~/code/database/firebase";
-import { gEnumCustomRoute } from "~/code/enums";
+import { gEnumClothingConflictReason, gEnumCustomRoute } from "~/code/enums";
 import {
   gClothingItemStore,
   gSearchText,
@@ -19,6 +22,8 @@ import { ReactiveMap } from "@solid-primitives/map";
 import { For } from "solid-js";
 import { UUID } from "~/code/types";
 import { createStore } from "solid-js/store";
+import { Switch } from "solid-js";
+import { Match } from "solid-js";
 export default function NavBar() {
   const navigate = useNavigate();
 
@@ -155,12 +160,144 @@ export default function NavBar() {
         stateSetter={setIsSyncModalOpen}
       >
         <h3>Sync Conflict</h3>
-        <For each={syncIssueArray}>
-          {(val) => {
-            console.log(val);
-            return <div>Soup: {val.data.reason}</div>;
-          }}
-        </For>
+
+        <ul class="list bg-base-100 rounded-box shadow-md">
+          {/* <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
+            Pls resolve :3
+          </li> */}
+
+          <For each={syncIssueArray}>
+            {(val) => {
+              console.log(val);
+
+              return (
+                <li class="list-row">
+                  {/* The client's image, if any */}
+                  <div class="avatar">
+                    <div class="mask mask-squircle w-16">
+                      <img
+                        src={
+                          val.data.reason !=
+                          gEnumClothingConflictReason.MISSING_ON_CLIENT
+                            ? val.data.client.imgUrl
+                            : undefined
+                        }
+                        class="cursor-pointer"
+                      />
+                      Img here
+                    </div>
+                  </div>
+
+                  <div class="*:text-center">
+                    {/* Descriptive text  */}
+                    <div class="font-bold whitespace-nowrap">
+                      {val.data.reason !=
+                      gEnumClothingConflictReason.MISSING_ON_CLIENT
+                        ? val.data.client.name
+                        : val.data.server.fields.name.stringValue}
+                    </div>
+
+                    <div class="text-xs uppercase font-semibold text-warning">
+                      <Switch fallback="Your local copy is newer than that on the server">
+                        <Match
+                          when={
+                            val.data.reason ==
+                            gEnumClothingConflictReason.MISSING_ON_CLIENT
+                          }
+                        >
+                          This clothing only exists on the server
+                        </Match>
+
+                        <Match
+                          when={
+                            val.data.reason ==
+                            gEnumClothingConflictReason.MISSING_ON_SERVER
+                          }
+                        >
+                          This clothing only exists on your device
+                        </Match>
+
+                        <Match
+                          when={
+                            val.data.reason ==
+                            gEnumClothingConflictReason.SERVER_HAS_NEWER
+                          }
+                        >
+                          The server's copy is newer than that on your device
+                        </Match>
+                      </Switch>
+                    </div>
+
+                    <div class="flex justify-center items-center">
+                      <button class="btn btn-circle btn-ghost">
+                        <Show
+                          fallback={
+                            <div
+                              class="tooltip"
+                              data-tip="Overwrite using your local copy"
+                            >
+                              <UploadIcon />
+                            </div>
+                          }
+                          when={
+                            val.data.reason ==
+                            gEnumClothingConflictReason.MISSING_ON_CLIENT
+                          }
+                        >
+                          <div
+                            class="tooltip"
+                            data-tip="Delete from the server"
+                          >
+                            <TrashIcon />
+                          </div>
+                        </Show>
+                      </button>
+                      <button class="btn btn-circle btn-ghost">
+                        <Show
+                          fallback={
+                            <div
+                              class="tooltip"
+                              data-tip="Overwrite using the server's copy"
+                            >
+                              <DownloadIcon />
+                            </div>
+                          }
+                          when={
+                            val.data.reason ==
+                            gEnumClothingConflictReason.MISSING_ON_SERVER
+                          }
+                        >
+                          <div
+                            class="tooltip"
+                            data-tip="Delete from your device"
+                          >
+                            <TrashIcon />
+                          </div>
+                        </Show>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* The server's image, if any */}
+                  <div class="avatar">
+                    <div class="mask mask-squircle w-16">
+                      <img
+                        src={
+                          val.data.reason !=
+                          gEnumClothingConflictReason.MISSING_ON_SERVER
+                            ? val.data.server.fields.imgUrl?.stringValue
+                            : undefined
+                        }
+                        class="cursor-pointer"
+                      />
+                      Img here
+                    </div>
+                  </div>
+                </li>
+              );
+            }}
+          </For>
+        </ul>
       </GenericModal>
     </>
   );
