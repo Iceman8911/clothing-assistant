@@ -171,10 +171,8 @@ export class ClothingItem implements MutableClassProps, ID {
   async safeForServer(): Promise<SerializableClothingDatabaseItem> {
     const clone = this.clone();
 
-    // TODO: Upload image file
-    const imgData = await this.base64();
     const uploadedImgUrl = query(async () => {
-      return uploadImg(imgData, this.id, this.name);
+      return uploadImg(await this.base64(), this.id, this.name);
     }, "data");
 
     return { ...clone, imgUrl: await uploadedImgUrl(), imgFile: undefined };
