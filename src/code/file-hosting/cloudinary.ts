@@ -1,12 +1,7 @@
 "use server";
 import { v2 as cloudinary } from "cloudinary";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
+/** If succesful, returns the url to the uploaded file */
 const uploadImage = async (
   /** Base 64 string */
   imgData: string,
