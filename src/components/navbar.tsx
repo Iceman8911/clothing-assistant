@@ -8,7 +8,10 @@ import UploadIcon from "lucide-solid/icons/upload-cloud";
 import DownloadIcon from "lucide-solid/icons/download-cloud";
 import TrashIcon from "lucide-solid/icons/trash-2";
 import { createSignal, Show } from "solid-js";
-import { SerializableClothingDatabaseItem } from "~/code/classes/clothing";
+import {
+  ClothingItem,
+  SerializableClothingDatabaseItem,
+} from "~/code/classes/clothing";
 import gFirebaseFunctions, { ClothingConflict } from "~/code/database/firebase";
 import { gEnumClothingConflictReason, gEnumCustomRoute } from "~/code/enums";
 import {
@@ -21,7 +24,7 @@ import GenericModal from "./shared/modal";
 import { ReactiveMap } from "@solid-primitives/map";
 import { For } from "solid-js";
 import { UUID } from "~/code/types";
-import { createStore } from "solid-js/store";
+import { createStore, produce } from "solid-js/store";
 import { Switch } from "solid-js";
 import { Match } from "solid-js";
 export default function NavBar() {
@@ -30,7 +33,7 @@ export default function NavBar() {
   const [isSyncing, setIsSyncing] = createSignal(false);
   const [isSyncModalOpen, setIsSyncModalOpen] = createSignal(false);
   const [syncIssueArray, setSyncIssueArray] = createStore<
-    Array<{ id: UUID; data: ClothingConflict }>
+    Array<{ id: UUID; data: ClothingConflict; isResolved: boolean }>
   >([]);
 
   let searchBar!: HTMLInputElement;
@@ -121,7 +124,7 @@ export default function NavBar() {
                   setSyncIssueArray(
                     Array.from(
                       data.entries().map(([id, val]) => {
-                        return { id, data: val };
+                        return { id, data: val, isResolved: false };
                       }),
                     ),
                   );
@@ -159,7 +162,12 @@ export default function NavBar() {
         stateAccessor={isSyncModalOpen}
         stateSetter={setIsSyncModalOpen}
       >
-        <h3>Sync Conflict</h3>
+        <Show
+          when={syncIssueArray.length}
+          fallback={<h3>No sync conflicts</h3>}
+        >
+          <h3>Sync Conflicts Detected</h3>
+        </Show>
 
         <ul class="list bg-base-100 rounded-box shadow-md">
           {/* <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
@@ -167,7 +175,7 @@ export default function NavBar() {
           </li> */}
 
           <For each={syncIssueArray}>
-            {(val) => {
+            {(val, index) => {
               console.log(val);
 
               return (
@@ -229,52 +237,172 @@ export default function NavBar() {
                     </div>
 
                     <div class="flex justify-center items-center">
-                      <button class="btn btn-circle btn-ghost">
-                        <Show
-                          fallback={
+                      <Show
+                        when={!val.isResolved}
+                        fallback={
+                          <span class="uppercase font-semibold text-success">
+                            Resolved
+                          </span>
+                        }
+                      >
+                        <button
+                          class="btn btn-circle btn-ghost"
+                          onClick={(_) => {
+                            if (
+                              val.data.reason !=
+                              gEnumClothingConflictReason.MISSING_ON_CLIENT
+                            ) {
+                              // Overwrite the data on the server
+                              gFirebaseFunctions.addClothing(
+                                gSettings.syncId,
+                                val.data.client,
+                                gClothingItemStore,
+                              );
+                            } else {
+                              // Remove the data from the server
+                              gFirebaseFunctions.removeClothing(
+                                gSettings.syncId,
+                                val.id,
+                              );
+                            }
+
+                            setSyncIssueArray(
+                              produce((state) => {
+                                state[index()].isResolved = true;
+                              }),
+                            );
+                          }}
+                        >
+                          <Show
+                            fallback={
+                              <div
+                                class="tooltip"
+                                data-tip="Overwrite using your local copy"
+                              >
+                                <UploadIcon />
+                              </div>
+                            }
+                            when={
+                              val.data.reason ==
+                              gEnumClothingConflictReason.MISSING_ON_CLIENT
+                            }
+                          >
                             <div
                               class="tooltip"
-                              data-tip="Overwrite using your local copy"
+                              data-tip="Delete from the server"
                             >
-                              <UploadIcon />
+                              <TrashIcon />
                             </div>
-                          }
-                          when={
-                            val.data.reason ==
-                            gEnumClothingConflictReason.MISSING_ON_CLIENT
-                          }
+                          </Show>
+                        </button>
+
+                        <button
+                          class="btn btn-circle btn-ghost"
+                          onClick={(_) => {
+                            if (
+                              val.data.reason !=
+                              gEnumClothingConflictReason.MISSING_ON_SERVER
+                            ) {
+                              // Overwrite the data on the client
+                              const {
+                                brand,
+                                category,
+                                color,
+                                condition,
+                                costPrice,
+                                dateBought,
+                                dateEdited,
+                                description,
+                                gender,
+                                material,
+                                name,
+                                occasion,
+                                quantity,
+                                season,
+                                sellingPrice,
+                                size,
+                                subCategory,
+                                imgUrl,
+                              } = val.data.server.fields;
+
+                              const { activeWear, casual, formal } =
+                                occasion.mapValue.fields;
+                              const { fall, spring, summer, winter } =
+                                season.mapValue.fields;
+
+                              gClothingItemStore.addItem(
+                                new ClothingItem({
+                                  id: val.id,
+                                  brand: brand.stringValue,
+                                  category: category.stringValue,
+                                  color: color.stringValue,
+                                  condition: condition.stringValue,
+                                  costPrice: parseFloat(costPrice.integerValue),
+                                  dateBought: new Date(
+                                    dateBought.timestampValue,
+                                  ),
+                                  dateEdited: new Date(
+                                    dateEdited.timestampValue,
+                                  ),
+                                  description: description.stringValue,
+                                  gender: gender.stringValue,
+                                  material: material.stringValue,
+                                  name: name.stringValue,
+                                  occasion: {
+                                    activeWear: activeWear.booleanValue,
+                                    casual: casual.booleanValue,
+                                    formal: formal.booleanValue,
+                                  },
+                                  imgUrl: imgUrl?.stringValue ?? "",
+                                  quantity: parseInt(quantity.integerValue),
+                                  season: {
+                                    fall: fall.booleanValue,
+                                    spring: spring.booleanValue,
+                                    summer: summer.booleanValue,
+                                    winter: winter.booleanValue,
+                                  },
+                                  sellingPrice: parseFloat(
+                                    sellingPrice.integerValue,
+                                  ),
+                                  size: size.stringValue,
+                                  subCategory: subCategory.stringValue,
+                                }),
+                              );
+                            } else {
+                              // Remove the data from the client
+                              gClothingItemStore.removeItem(val.id);
+                            }
+
+                            setSyncIssueArray(
+                              produce((state) => {
+                                state[index()].isResolved = true;
+                              }),
+                            );
+                          }}
                         >
-                          <div
-                            class="tooltip"
-                            data-tip="Delete from the server"
+                          <Show
+                            fallback={
+                              <div
+                                class="tooltip"
+                                data-tip="Overwrite using the server's copy"
+                              >
+                                <DownloadIcon />
+                              </div>
+                            }
+                            when={
+                              val.data.reason ==
+                              gEnumClothingConflictReason.MISSING_ON_SERVER
+                            }
                           >
-                            <TrashIcon />
-                          </div>
-                        </Show>
-                      </button>
-                      <button class="btn btn-circle btn-ghost">
-                        <Show
-                          fallback={
                             <div
                               class="tooltip"
-                              data-tip="Overwrite using the server's copy"
+                              data-tip="Delete from your device"
                             >
-                              <DownloadIcon />
+                              <TrashIcon />
                             </div>
-                          }
-                          when={
-                            val.data.reason ==
-                            gEnumClothingConflictReason.MISSING_ON_SERVER
-                          }
-                        >
-                          <div
-                            class="tooltip"
-                            data-tip="Delete from your device"
-                          >
-                            <TrashIcon />
-                          </div>
-                        </Show>
-                      </button>
+                          </Show>
+                        </button>
+                      </Show>
                     </div>
                   </div>
 
