@@ -167,8 +167,9 @@ export class ClothingItem implements MutableClassProps, ID {
   }
 
   /** Returns a plain object copy that can be easily used in server side code. */
-  get safeForServer(): Promise<SerializableClothingDatabaseItem> {
+  async safeForServer(): Promise<SerializableClothingDatabaseItem> {
     const clone = this.clone();
+
     // TODO: Upload image file
     this.base64().then((data) => {
       const res = uploadImg(data, this.imgFile?.name);
@@ -178,7 +179,7 @@ export class ClothingItem implements MutableClassProps, ID {
       });
     });
 
-    return Promise.resolve({ ...clone, imgUrl: "", imgFile: undefined });
+    return { ...clone, imgUrl: "", imgFile: undefined };
   }
 }
 

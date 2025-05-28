@@ -59,7 +59,7 @@ export const gClothingItemStore = {
     this.items.set(clothing.id, clothing);
 
     this.store.setItem(clothing.id, unwrapped).then((_) => {
-      clothing.safeForServer.then((data) => {
+      clothing.safeForServer().then((data) => {
         gFirebaseFunctions.addClothing(
           gSettings.syncId,
           data,

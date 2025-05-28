@@ -47,7 +47,7 @@ export default function App() {
               clothing.dateEdited
             ) {
               // Return the promise from the nested action if the condition is met
-              return clothing.safeForServer.then((data) => {
+              return clothing.safeForServer().then((data) => {
                 gFirebaseFunctions.addClothing(
                   gSettings.syncId,
                   data,
