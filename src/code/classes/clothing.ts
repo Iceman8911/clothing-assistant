@@ -4,6 +4,7 @@ import PlaceholderImage from "~/assets/images/placeholder.webp";
 import { generateRandomId } from "../functions";
 import { UUID } from "../types";
 import gCloudinaryFunctions from "../file-hosting/cloudinary";
+import { query } from "@solidjs/router";
 
 interface MutableClassProps {
   name: string;
@@ -171,25 +172,19 @@ export class ClothingItem implements MutableClassProps, ID {
     const clone = this.clone();
 
     // TODO: Upload image file
-    this.base64().then((data) => {
-      const res = uploadImg(data, this.imgFile?.name);
+    const imgData = await this.base64();
+    const uploadedImgUrl = query(async () => {
+      return uploadImg(imgData, this.id, this.name);
+    }, "data");
 
-      res.then((ress) => {
-        console.log("Cloudinary Response is: ", ress);
-      });
-    });
-
-    return { ...clone, imgUrl: "", imgFile: undefined };
+    return { ...clone, imgUrl: await uploadedImgUrl(), imgFile: undefined };
   }
 }
 
-/** Since this is a server function, it must have `"use server"` and thus cannot be inlined in the class */
-function uploadImg(imgString: string, fileName?: string) {
+/** Due to a regression, this can't be inlined */
+function uploadImg(imgString: string, id: UUID, name?: string) {
   "use server";
-  return gCloudinaryFunctions.uploadImage(
-    imgString,
-    fileName ?? generateRandomId(),
-  );
+  return gCloudinaryFunctions.uploadImage(imgString, id, name);
 }
 
 /** The serializable structure of the clothing data that will then be converted to a form the database will accept. Since the database code is ran on the server, we need to get rid of anything not easily serializable */

@@ -110,8 +110,7 @@ interface ClothingDatabaseEntry extends FirestoreDocumentUpload {
     size: StringValue<ClothingItem["size"]>;
     dateBought: TimestampValue;
     dateEdited: TimestampValue;
-    // TODO: Maybe don't make this optional?
-    imgUrl?: StringValue;
+    imgUrl: StringValue;
   };
 }
 
@@ -308,6 +307,7 @@ async function addClothing(
               },
               description: { stringValue: clothingItem.description },
               gender: { stringValue: clothingItem.gender },
+              imgUrl: { stringValue: clothingItem.imgUrl },
               material: { stringValue: clothingItem.material },
               name: { stringValue: clothingItem.name },
               occasion: {
