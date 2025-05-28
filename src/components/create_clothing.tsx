@@ -9,7 +9,7 @@ import {
   onMount,
   Switch,
 } from "solid-js";
-import { unwrap } from "solid-js/store";
+import PlaceholderImage from "~/assets/images/placeholder.webp";
 import {
   AiJsonResponse,
   understandImageWithGemini,
@@ -181,11 +181,14 @@ export default function CreateClothingModal(
         }
       }
 
-      if (prop.stateAccessor() && clothingItem.imgFile) {
-        // Also set the file input's value
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(clothingItem.imgFile);
-        clothingImgInput.files = dataTransfer.files;
+      if (prop.stateAccessor()) {
+        if (clothingItem.imgFile) {
+          // Also set the file input's value
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(clothingItem.imgFile);
+          clothingImgInput.files = dataTransfer.files;
+        }
+
         await refetch();
       }
     }),
@@ -214,9 +217,11 @@ export default function CreateClothingModal(
               }
               ref={clothingDisplay}
               style={{
-                "background-image": clothingItemBase64Url()
-                  ? `url(${clothingItemBase64Url()})`
-                  : "",
+                "background-image":
+                  clothingItemBase64Url() &&
+                  clothingItemBase64Url() != PlaceholderImage
+                    ? `url(${clothingItemBase64Url()})`
+                    : "",
               }}
               onClick={() => {
                 if (!isAiGeneratingData()) {
@@ -224,7 +229,12 @@ export default function CreateClothingModal(
                 }
               }}
             >
-              <Show when={clothingItemBase64Url()}>
+              <Show
+                when={
+                  clothingItemBase64Url() &&
+                  clothingItemBase64Url() != PlaceholderImage
+                }
+              >
                 {/* Button for previewing the chosen clothing */}
                 <button
                   type="button"

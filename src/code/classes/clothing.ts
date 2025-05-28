@@ -1,6 +1,6 @@
 import { createMutable, unwrap } from "solid-js/store";
 import { fileToDataURL } from "../utilities";
-import { Accessor, createMemo } from "solid-js";
+import PlaceholderImage from "~/assets/images/placeholder.webp";
 import { generateRandomId } from "../functions";
 import { UUID } from "../types";
 
@@ -140,6 +140,8 @@ export class ClothingItem implements MutableClassProps, ID {
   ) {
     const trim = (string: string) =>
       string.replace(/^data:image\/\w+;base64,/, "");
+
+    if (!this.imgFile) return PlaceholderImage;
 
     // The cache is empty
     if (!this._imgCache || this._imgCache.endsWith("base64,")) {

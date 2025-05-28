@@ -7,6 +7,7 @@ import ShirtIcon from "lucide-solid/icons/shirt";
 import UploadIcon from "lucide-solid/icons/upload-cloud";
 import DownloadIcon from "lucide-solid/icons/download-cloud";
 import TrashIcon from "lucide-solid/icons/trash-2";
+import PlaceholderImage from "~/assets/images/placeholder.webp";
 import { createSignal, Show } from "solid-js";
 import {
   ClothingItem,
@@ -179,7 +180,7 @@ export default function NavBar() {
               console.log(val);
 
               return (
-                <li class="list-row">
+                <li class="list-row [&_img]:h-auto">
                   {/* The client's image, if any */}
                   <div class="avatar">
                     <div class="mask mask-squircle w-16">
@@ -187,8 +188,8 @@ export default function NavBar() {
                         src={
                           val.data.reason !=
                           gEnumClothingConflictReason.MISSING_ON_CLIENT
-                            ? val.data.client.imgUrl
-                            : undefined
+                            ? val.data.client.imgUrl || PlaceholderImage
+                            : PlaceholderImage
                         }
                         class="cursor-pointer"
                       />
@@ -413,8 +414,9 @@ export default function NavBar() {
                         src={
                           val.data.reason !=
                           gEnumClothingConflictReason.MISSING_ON_SERVER
-                            ? val.data.server.fields.imgUrl?.stringValue
-                            : undefined
+                            ? val.data.server.fields.imgUrl?.stringValue ||
+                              PlaceholderImage
+                            : PlaceholderImage
                         }
                         class="cursor-pointer"
                       />
