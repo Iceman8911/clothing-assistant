@@ -3,6 +3,7 @@ import { fileToDataURL } from "../utilities";
 import PlaceholderImage from "~/assets/images/placeholder.webp";
 import { generateRandomId } from "../functions";
 import { UUID } from "../types";
+import gCloudinaryFunctions from "../file-hosting/cloudinary";
 
 interface MutableClassProps {
   name: string;
@@ -169,8 +170,25 @@ export class ClothingItem implements MutableClassProps, ID {
   get safeForServer(): Promise<SerializableClothingDatabaseItem> {
     const clone = this.clone();
     // TODO: Upload image file
+    this.base64().then((data) => {
+      const res = uploadImg(data, this.imgFile?.name);
+
+      res.then((ress) => {
+        console.log("Cloudinary Response is: ", ress);
+      });
+    });
+
     return Promise.resolve({ ...clone, imgUrl: "", imgFile: undefined });
   }
+}
+
+/** Since this is a server function, it must have `"use server"` and thus cannot be inlined in the class */
+function uploadImg(imgString: string, fileName?: string) {
+  "use server";
+  return gCloudinaryFunctions.uploadImage(
+    imgString,
+    fileName ?? generateRandomId(),
+  );
 }
 
 /** The serializable structure of the clothing data that will then be converted to a form the database will accept. Since the database code is ran on the server, we need to get rid of anything not easily serializable */
