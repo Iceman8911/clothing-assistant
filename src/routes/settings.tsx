@@ -1,8 +1,5 @@
-import { trackStore } from "@solid-primitives/deep";
-import { createEffect, on, onMount } from "solid-js";
-import { produce, unwrap } from "solid-js/store";
+import { produce } from "solid-js/store";
 import { generateRandomId } from "~/code/functions";
-import { gDefaultSettings } from "~/code/variables";
 import { gSetSettings, gSettings } from "~/code/variables";
 
 export default function SettingsPage() {
