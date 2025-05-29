@@ -10,7 +10,7 @@ export default function SettingsPage() {
       <section>
         <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
           <legend class="fieldset-legend">Sync Id</legend>
-          <div class="flex gap-4">
+          <div class="flex gap-2">
             <input
               type="text"
               class="input"
@@ -18,6 +18,7 @@ export default function SettingsPage() {
               disabled={gSettings.syncId ? true : false}
               value={gSettings.syncId}
             />
+
             <button
               class="btn btn-soft btn-primary w-20"
               onClick={(_) => {
@@ -29,10 +30,23 @@ export default function SettingsPage() {
             >
               Generate
             </button>
+
+            <button
+              class="btn btn-soft btn-secondary w-14"
+              onClick={(_) => {
+                navigator.clipboard.writeText(gSettings.syncId);
+              }}
+              disabled={!gSettings.syncId ? true : false}
+            >
+              Copy
+            </button>
           </div>
           <span class="label text-warning inline-block whitespace-break-spaces">
             Required for syncing. You can generate this only{" "}
             <b class="italic">once</b>!
+            <br />
+            If you want to use the data here on another device, <b>copy</b> this
+            id and paste it into this field on the other device.
           </span>
         </fieldset>
       </section>
