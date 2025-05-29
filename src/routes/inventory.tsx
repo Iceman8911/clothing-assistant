@@ -45,6 +45,7 @@ export default function InventoryPage() {
     UUID | undefined
   >();
   const currentClothingItem = createMemo((_) =>
+    //@ts-expect-error
     gClothingItemStore.items.get(idOfClothingItemToEdit() ?? ""),
   );
 
