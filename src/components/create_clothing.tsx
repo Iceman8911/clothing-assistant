@@ -17,7 +17,7 @@ import {
 import { gIsUserConnectedToInternet } from "~/code/functions";
 import { gClothingItemStore, gSettings } from "~/code/variables";
 import { generateRandomId } from "~/code/functions";
-import { SignalProps } from "~/code/types";
+import { SignalProps, UUID } from "~/code/types";
 import { ClothingItem } from "~/code/classes/clothing";
 import Sparkles from "lucide-solid/icons/sparkles";
 import { gTriggerAlert } from "./shared/alert-toast";
@@ -29,7 +29,7 @@ import ImgPreview from "./shared/img-preview";
 
 export default function CreateClothingModal(
   prop: SignalProps & {
-    clothIdToEdit?: string;
+    clothIdToEdit?: UUID;
   },
 ) {
   const clothingSizes: ClothingItem["size"][] = ["XS", "S", "M", "L", "XL"];
