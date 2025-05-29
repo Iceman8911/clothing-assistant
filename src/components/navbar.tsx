@@ -106,7 +106,8 @@ export default function NavBar() {
           <button
             class="btn btn-ghost btn-circle"
             onClick={async (_) => {
-              // TODO: Do manual sync
+              if (isSyncing()) return;
+
               setIsSyncing(true);
 
               const serverReadyClothingStore = gClothingItemStore.items
