@@ -56,15 +56,16 @@ export const gClothingItemStore = {
    */
   addItem(clothing: ClothingItem) {
     gShowSavingAlert();
+    const clone = clothing.clone();
 
     /** Set the timestamps */
     this.storeLastEdited[gEnumReactiveMember.SETTER](
       (this.lastEdited = clothing.dateEdited = new Date()),
     );
 
-    const unwrapped = unwrap(clothing);
-    this.items.set(clothing.id, clothing);
+    this.items.set(clothing.id, clone);
 
+    const unwrapped = unwrap(clothing);
     this.store.setItem(clothing.id, unwrapped).then((_) => {
       clothing.safeForServer().then((data) => {
         gFirebaseFunctions.addClothing(
