@@ -1,8 +1,11 @@
 import { produce } from "solid-js/store";
 import { generateRandomId } from "~/code/functions";
+import { UUID } from "~/code/types";
 import { gSetSettings, gSettings } from "~/code/variables";
 
 export default function SettingsPage() {
+  let syncIdInput!: HTMLInputElement;
+
   return (
     <div class="p-4 prose">
       <h2 class="font-bold">Settings</h2>
@@ -17,13 +20,18 @@ export default function SettingsPage() {
               placeholder="Click 'Generate'"
               disabled={gSettings.syncId ? true : false}
               value={gSettings.syncId}
+              ref={syncIdInput}
             />
 
             <button
               class="btn btn-soft btn-primary w-20"
               onClick={(_) => {
                 gSetSettings(
-                  produce((settings) => (settings.syncId = generateRandomId())),
+                  produce(
+                    (settings) =>
+                      (settings.syncId =
+                        (syncIdInput.value as UUID) ?? generateRandomId()),
+                  ),
                 );
               }}
               disabled={gSettings.syncId ? true : false}
