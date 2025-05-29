@@ -112,7 +112,11 @@ export class ClothingItem implements MutableClassProps, ID {
     }
     //@ts-expect-error
     else if (data.imgUrl) {
-      // TODO: Get image from the server
+      const dataa = data as SerializableClothingDatabaseItem;
+
+      fetch(dataa.imgUrl)
+        .then((res) => res.blob())
+        .then((blob) => this.addImg(new File([blob], `${this.id}.webp`)));
     }
 
     return createMutable(this);
@@ -192,7 +196,7 @@ function uploadImg(imgString: string, id: UUID, name?: string) {
 export interface SerializableClothingDatabaseItem
   extends MutableClassProps,
     ID {
-  /** No longer exists since uploading / serializing a file isn't worth the space it takes up. Besides, Seroval can't serialize them :p */
+  /** No longer exists since uploading / serializing a file isn't worth the space it takes up*/
   imgFile: undefined | never;
   /** The image will be uploaded to a seperate file host (i.e Firebase Storage)*/
   imgUrl: string;

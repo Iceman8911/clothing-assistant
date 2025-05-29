@@ -9,6 +9,7 @@ import gFirebaseFunctions from "./database/firebase";
 import { generateRandomId, gShowSavingAlert } from "./functions";
 import { gEnumReactiveMember } from "./enums";
 import { UUID } from "./types";
+import gCloudinaryFunctions from "./file-hosting/cloudinary";
 
 type Settings = {
   currency: "$" | "€" | "£" | "¥" | "₦";
@@ -32,6 +33,12 @@ export const gDefaultSettings = {
     gemini: "",
   },
 } as const satisfies Settings;
+
+function removeServerClothing(syncId: UUID, clothingId: UUID) {
+  "use server";
+  gFirebaseFunctions.removeClothing(syncId, clothingId);
+  gCloudinaryFunctions.deleteImage(clothingId);
+}
 
 /** Contains the stores (in-memory and persistent) for clothing items */
 export const gClothingItemStore = {
@@ -82,7 +89,7 @@ export const gClothingItemStore = {
 
     this.items.delete(clothingId);
     this.store.removeItem(clothingId).then((_) => {
-      gFirebaseFunctions.removeClothing(gSettings.syncId, clothingId);
+      removeServerClothing(gSettings.syncId, clothingId);
     });
   },
 
