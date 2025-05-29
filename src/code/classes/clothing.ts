@@ -134,7 +134,7 @@ export class ClothingItem implements MutableClassProps, ID {
   }
 
   /**
-   * Base64 encoded string of the image file (with or without the mime type included)
+   * Base64 encoded string of the image file (with or without the mime type included) or the URL to a placeholder img
    */
   async base64(
     /** If true, the mime type at the beginning of the string will be removed. */
@@ -170,9 +170,12 @@ export class ClothingItem implements MutableClassProps, ID {
   /** Returns a plain object copy that can be easily used in server side code. */
   async safeForServer(): Promise<SerializableClothingDatabaseItem> {
     const clone = this.clone();
+    const possibleBase64String = await this.base64();
 
     const uploadedImgUrl = query(async () => {
-      return uploadImg(await this.base64(), this.id, this.name);
+      return possibleBase64String != PlaceholderImage
+        ? uploadImg(await this.base64(), this.id, this.name)
+        : "";
     }, "data");
 
     return { ...clone, imgUrl: await uploadedImgUrl(), imgFile: undefined };

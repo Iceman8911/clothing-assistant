@@ -111,7 +111,7 @@ export default function NavBar() {
 
               const serverReadyClothingStore = gClothingItemStore.items
                 .entries()
-                .map(([id, val]) => [id, val.safeForServer]);
+                .map(([id, val]) => [id, val.safeForServer()]);
 
               gFirebaseFunctions
                 .getClothingUpdates(
