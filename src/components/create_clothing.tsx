@@ -208,7 +208,7 @@ export default function CreateClothingModal(
     createSignal(false);
 
   return (
-    <Suspense>
+    <>
       <GenericModal
         stateAccessor={prop.stateAccessor}
         stateSetter={prop.stateSetter}
@@ -219,173 +219,175 @@ export default function CreateClothingModal(
             id={clothingFormId}
             ref={clothingForm}
           >
-            <div
-              class={
-                "glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center flex justify-center items-center " +
-                (isAiGeneratingData() ? "opacity-50 cursor-not-allowed" : "")
-              }
-              ref={clothingDisplay}
-              style={{
-                "background-image":
-                  clothingItemBase64Url() &&
-                  clothingItemBase64Url() != PlaceholderImage
-                    ? `url(${clothingItemBase64Url()})`
-                    : "",
-              }}
-              onClick={() => {
-                if (!isAiGeneratingData()) {
-                  clothingImgInput.click();
+            <Suspense>
+              <div
+                class={
+                  "glass border rounded-box col-start-1 col-span-3 row-start-1 row-span-2 bg-contain bg-no-repeat bg-center flex justify-center items-center " +
+                  (isAiGeneratingData() ? "opacity-50 cursor-not-allowed" : "")
                 }
-              }}
-            >
-              <Show
-                when={
-                  clothingItemBase64Url() &&
-                  clothingItemBase64Url() != PlaceholderImage
-                }
-              >
-                {/* Button for previewing the chosen clothing */}
-                <button
-                  type="button"
-                  class="btn btn-info btn-soft btn-sm opacity-75 absolute top-0 right-0"
-                  disabled={isAiGeneratingData()}
-                  onClick={(ev) => {
-                    ev.stopPropagation();
-                    setIsThumbnailPreviewOpen(true);
-                  }}
-                >
-                  Preview
-                </button>
-
-                {/* Button for AI-based data generation */}
-                <button
-                  type="button"
-                  class={
-                    "btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
-                    (isAiGeneratingData() &&
-                      "cursor-not-allowed pointer-events-none")
+                ref={clothingDisplay}
+                style={{
+                  "background-image":
+                    clothingItemBase64Url() &&
+                    clothingItemBase64Url() != PlaceholderImage
+                      ? `url(${clothingItemBase64Url()})`
+                      : "",
+                }}
+                onClick={() => {
+                  if (!isAiGeneratingData()) {
+                    clothingImgInput.click();
                   }
-                  onClick={async (e) => {
-                    e.stopPropagation();
+                }}
+              >
+                <Show
+                  when={
+                    clothingItemBase64Url() &&
+                    clothingItemBase64Url() != PlaceholderImage
+                  }
+                >
+                  {/* Button for previewing the chosen clothing */}
+                  <button
+                    type="button"
+                    class="btn btn-info btn-soft btn-sm opacity-75 absolute top-0 right-0"
+                    disabled={isAiGeneratingData()}
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      setIsThumbnailPreviewOpen(true);
+                    }}
+                  >
+                    Preview
+                  </button>
 
-                    if (
-                      isAiGeneratingData() ||
-                      !(await gIsUserConnectedToInternet())
-                    ) {
-                      gTriggerAlert(
-                        gEnumStatus.ERROR,
-                        "Could not connect to a model. Please check your connection and try again later.",
-                      );
-                      return;
+                  {/* Button for AI-based data generation */}
+                  <button
+                    type="button"
+                    class={
+                      "btn btn-primary btn-soft flex justify-center items-center opacity-75 max-w-full " +
+                      (isAiGeneratingData() &&
+                        "cursor-not-allowed pointer-events-none")
                     }
+                    onClick={async (e) => {
+                      e.stopPropagation();
 
-                    try {
-                      setIsAiGeneratingData(true);
-
-                      const aiJsonResponse = await understandImageWithGemini(
-                        gSettings.apiKeys.gemini,
-                        await clothingItem.base64(true),
-                      );
-
-                      // Fill up the appropriate fields
-                      for (const i in aiJsonResponse) {
-                        if (
-                          Object.prototype.hasOwnProperty.call(
-                            aiJsonResponse,
-                            i,
-                          )
-                        ) {
-                          const key = i as keyof AiJsonResponse;
-                          const value = aiJsonResponse[key];
-
-                          const state = clothingItem;
-                          switch (key) {
-                            case "Name":
-                            case "Description":
-                            case "Category":
-                            case "Material":
-                            case "Condition":
-                            case "Gender":
-                            case "Brand":
-                            case "Size":
-                              state[
-                                //@ts-expect-error
-                                key.toLowerCase() as keyof ClothingItem
-                              ] = value;
-                              break;
-                            case "Color":
-                              state.color = (value as string[]).join(", ");
-                              break;
-                            case "Season":
-                              // Just reset it at first
-                              state.season = {
-                                fall: false,
-                                spring: false,
-                                summer: false,
-                                winter: false,
-                              };
-
-                              (value as AiJsonResponse["Season"]).forEach(
-                                (val) => {
-                                  state.season[
-                                    val.toLowerCase() as keyof ClothingItem["season"]
-                                  ] = true;
-                                },
-                              );
-                              break;
-                            case "Occasion":
-                              // Just reset it at first
-                              state.occasion = {
-                                formal: false,
-                                casual: false,
-                                activeWear: false,
-                              };
-
-                              (value as AiJsonResponse["Occasion"]).forEach(
-                                (val) => {
-                                  if (val == "Active Wear") {
-                                    state.occasion.activeWear = true;
-                                  } else {
-                                    state.occasion[
-                                      val.toLowerCase() as keyof ClothingItem["occasion"]
-                                    ] = true;
-                                  }
-                                },
-                              );
-                              break;
-                            case "Subcategory":
-                              state.subCategory =
-                                value as ClothingItem["subCategory"];
-                              break;
-                          }
-                        }
+                      if (
+                        isAiGeneratingData() ||
+                        !(await gIsUserConnectedToInternet())
+                      ) {
+                        gTriggerAlert(
+                          gEnumStatus.ERROR,
+                          "Could not connect to a model. Please check your connection and try again later.",
+                        );
+                        return;
                       }
 
-                      gTriggerAlert(
-                        gEnumStatus.SUCCESS,
-                        "Data generated successfully!",
-                      );
-                    } catch (e) {
-                      const error = e as Error;
+                      try {
+                        setIsAiGeneratingData(true);
 
-                      gTriggerAlert(gEnumStatus.ERROR, error.message);
-                    }
-                    setIsAiGeneratingData(false);
-                  }}
-                >
-                  <Show
-                    when={isAiGeneratingData()}
-                    fallback={
-                      <p>
-                        Generate Data (AI <Sparkles class="inline-block" />)
-                      </p>
-                    }
+                        const aiJsonResponse = await understandImageWithGemini(
+                          gSettings.apiKeys.gemini,
+                          await clothingItem.base64(true),
+                        );
+
+                        // Fill up the appropriate fields
+                        for (const i in aiJsonResponse) {
+                          if (
+                            Object.prototype.hasOwnProperty.call(
+                              aiJsonResponse,
+                              i,
+                            )
+                          ) {
+                            const key = i as keyof AiJsonResponse;
+                            const value = aiJsonResponse[key];
+
+                            const state = clothingItem;
+                            switch (key) {
+                              case "Name":
+                              case "Description":
+                              case "Category":
+                              case "Material":
+                              case "Condition":
+                              case "Gender":
+                              case "Brand":
+                              case "Size":
+                                state[
+                                  //@ts-expect-error
+                                  key.toLowerCase() as keyof ClothingItem
+                                ] = value;
+                                break;
+                              case "Color":
+                                state.color = (value as string[]).join(", ");
+                                break;
+                              case "Season":
+                                // Just reset it at first
+                                state.season = {
+                                  fall: false,
+                                  spring: false,
+                                  summer: false,
+                                  winter: false,
+                                };
+
+                                (value as AiJsonResponse["Season"]).forEach(
+                                  (val) => {
+                                    state.season[
+                                      val.toLowerCase() as keyof ClothingItem["season"]
+                                    ] = true;
+                                  },
+                                );
+                                break;
+                              case "Occasion":
+                                // Just reset it at first
+                                state.occasion = {
+                                  formal: false,
+                                  casual: false,
+                                  activeWear: false,
+                                };
+
+                                (value as AiJsonResponse["Occasion"]).forEach(
+                                  (val) => {
+                                    if (val == "Active Wear") {
+                                      state.occasion.activeWear = true;
+                                    } else {
+                                      state.occasion[
+                                        val.toLowerCase() as keyof ClothingItem["occasion"]
+                                      ] = true;
+                                    }
+                                  },
+                                );
+                                break;
+                              case "Subcategory":
+                                state.subCategory =
+                                  value as ClothingItem["subCategory"];
+                                break;
+                            }
+                          }
+                        }
+
+                        gTriggerAlert(
+                          gEnumStatus.SUCCESS,
+                          "Data generated successfully!",
+                        );
+                      } catch (e) {
+                        const error = e as Error;
+
+                        gTriggerAlert(gEnumStatus.ERROR, error.message);
+                      }
+                      setIsAiGeneratingData(false);
+                    }}
                   >
-                    <span class="loading loading-spinner"></span>
-                  </Show>
-                </button>
-              </Show>
-            </div>
+                    <Show
+                      when={isAiGeneratingData()}
+                      fallback={
+                        <p>
+                          Generate Data (AI <Sparkles class="inline-block" />)
+                        </p>
+                      }
+                    >
+                      <span class="loading loading-spinner"></span>
+                    </Show>
+                  </button>
+                </Show>
+              </div>
+            </Suspense>
 
             <fieldset class="fieldset row-start-3 col-span-4">
               <legend class="fieldset-legend">Select an Image</legend>
@@ -776,11 +778,13 @@ export default function CreateClothingModal(
         }}
       ></DeleteModal>
 
-      <ImgPreview
-        stateAccessor={isThumbnailPreviewOpen}
-        stateSetter={setIsThumbnailPreviewOpen}
-        img={clothingItemBase64Url() ?? ""}
-      ></ImgPreview>
-    </Suspense>
+      <Suspense>
+        <ImgPreview
+          stateAccessor={isThumbnailPreviewOpen}
+          stateSetter={setIsThumbnailPreviewOpen}
+          img={clothingItemBase64Url() ?? ""}
+        ></ImgPreview>
+      </Suspense>
+    </>
   );
 }
