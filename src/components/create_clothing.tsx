@@ -746,7 +746,7 @@ export default function CreateClothingModal(
                 }
 
                 if (clothingForm.reportValidity()) {
-                  gClothingItemStore.addItem(clothingItem);
+                  gClothingItemStore.addItem(clothingItem.clone(true));
                   prop.stateSetter(false);
                 }
               }}
