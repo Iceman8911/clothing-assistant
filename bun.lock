@@ -5,6 +5,7 @@
       "name": "example-with-tailwindcss",
       "dependencies": {
         "@solid-primitives/deep": "^0.3.2",
+        "@solid-primitives/keyed": "^1.5.1",
         "@solid-primitives/map": "^0.7.1",
         "@solid-primitives/storage": "^4.3.2",
         "@solidjs/router": "^0.15.3",
@@ -295,6 +296,8 @@
     "@sindresorhus/merge-streams": ["@sindresorhus/merge-streams@2.3.0", "", {}, "sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg=="],
 
     "@solid-primitives/deep": ["@solid-primitives/deep@0.3.2", "", { "dependencies": { "@solid-primitives/memo": "^1.4.2" }, "peerDependencies": { "solid-js": "^1.6.12" } }, "sha512-DBZ4gxNCsV+0Mzx3yXL8aeQgGGOkzyAToiyh6Qios/rKdYa7kxQDRIACKybX/gXlicuJ5oK5Zv3xP4RrPPrWhQ=="],
+
+    "@solid-primitives/keyed": ["@solid-primitives/keyed@1.5.1", "", { "peerDependencies": { "solid-js": "^1.6.12" } }, "sha512-lAgQ1Jou8nxywifWsWjDTla9MI7Pfr46JRTC40K81fqz8dw4E8t/4gYuIwqP1EHVG0mItfIb3XqDw0wEQh+QYA=="],
 
     "@solid-primitives/map": ["@solid-primitives/map@0.7.1", "", { "dependencies": { "@solid-primitives/trigger": "^1.2.1" }, "peerDependencies": { "solid-js": "^1.6.12" } }, "sha512-0Fo5gToY+XPZVQLwzm8dc/3vVLdYLboUJD+kyoW+V64YPHs0qPDEekJuRUV7Mp9uiyHnD1DArfy1CrHAezTDZQ=="],
 
