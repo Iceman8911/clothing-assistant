@@ -24,6 +24,8 @@ import GenericModal from "~/components/shared/modal";
 import RestockModal from "~/components/shared/restock-modal";
 import ImgPreview from "~/components/shared/img-preview";
 import { UUID } from "~/code/types";
+import { Suspense } from "solid-js";
+import { createAsync, query } from "@solidjs/router";
 
 export default function InventoryPage() {
   // Filter out only the properties of the clothing that should be displayed
@@ -191,9 +193,11 @@ export default function InventoryPage() {
           <tbody>
             <For each={processedRows()}>
               {(rowObject, index) => {
-                const [base64Img] = createResource(
-                  async () => await rowObject.base64(),
+                const q = query(
+                  async (obj: typeof rowObject) => await obj.base64(),
+                  "base64",
                 );
+                const base64Img = createAsync(() => q(rowObject));
 
                 return (
                   <>
@@ -238,15 +242,17 @@ export default function InventoryPage() {
                       <td class="flex flex-col md:flex-row items-center justify-center gap-2">
                         <div class="avatar">
                           <div class="mask mask-squircle w-16">
-                            <img
-                              src={base64Img()}
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                setThumbnailPreviewImg(base64Img()!);
-                                setIsThumbnailPreviewOpen(true);
-                              }}
-                              class="cursor-pointer"
-                            />
+                            <Suspense>
+                              <img
+                                src={base64Img()}
+                                onClick={(ev) => {
+                                  ev.stopPropagation();
+                                  setThumbnailPreviewImg(base64Img()!);
+                                  setIsThumbnailPreviewOpen(true);
+                                }}
+                                class="cursor-pointer"
+                              />
+                            </Suspense>
                           </div>
                         </div>
 
