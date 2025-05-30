@@ -169,29 +169,28 @@ export default function CreateClothingModal(
   );
 
   // Alter some things depending on if we're creating or editing
-  createEffect(
-    on([isEditMode, prop.stateAccessor], async () => {
-      if (isEditMode()) {
-        const clothingData = gClothingItemStore.items.get(prop.clothIdToEdit!)!;
-        for (const k in clothingData) {
-          if (Object.prototype.hasOwnProperty.call(clothingData, k)) {
-            const key = k as keyof ClothingItem;
-            //@ts-expect-error
-            clothingItem[key] = clothingData[key];
-          }
-        }
-      }
+  createEffect(async () => {
+    if (isEditMode()) {
+      const clothingData = gClothingItemStore.items.get(prop.clothIdToEdit!)!;
 
-      if (prop.stateAccessor()) {
-        if (clothingItem.imgFile) {
-          // Also set the file input's value
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(clothingItem.imgFile);
-          clothingImgInput.files = dataTransfer.files;
+      for (const k in clothingItem) {
+        if (Object.prototype.hasOwnProperty.call(clothingItem, k)) {
+          const key = k as keyof ClothingItem;
+          //@ts-expect-error
+          clothingItem[key] = clothingData[key];
         }
       }
-    }),
-  );
+    }
+
+    if (prop.stateAccessor()) {
+      if (clothingItem.imgFile) {
+        // Also set the file input's value
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(clothingItem.imgFile);
+        clothingImgInput.files = dataTransfer.files;
+      }
+    }
+  });
 
   const [isConfirmingDelete, setIsConfirmingDelete] = createSignal(false);
   const [isThumbnailPreviewOpen, setIsThumbnailPreviewOpen] =
