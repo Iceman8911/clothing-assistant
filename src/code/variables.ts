@@ -27,7 +27,7 @@ type Settings = {
 
 export const gDefaultSettings = {
   currency: "₦",
-  syncId: generateRandomId(),
+  syncId: "" as any,
   apiKeys: {
     persist: false,
     gemini: "",
@@ -56,7 +56,7 @@ export const gClothingItemStore = {
    */
   addItem(clothing: ClothingItem) {
     gShowSavingAlert();
-    const clone = clothing.clone();
+    const clone = clothing;
 
     /** Set the timestamps */
     this.storeLastEdited[gEnumReactiveMember.SETTER](
