@@ -27,6 +27,7 @@ import { Show } from "solid-js";
 import { gEnumStatus } from "~/code/enums";
 import ImgPreview from "./shared/img-preview";
 import { createAsync } from "@solidjs/router";
+import { Suspense } from "solid-js";
 
 export default function CreateClothingModal(
   prop: SignalProps & {
@@ -124,7 +125,7 @@ export default function CreateClothingModal(
   /**
    * The actual cloth data
    */
-  let clothingItem = new ClothingItem({
+  const clothingItem = new ClothingItem({
     name: "",
     description: "",
     color: "",
@@ -171,24 +172,33 @@ export default function CreateClothingModal(
   // Alter some things depending on if we're creating or editing
   createEffect(
     on([isEditMode, prop.stateAccessor], async () => {
+      if (!prop.stateAccessor()) return;
+
+      const clothingData = gClothingItemStore.items.get(prop.clothIdToEdit!);
+      if (!clothingData) return;
+
       if (isEditMode()) {
-        const clothingData = gClothingItemStore.items.get(prop.clothIdToEdit!)!;
         for (const k in clothingData) {
           if (Object.prototype.hasOwnProperty.call(clothingData, k)) {
             const key = k as keyof ClothingItem;
+
+            if (key == "imgFile" && clothingData[key]) {
+              clothingItem.addImg(clothingData[key]);
+              continue;
+            }
+
             //@ts-expect-error
             clothingItem[key] = clothingData[key];
           }
         }
       }
 
-      if (prop.stateAccessor()) {
-        if (clothingItem.imgFile) {
-          // Also set the file input's value
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(clothingItem.imgFile);
-          clothingImgInput.files = dataTransfer.files;
-        }
+      const imgFile = clothingItem.imgFile ?? clothingData.imgFile;
+      if (imgFile) {
+        // Also set the file input's value
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(imgFile);
+        clothingImgInput.files = dataTransfer.files;
       }
     }),
   );
@@ -198,7 +208,7 @@ export default function CreateClothingModal(
     createSignal(false);
 
   return (
-    <>
+    <Suspense>
       <GenericModal
         stateAccessor={prop.stateAccessor}
         stateSetter={prop.stateSetter}
@@ -771,6 +781,6 @@ export default function CreateClothingModal(
         stateSetter={setIsThumbnailPreviewOpen}
         img={clothingItemBase64Url() ?? ""}
       ></ImgPreview>
-    </>
+    </Suspense>
   );
 }
