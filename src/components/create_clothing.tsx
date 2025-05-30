@@ -26,6 +26,7 @@ import DeleteModal from "./shared/delete-modal";
 import { Show } from "solid-js";
 import { gEnumStatus } from "~/code/enums";
 import ImgPreview from "./shared/img-preview";
+import { createAsync } from "@solidjs/router";
 
 export default function CreateClothingModal(
   prop: SignalProps & {
@@ -163,7 +164,7 @@ export default function CreateClothingModal(
     }
   });
 
-  const [clothingItemBase64Url, { refetch, mutate }] = createResource(
+  const clothingItemBase64Url = createAsync(
     async () => await clothingItem.base64(),
   );
 
@@ -188,8 +189,6 @@ export default function CreateClothingModal(
           dataTransfer.items.add(clothingItem.imgFile);
           clothingImgInput.files = dataTransfer.files;
         }
-
-        await refetch();
       }
     }),
   );
@@ -401,12 +400,7 @@ export default function CreateClothingModal(
                     });
                   }
 
-                  clothingItem
-                    .addImg(await compressFile(file))
-                    .then(async (_) => {
-                      // Refetch the base64 url whenever a new clothing image is added.
-                      await refetch();
-                    });
+                  clothingItem.addImg(await compressFile(file));
                 }}
               />
               <label class="label">Max size 10MB</label>
@@ -732,8 +726,9 @@ export default function CreateClothingModal(
                   setIsConfirmingDelete(true);
                 } else {
                   clothingForm.reset();
+
                   // Clear the display
-                  mutate("");
+                  clothingItem.imgFile = undefined;
                 }
               }}
             >
