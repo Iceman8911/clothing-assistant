@@ -1,38 +1,25 @@
+import { Link, MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
-import { FileRoutes } from "@solidjs/start/router";
-import { onCleanup, onMount, Suspense } from "solid-js";
-import "./app.css";
-import HomePage from "./routes";
-import InventoryPage from "./routes/inventory";
-import ReportPage from "./routes/reports";
-import SettingsPage from "./routes/settings";
+import { onMount, Suspense } from "solid-js";
+import { pwaInfo } from "virtual:pwa-info";
 import NavBar from "~/components/navbar";
+import "./app.css";
+import { ClothingItem } from "./code/classes/clothing";
+import gFirebaseFunctions from "./code/database/firebase";
 import {
   gEnumCustomRoute,
   gEnumReactiveMember,
   gEnumStatus,
 } from "./code/enums";
-import Dock from "./components/dock";
-import { gClothingItemStore, gDefaultSettings } from "./code/variables";
-import { gSetSettings, gSettings } from "./code/variables";
-import { AlertToast, gTriggerAlert } from "./components/shared/alert-toast";
-import { ClothingItem } from "./code/classes/clothing";
-import gFirebaseFunctions from "./code/database/firebase";
 import { gIsUserConnectedToInternet } from "./code/functions";
-import { useRegisterSW } from "virtual:pwa-register/solid";
-import { pwaInfo } from "virtual:pwa-info";
-import { MetaProvider, Link } from "@solidjs/meta";
-
-const intervalMS = 1000 * 60; //* 60
-useRegisterSW({
-  immediate: true,
-  onRegistered(r) {
-    r &&
-      setInterval(() => {
-        r.update();
-      }, intervalMS);
-  },
-});
+import { gClothingItemStore, gSettings } from "./code/variables";
+import Dock from "./components/dock";
+import ReloadPrompt from "./components/reload-prompt";
+import { AlertToast, gTriggerAlert } from "./components/shared/alert-toast";
+import HomePage from "./routes";
+import InventoryPage from "./routes/inventory";
+import ReportPage from "./routes/reports";
+import SettingsPage from "./routes/settings";
 
 export default function App() {
   onMount(() => {
@@ -111,20 +98,31 @@ export default function App() {
       }
     });
   });
+
   return (
     <MetaProvider>
       {/* check for and add a Link for the webmanifest */}
       {pwaInfo?.webManifest?.href ? (
-        <Link rel="manifest" href={pwaInfo.webManifest.href} />
+        <Link
+          rel="manifest"
+          href={pwaInfo.webManifest.href}
+          crossOrigin={
+            pwaInfo.webManifest.useCredentials ? "use-credentials" : undefined
+          }
+        />
       ) : (
         ""
       )}
+      <Link rel="icon" href="/favicon.ico" sizes="48x48" />
+      <Link rel="icon" href="/logo.svg" sizes="any" type="image/svg+xml" />
+      <Link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
 
       <Router
         root={(props) => (
           <>
             <NavBar />
             <AlertToast />
+            <ReloadPrompt />
             <div class="h-[80vh] overflow-y-auto">
               <Suspense>{props.children}</Suspense>
             </div>

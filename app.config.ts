@@ -10,10 +10,15 @@ export default defineConfig({
       tailwindcss(),
       VitePWA({
         registerType: "autoUpdate",
-        devOptions: { enabled: true, type: "module" },
-        includeAssets: ["**/*"],
+        devOptions: { enabled: true },
+        includeAssets: ["**/*.{svg,png,ico}"],
         workbox: {
           globPatterns: ["**/*"],
+          // cleanupOutdatedCaches: true,
+          // Explicitly add the root path to ensure index.html is precached
+          additionalManifestEntries: [{ url: "/", revision: null }],
+          navigateFallback: "/",
+          // runtimeCaching:[{options:{}}]
         },
         manifest: {
           name: "Clothing Assistant",
@@ -23,28 +28,28 @@ export default defineConfig({
           theme_color: "#ffffff",
           icons: [
             {
-              src: "pwa-64x64.png",
+              src: "/pwa-64x64.png",
               sizes: "64x64",
               type: "image/png",
             },
             {
-              src: "pwa-192x192.png",
+              src: "/pwa-192x192.png",
               sizes: "192x192",
               type: "image/png",
             },
             {
-              src: "pwa-512x512.png",
+              src: "/pwa-512x512.png",
               sizes: "512x512",
               type: "image/png",
             },
             {
-              src: "maskable-icon-512x512.png",
+              src: "/maskable-icon-512x512.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable",
             },
             {
-              src: "maskable-icon-512x512.png",
+              src: "/maskable-icon-512x512.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "any",
