@@ -23,9 +23,18 @@ import { useRegisterSW } from "virtual:pwa-register/solid";
 import { pwaInfo } from "virtual:pwa-info";
 import { MetaProvider, Link } from "@solidjs/meta";
 
-export default function App() {
-  useRegisterSW({ immediate: true });
+const intervalMS = 1000 * 60; //* 60
+useRegisterSW({
+  immediate: true,
+  onRegistered(r) {
+    r &&
+      setInterval(() => {
+        r.update();
+      }, intervalMS);
+  },
+});
 
+export default function App() {
   onMount(() => {
     // load all the clothing from storage
     gClothingItemStore.store.iterate<ClothingItem, void>((clothing) => {

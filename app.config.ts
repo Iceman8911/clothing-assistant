@@ -11,8 +11,9 @@ export default defineConfig({
       VitePWA({
         registerType: "autoUpdate",
         devOptions: { enabled: true, type: "module" },
+        includeAssets: ["**/*"],
         workbox: {
-          globPatterns: ["**/*.{js,wasm,css,html,ico,png,webp,svg,jpg}"],
+          globPatterns: ["**/*"],
         },
         manifest: {
           name: "Clothing Assistant",
