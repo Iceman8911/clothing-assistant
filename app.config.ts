@@ -9,11 +9,11 @@ export default defineConfig({
     plugins: [
       tailwindcss(),
       VitePWA({
-        registerType: "autoUpdate",
-        devOptions: { enabled: true, type: "module" },
+        // registerType: "autoUpdate",
+        devOptions: { enabled: true },
         includeAssets: ["**/*"],
         workbox: {
-          globPatterns: ["**/*"],
+          // globPatterns: ["**/*"],
         },
         manifest: {
           name: "Clothing Assistant",

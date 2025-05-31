@@ -22,19 +22,13 @@ import { gIsUserConnectedToInternet } from "./code/functions";
 import { useRegisterSW } from "virtual:pwa-register/solid";
 import { pwaInfo } from "virtual:pwa-info";
 import { MetaProvider, Link } from "@solidjs/meta";
-
-const intervalMS = 1000 * 60; //* 60
-useRegisterSW({
-  immediate: true,
-  onRegistered(r) {
-    r &&
-      setInterval(() => {
-        r.update();
-      }, intervalMS);
-  },
-});
+import ReloadPrompt from "./components/reload-prompt";
 
 export default function App() {
+  // useRegisterSW({
+  //   immediate: true,
+  // });
+
   onMount(() => {
     // load all the clothing from storage
     gClothingItemStore.store.iterate<ClothingItem, void>((clothing) => {
@@ -111,6 +105,7 @@ export default function App() {
       }
     });
   });
+
   return (
     <MetaProvider>
       {/* check for and add a Link for the webmanifest */}
@@ -125,6 +120,7 @@ export default function App() {
           <>
             <NavBar />
             <AlertToast />
+            <ReloadPrompt />
             <div class="h-[80vh] overflow-y-auto">
               <Suspense>{props.children}</Suspense>
             </div>
