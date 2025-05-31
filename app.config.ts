@@ -9,16 +9,15 @@ export default defineConfig({
     plugins: [
       tailwindcss(),
       VitePWA({
+        scope: "/",
         registerType: "autoUpdate",
-        devOptions: { enabled: true },
-        includeAssets: ["**/*.{svg,png,ico}"],
         workbox: {
           globPatterns: ["**/*"],
-          // cleanupOutdatedCaches: true,
           // Explicitly add the root path to ensure index.html is precached
-          additionalManifestEntries: [{ url: "/", revision: null }],
-          navigateFallback: "/",
-          // runtimeCaching:[{options:{}}]
+          additionalManifestEntries: [
+            // { url: "/", revision: null },
+            { url: "index.html", revision: "REV_INDEX_HTML_TO_CHANGE" },
+          ],
         },
         manifest: {
           name: "Clothing Assistant",

@@ -1,11 +1,10 @@
-/_build/assets/*
-  cache-control: public, immutable, max-age=31536000
-
 /_build/manifest.webmanifest
   content-type: application/manifest+json
 
 /_build/sw.js
+  content-type: application/javascript
   cache-control: public, max-age=0, must-revalidate
+  service-worker-allowed: /
 
 /index.html
   cache-control: public, max-age=0, must-revalidate
