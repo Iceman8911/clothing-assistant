@@ -24,7 +24,7 @@ const alerts = new ReactiveMap<string, Alert>();
 export function AlertToast() {
   return (
     <Portal>
-      <div class="toast toast-top z-[999]">
+      <div class="toast toast-top z-[1999]">
         <For each={[...alerts.values()]}>
           {(alert) => (
             <div
