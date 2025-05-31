@@ -1,4 +1,5 @@
 dist
+dev-dist
 .wrangler
 .output
 .vercel
@@ -27,3 +28,8 @@ gitignore
 # System Files
 .DS_Store
 Thumbs.db
+public/apple-touch-icon-180x180.png
+public/maskable-icon-512x512.png
+public/pwa-64x64.png
+public/pwa-192x192.png
+public/pwa-512x512.png

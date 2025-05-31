@@ -47,5 +47,6 @@
     // Represents the tags for inline runnable indicators, or spawning multiple tasks at once.
     "tags": []
   },
-  { "label": "bun-build", "command": "bun bun-build" }
+  { "label": "bun-build", "command": "bun bun-build" },
+  { "label": "generate-pwa-assets", "command": "bun --bun generate-pwa-assets" }
 ]

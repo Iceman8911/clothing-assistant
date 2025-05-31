@@ -19,8 +19,13 @@ import { AlertToast, gTriggerAlert } from "./components/shared/alert-toast";
 import { ClothingItem } from "./code/classes/clothing";
 import gFirebaseFunctions from "./code/database/firebase";
 import { gIsUserConnectedToInternet } from "./code/functions";
+import { useRegisterSW } from "virtual:pwa-register/solid";
+import { pwaInfo } from "virtual:pwa-info";
+import { MetaProvider, Link } from "@solidjs/meta";
 
 export default function App() {
+  useRegisterSW({ immediate: true });
+
   onMount(() => {
     // load all the clothing from storage
     gClothingItemStore.store.iterate<ClothingItem, void>((clothing) => {
@@ -98,7 +103,14 @@ export default function App() {
     });
   });
   return (
-    <>
+    <MetaProvider>
+      {/* check for and add a Link for the webmanifest */}
+      {pwaInfo?.webManifest?.href ? (
+        <Link rel="manifest" href={pwaInfo.webManifest.href} />
+      ) : (
+        ""
+      )}
+
       <Router
         root={(props) => (
           <>
@@ -116,6 +128,6 @@ export default function App() {
         <Route path={gEnumCustomRoute.REPORTS} component={ReportPage} />
         <Route path={gEnumCustomRoute.SETTINGS} component={SettingsPage} />
       </Router>
-    </>
+    </MetaProvider>
   );
 }
