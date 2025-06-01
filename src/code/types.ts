@@ -1,4 +1,5 @@
 import { Accessor, Setter } from "solid-js";
+import { ClothingConflict } from "./database/firebase";
 
 export interface SignalProps {
   stateAccessor: Accessor<boolean>;
@@ -6,3 +7,8 @@ export interface SignalProps {
 }
 
 export type UUID = ReturnType<typeof crypto.randomUUID>;
+export type SyncIssueArray = Array<{
+  id: UUID;
+  data: ClothingConflict;
+  isResolved: boolean;
+}>;
