@@ -112,7 +112,7 @@ export class ClothingItem implements MutableClassProps, ID {
       this.addImg(data.imgFile);
     }
     //@ts-expect-error
-    else if (data.imgUrl) {
+    if (data.imgUrl) {
       const dataa = data as SerializableClothingDatabaseItem;
 
       fetch(dataa.imgUrl)
