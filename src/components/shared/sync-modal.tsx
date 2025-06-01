@@ -135,7 +135,7 @@ export default function SyncModal(
                         <Show
                           fallback={
                             <div
-                              class="tooltip"
+                              class="tooltip text-info"
                               data-tip="Overwrite using your local copy"
                             >
                               <UploadIcon />
@@ -147,7 +147,7 @@ export default function SyncModal(
                           }
                         >
                           <div
-                            class="tooltip"
+                            class="tooltip text-error"
                             data-tip="Delete from the server"
                           >
                             <TrashIcon />
@@ -238,7 +238,7 @@ export default function SyncModal(
                         <Show
                           fallback={
                             <div
-                              class="tooltip"
+                              class="tooltip text-info"
                               data-tip="Overwrite using the server's copy"
                             >
                               <DownloadIcon />
@@ -250,7 +250,7 @@ export default function SyncModal(
                           }
                         >
                           <div
-                            class="tooltip"
+                            class="tooltip text-error"
                             data-tip="Delete from your device"
                           >
                             <TrashIcon />
