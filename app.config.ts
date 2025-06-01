@@ -63,9 +63,9 @@ export default defineConfig({
   },
   server: {
     preset: "cloudflare_pages",
-    rollupConfig: {
-      external: ["node:async_hooks"],
-    },
+    // rollupConfig: {
+    //   external: ["node:async_hooks",],
+    // },
     prerender: {
       crawlLinks: true,
     },
