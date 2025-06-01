@@ -35,8 +35,8 @@ export default function RestockModal(
           </Show>
         </p>
 
-        <fieldset class="fieldset w-fit inline-block *:inline-block *:w-40">
-          <div class="mr-4">
+        <fieldset class="fieldset w-fit inline-block *:inline-block">
+          <div class="mr-4 w-28 md:w-40">
             <legend class="fieldset-legend">Quantity to Add:</legend>
             <label class="input">
               <input
@@ -52,7 +52,7 @@ export default function RestockModal(
               />
             </label>
           </div>
-          <div>
+          <div class="w-28 md:w-40">
             <legend class="fieldset-legend">Price per Clothing:</legend>
             <label class="input">
               <input
