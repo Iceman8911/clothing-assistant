@@ -179,7 +179,7 @@ export class ClothingItem implements MutableClassProps, ID {
 
     const uploadedImgUrl = query(async (id: UUID) => {
       return possibleBase64String != PlaceholderImage
-        ? uploadImg(await this.base64(), id, this.name)
+        ? uploadImg(possibleBase64String, id, this.name)
         : "";
     }, "data");
 
