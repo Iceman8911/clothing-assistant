@@ -1,93 +1,86 @@
-import { ReactiveMap } from "@solid-primitives/map";
-import { createEffect, For } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { ClothingItem } from "~/code/classes/clothing";
 import { SignalProps } from "~/code/types";
-import { gSettings } from "~/code/variables";
+import { gClothingItemStore, gSettings } from "~/code/variables";
 import GenericModal from "./modal";
 
 export default function RestockModal(
   props: SignalProps & {
-    items: (ClothingItem | undefined)[];
+    item: ClothingItem;
   },
 ) {
-  /** This links each clothing item with some data for the restock stuff */
-  const dataMap = new ReactiveMap<ClothingItem, number>();
-
-  createEffect(() => {
-    props.items.forEach((item) => {
-      dataMap.set(item!, 1);
-    });
-  });
+  const clothing = createMemo(() => props.item);
+  const [amountToAdd, setAmountToAdd] = createSignal(1);
 
   return (
     <GenericModal
       stateAccessor={props.stateAccessor}
       stateSetter={props.stateSetter}
     >
-      <h2>Restock</h2>
-      <For each={props.items}>
-        {(item) => (
-          <>
-            <p class="[&>span]:text-info font-semibold">
-              You have <span>{item?.quantity ?? 0}</span>{" "}
-              <span>{item?.name}</span> in stock worth{" "}
-              <span>
-                {gSettings.currency +
-                  (item?.costPrice ?? 0) * (item?.quantity ?? 0)}
-              </span>
-              . Adding <span>{dataMap.get(item!)!}</span> more will bring it up
-              to <span>{dataMap.get(item!)! + (item?.quantity ?? 0)}</span>.
-            </p>
+      <h2>Restock - {clothing().name}</h2>
 
-            <fieldset class="fieldset w-fit inline-block *:inline-block *:w-40">
-              <div class="mr-4">
-                <legend class="fieldset-legend">Quantity to Add:</legend>
-                <label class="input">
-                  <input
-                    type="number"
-                    class="grow validator"
-                    placeholder="1000"
-                    required
-                    min={0}
-                    onChange={({ target }) => {
-                      dataMap.set(item!, parseInt(target.value));
-                    }}
-                    value={dataMap.get(item!)}
-                  />
-                </label>
-              </div>
-              <div>
-                <legend class="fieldset-legend">Price per Clothing:</legend>
-                <label class="input">
-                  <input
-                    type="number"
-                    class="grow validator"
-                    placeholder="1000"
-                    required
-                    min={0}
-                    onChange={({ target }) => {
-                      // dataMap.set(item!, parseInt(target.value));
-                      // TODO: Add history support
-                      item!.costPrice = parseInt(target.value);
-                    }}
-                    value={item?.costPrice}
-                  />
-                </label>
-              </div>
-            </fieldset>
+      <>
+        <p class="[&>span]:text-info font-semibold">
+          You have <span>{clothing().quantity}</span>{" "}
+          <span>{clothing().name}</span> in stock worth{" "}
+          <span>
+            {gSettings.currency + clothing().costPrice * clothing().quantity}
+          </span>
+          .{" "}
+          <Show when={amountToAdd()}>
+            Adding <span>{amountToAdd()}</span> more will bring it up to{" "}
+            <span>{amountToAdd() + clothing().quantity}</span>.
+          </Show>
+        </p>
 
-            <button
-              class="btn btn-soft btn-primary ml-4"
-              onClick={(_) => {
-                item!.quantity = dataMap.get(item!)! + item!.quantity;
-                props.stateSetter(false);
-              }}
-            >
-              Update
-            </button>
-          </>
-        )}
-      </For>
+        <fieldset class="fieldset w-fit inline-block *:inline-block *:w-40">
+          <div class="mr-4">
+            <legend class="fieldset-legend">Quantity to Add:</legend>
+            <label class="input">
+              <input
+                type="number"
+                class="grow validator"
+                placeholder="1000"
+                required
+                min={0}
+                onChange={({ target }) => {
+                  setAmountToAdd(parseInt(target.value));
+                }}
+                value={amountToAdd()}
+              />
+            </label>
+          </div>
+          <div>
+            <legend class="fieldset-legend">Price per Clothing:</legend>
+            <label class="input">
+              <input
+                type="number"
+                class="grow validator"
+                placeholder="1000"
+                required
+                min={0}
+                onChange={({ target }) => {
+                  // dataMap.set(item!, parseInt(target.value));
+                  // TODO: Add history support
+                  clothing().costPrice = parseInt(target.value);
+                }}
+                value={clothing().costPrice}
+              />
+            </label>
+          </div>
+        </fieldset>
+
+        <button
+          class="btn btn-soft btn-primary ml-4"
+          onClick={(_) => {
+            clothing().quantity = amountToAdd() + clothing().quantity;
+            gClothingItemStore.addItem(clothing());
+            props.stateSetter(false);
+          }}
+        >
+          Update
+        </button>
+      </>
     </GenericModal>
   );
 }

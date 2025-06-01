@@ -356,11 +356,15 @@ export default function InventoryPage() {
         }}
       ></DeleteModal>
 
-      <RestockModal
-        stateAccessor={isRestockModalOpen}
-        stateSetter={setIsRestockModalOpen}
-        items={[currentClothingItem()]}
-      ></RestockModal>
+      <Show when={currentClothingItem()}>
+        {(cloth) => (
+          <RestockModal
+            stateAccessor={isRestockModalOpen}
+            stateSetter={setIsRestockModalOpen}
+            item={cloth()}
+          ></RestockModal>
+        )}
+      </Show>
 
       <ImgPreview
         stateAccessor={isThumbnailPreviewOpen}
