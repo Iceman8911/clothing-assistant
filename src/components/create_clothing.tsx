@@ -1,33 +1,29 @@
+import { createAsync } from "@solidjs/router";
+import Sparkles from "lucide-solid/icons/sparkles";
 import { compressImage } from "simple-image-compressor";
 import {
   createEffect,
-  createResource,
   createSignal,
   For,
-  Match,
   on,
   onMount,
-  Switch,
+  Show,
+  Suspense,
 } from "solid-js";
 import PlaceholderImage from "~/assets/images/placeholder.webp";
+import { ClothingItem } from "~/code/classes/clothing";
+import { gEnumStatus } from "~/code/enums";
+import { generateRandomId, gIsUserConnectedToInternet } from "~/code/functions";
+import { SignalProps, UUID } from "~/code/types";
+import { gClothingItemStore, gSettings } from "~/code/variables";
 import {
   AiJsonResponse,
   understandImageWithGemini,
 } from "./../code/image-recognition/ai-api";
-import { gIsUserConnectedToInternet } from "~/code/functions";
-import { gClothingItemStore, gSettings } from "~/code/variables";
-import { generateRandomId } from "~/code/functions";
-import { SignalProps, UUID } from "~/code/types";
-import { ClothingItem } from "~/code/classes/clothing";
-import Sparkles from "lucide-solid/icons/sparkles";
 import { gTriggerAlert } from "./shared/alert-toast";
-import GenericModal from "./shared/modal";
 import DeleteModal from "./shared/delete-modal";
-import { Show } from "solid-js";
-import { gEnumStatus } from "~/code/enums";
 import ImgPreview from "./shared/img-preview";
-import { createAsync } from "@solidjs/router";
-import { Suspense } from "solid-js";
+import GenericModal from "./shared/modal";
 
 export default function CreateClothingModal(
   prop: SignalProps & {
