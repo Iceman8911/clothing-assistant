@@ -42,7 +42,7 @@ export default function SyncModal(
               <li class="list-row [&_img]:h-auto">
                 {/* The client's image, if any */}
                 <div class="avatar">
-                  <div class="mask mask-squircle w-16">
+                  <div class="mask mask-squircle w-16 h-16">
                     <img
                       src={
                         val.data.reason !=
@@ -50,9 +50,8 @@ export default function SyncModal(
                           ? val.data.client.imgUrl || PlaceholderImage
                           : PlaceholderImage
                       }
-                      class="cursor-pointer"
+                      class="cursor-pointer aspect-square not-prose"
                     />
-                    Img here
                   </div>
                 </div>
 
@@ -264,7 +263,7 @@ export default function SyncModal(
 
                 {/* The server's image, if any */}
                 <div class="avatar">
-                  <div class="mask mask-squircle w-16">
+                  <div class="mask mask-squircle w-16 h-16">
                     <img
                       src={
                         val.data.reason !=
@@ -273,7 +272,7 @@ export default function SyncModal(
                             PlaceholderImage
                           : PlaceholderImage
                       }
-                      class="cursor-pointer"
+                      class="cursor-pointer aspect-square not-prose"
                     />
                     Img here
                   </div>
