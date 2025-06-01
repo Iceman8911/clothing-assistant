@@ -115,9 +115,18 @@ export class ClothingItem implements MutableClassProps, ID {
     if (data.imgUrl) {
       const dataa = data as SerializableClothingDatabaseItem;
 
+      console.log("Fetching");
       fetch(dataa.imgUrl)
         .then((res) => res.blob())
-        .then((blob) => this.addImg(new File([blob], `${this.id}.webp`)));
+        .then((blob) => {
+          console.log(
+            "Fetched Blob is: ",
+            blob,
+            "and file is: ",
+            new File([blob], `${this.id}.webp`),
+          );
+          this.addImg(new File([blob], `${this.id}.webp`));
+        });
     }
 
     return createMutable(this);

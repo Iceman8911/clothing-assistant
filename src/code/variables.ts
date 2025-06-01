@@ -54,7 +54,7 @@ export const gClothingItemStore = {
   /**
    * Preferred to `gClothingItemStore.items.set`. Only call this in a reactive context
    */
-  addItem(clothing: ClothingItem) {
+  addItem(clothing: ClothingItem, uploadToServer = true) {
     gShowSavingAlert();
 
     /** Set the timestamps */
@@ -66,6 +66,8 @@ export const gClothingItemStore = {
     this.items.set(clothing.id, clothing);
 
     this.store.setItem(clothing.id, unwrapped).then((_) => {
+      if (!uploadToServer) return;
+
       clothing.safeForServer().then((data) => {
         gFirebaseFunctions.addClothing(
           gSettings.syncId,
@@ -79,7 +81,7 @@ export const gClothingItemStore = {
   /**
    * Preferred to `gClothingItemStore.items.delete`. Only call this in a reactive context
    */
-  removeItem(clothingId: UUID) {
+  removeItem(clothingId: UUID, deleteFromServer = true) {
     gShowSavingAlert();
 
     /** Set the timestamps */
@@ -89,6 +91,8 @@ export const gClothingItemStore = {
 
     this.items.delete(clothingId);
     this.store.removeItem(clothingId).then((_) => {
+      if (!deleteFromServer) return;
+
       removeServerClothing(gSettings.syncId, clothingId);
     });
   },

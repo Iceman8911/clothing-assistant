@@ -36,8 +36,6 @@ export default function SyncModal(
 
         <For each={props.syncIssueArray}>
           {(val, index) => {
-            console.log(val);
-
             return (
               <li class="list-row [&_img]:h-auto">
                 {/* The client's image, if any */}
@@ -222,10 +220,11 @@ export default function SyncModal(
                                 size: size.stringValue,
                                 subCategory: subCategory.stringValue,
                               }),
+                              false,
                             );
                           } else {
                             // Remove the data from the client
-                            gClothingItemStore.removeItem(val.id);
+                            gClothingItemStore.removeItem(val.id, false);
                           }
 
                           props.setSyncIssueArray(
