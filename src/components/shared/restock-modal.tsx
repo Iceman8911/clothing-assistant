@@ -9,8 +9,10 @@ export default function RestockModal(
     item: ClothingItem;
   },
 ) {
+  const DEFAULT_AMOUNT_TO_ADD = 1;
+
   const clothing = createMemo(() => props.item);
-  const [amountToAdd, setAmountToAdd] = createSignal(1);
+  const [amountToAdd, setAmountToAdd] = createSignal(DEFAULT_AMOUNT_TO_ADD);
 
   return (
     <GenericModal
@@ -75,6 +77,7 @@ export default function RestockModal(
           onClick={(_) => {
             clothing().quantity = amountToAdd() + clothing().quantity;
             gClothingItemStore.addItem(clothing());
+            setAmountToAdd(DEFAULT_AMOUNT_TO_ADD);
             props.stateSetter(false);
           }}
         >
