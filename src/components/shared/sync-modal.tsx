@@ -57,7 +57,7 @@ export default function SyncModal(
 
                 <div class="*:text-center">
                   {/* Descriptive text  */}
-                  <div class="font-bold whitespace-nowrap">
+                  <div class="font-bold">
                     {val.data.reason !=
                     gEnumClothingConflictReason.MISSING_ON_CLIENT
                       ? val.data.client.name
