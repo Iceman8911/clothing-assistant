@@ -69,6 +69,7 @@ export default defineConfig({
     prerender: {
       crawlLinks: true,
     },
+    cloudflare: { nodeCompat: true },
     compressPublicAssets: { gzip: true, brotli: true },
     // compatibilityDate: "2025-05-23",
     // cloudflare: {
