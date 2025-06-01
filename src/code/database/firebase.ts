@@ -243,7 +243,7 @@ async function addClothingItemDoc(args: {
   const resJson = (
     await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
-      method: !shouldUpdate ? "PATCH" : "POST",
+      method: shouldUpdate ? "PATCH" : "POST",
       body: JSON.stringify(fieldsToAdd),
     })
   ).json();
@@ -252,7 +252,8 @@ async function addClothingItemDoc(args: {
   // I know that Firestore auto-saves when it was modified but due to latency and stuff, it's not reliable for my use case (it's normally around a second or 2 off)
   await fetch(USER_METADATA_DOCUMENT_URL(syncId), {
     headers: await SHARED_HEADERS(),
-    method: !shouldUpdate ? "PATCH" : "POST",
+    // method: shouldUpdate ? "PATCH" : "POST",
+    method: "PATCH",
     body: JSON.stringify({
       fields: {
         [LAST_UPDATED_FIELD_NAME]: fieldsToAdd.fields.dateEdited,
@@ -289,6 +290,18 @@ async function addClothing(
     (async () => {
       // "use server";
       try {
+        let shouldUpdate = false;
+
+        try {
+          shouldUpdate = (await getClothing(syncId, clothingItem.id)).fields
+            .name
+            ? true
+            : false;
+        } catch (e) {
+          // The clothing item doesn't exist
+          shouldUpdate = false;
+        }
+
         const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
           syncId,
           clothingId: clothingItem.id,
@@ -337,6 +350,7 @@ async function addClothing(
               subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
             },
           },
+          shouldUpdate,
         });
 
         console.log("Document written. Response JSON is: ", resJson);

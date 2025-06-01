@@ -81,7 +81,8 @@ export class ClothingItem implements MutableClassProps, ID {
   constructor(
     data: MutableClassProps | ClothingItem | SerializableClothingDatabaseItem,
   ) {
-    this.dateEdited = data.dateBought;
+    // Smth, I ain't touching this again
+    this.dateEdited = data.dateEdited ?? data.dateBought;
     this.name = data.name;
     this.description = data.description;
     this.brand = data.brand;
