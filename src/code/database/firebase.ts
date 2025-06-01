@@ -430,6 +430,7 @@ async function getClothingUpdates(
 
     /** We can get the orignal clothing ids by using the ending string (after the last forward slash). Note that one of the documents represents "metadata" so it should be ignored */
     const fetchedDocuments = (await getAllClothingDocuments(syncId)).documents;
+    if (!fetchedDocuments.length) return new Map();
 
     const conflictingClothingItems: ClothingConflictMap = new Map();
 
