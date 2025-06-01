@@ -155,7 +155,7 @@ export default function SyncModal(
 
                       <button
                         class="btn btn-circle btn-ghost"
-                        onClick={(_) => {
+                        onClick={async (_) => {
                           if (
                             val.data.reason !=
                             gEnumClothingConflictReason.MISSING_ON_SERVER
@@ -188,7 +188,7 @@ export default function SyncModal(
                               season.mapValue.fields;
 
                             gClothingItemStore.addItem(
-                              new ClothingItem({
+                              await ClothingItem.create({
                                 id: val.id,
                                 brand: brand.stringValue,
                                 category: category.stringValue,
@@ -219,6 +219,7 @@ export default function SyncModal(
                                 ),
                                 size: size.stringValue,
                                 subCategory: subCategory.stringValue,
+                                imgFile: undefined,
                               }),
                               false,
                             );

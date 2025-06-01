@@ -111,25 +111,29 @@ export class ClothingItem implements MutableClassProps, ID {
     if (data.imgFile) {
       this.addImg(data.imgFile);
     }
-    //@ts-expect-error
-    if (data.imgUrl) {
-      const dataa = data as SerializableClothingDatabaseItem;
-
-      console.log("Fetching");
-      fetch(dataa.imgUrl)
-        .then((res) => res.blob())
-        .then((blob) => {
-          console.log(
-            "Fetched Blob is: ",
-            blob,
-            "and file is: ",
-            new File([blob], `${this.id}.webp`),
-          );
-          this.addImg(new File([blob], `${this.id}.webp`));
-        });
-    }
 
     return createMutable(this);
+  }
+
+  /** Returns a new instance of the clothing item, but wrapped in a promise so stuff like fetching image data resolve on time.
+   *
+   * Use this when parsing data from the server
+   */
+  static async create(data: SerializableClothingDatabaseItem) {
+    const clothing = new ClothingItem(data);
+
+    if (data.imgUrl) {
+      await clothing.addImg(
+        new File(
+          [await (await fetch(data.imgUrl)).blob()],
+          `${clothing.id}.webp`,
+        ),
+      );
+
+      return clothing;
+    }
+
+    return clothing;
   }
 
   /** Caches and returns a base64 representation of a the image associated with the clothing */
@@ -142,9 +146,9 @@ export class ClothingItem implements MutableClassProps, ID {
     return this._imgCache;
   }
 
-  async addImg(file: File) {
+  addImg(file: File) {
     this.imgFile = file;
-    await this._cacheImg();
+    return this._cacheImg();
   }
 
   /**
