@@ -1,9 +1,8 @@
 "use server";
-import { gTriggerAlert } from "~/components/shared/alert-toast";
 import { type ClothingItem } from "../classes/clothing";
-import { gEnumStatus } from "../enums";
+import { type ContentListUnion, GoogleGenAI } from "@google/genai";
 
-const GEMINI_MODELS = [
+const geminiModels = [
   "gemini-2.0-flash",
   "gemini-2.0-flash-lite",
   "gemini-1.5-flash",
@@ -11,66 +10,40 @@ const GEMINI_MODELS = [
   "gemini-1.5-pro",
 ] as const;
 
+function initGoogleGenAI(apiKey: string) {
+  return new GoogleGenAI({ apiKey });
+}
+
+let ai: GoogleGenAI | null = null;
+
 async function tryGenerateContent(
   apiKey: string,
-  contents: any,
+  contents: ContentListUnion,
   modelIndex = 0,
-): Promise<AiJsonResponse> {
-  if (modelIndex >= GEMINI_MODELS.length) {
+) {
+  if (!ai) ai = initGoogleGenAI(apiKey);
+
+  if (modelIndex + 1 > geminiModels.length) {
     throw new Error("No more models available. Please try again later");
   }
 
-  const model = GEMINI_MODELS[modelIndex];
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              contents[0], // Image data
-              { text: contents[1].text }, // Prompt
-            ],
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error.message);
-    }
-
-    const data = await response.json();
-    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!textResponse) {
-      throw new Error("No valid response from Gemini");
-    }
-
-    // Clean up the text before parsing
-    return JSON.parse(
-      textResponse.replace("```", "").replace("json", "").replace("```", ""),
-    ) as AiJsonResponse;
-  } catch (error) {
-    gTriggerAlert(
-      gEnumStatus.ERROR,
-      `Failed with ${model} because: ${error}. Trying others...`,
-    );
-    return tryGenerateContent(apiKey, contents, modelIndex + 1);
+    return (
+      await ai.models.generateContent({
+        model: geminiModels[modelIndex],
+        contents,
+      })
+    ).text!;
+  } catch (_) {
+    return await tryGenerateContent(apiKey, contents, modelIndex + 1);
   }
 }
 
-export function understandImageWithGemini(
+async function parseImage(
   apiKey: string,
   /** Base64 encoded image */
   imageData: string,
-): Promise<AiJsonResponse> {
+): Promise<GeminiAiJsonResponse> {
   const contents = [
     {
       inlineData: {
@@ -97,7 +70,12 @@ export function understandImageWithGemini(
     },
   ];
 
-  return tryGenerateContent(apiKey, contents);
+  return JSON.parse(
+    (await tryGenerateContent(apiKey, contents))
+      .replace("```", "")
+      .replace("json", "")
+      .replace("```", ""),
+  );
 }
 
 /**
@@ -119,7 +97,7 @@ export function understandImageWithGemini(
       }
   ```
   */
-export interface AiJsonResponse {
+export interface GeminiAiJsonResponse {
   Name: string;
   Description: string;
   Category: ClothingItem["category"];
@@ -133,3 +111,9 @@ export interface AiJsonResponse {
   Gender: ClothingItem["gender"];
   Size: ClothingItem["size"];
 }
+
+const gGeminiFunctions = {
+  parseImage,
+} as const;
+
+export default gGeminiFunctions;

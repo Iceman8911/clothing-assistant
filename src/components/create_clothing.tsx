@@ -16,14 +16,18 @@ import { gEnumStatus } from "~/code/enums";
 import { generateRandomId, gIsUserConnectedToInternet } from "~/code/functions";
 import { SignalProps, UUID } from "~/code/types";
 import { gClothingItemStore, gSettings } from "~/code/variables";
-import {
-  AiJsonResponse,
-  understandImageWithGemini,
-} from "./../code/image-recognition/ai-api";
+import gGeminiFunctions, {
+  GeminiAiJsonResponse,
+} from "../code/image-recognition/gemini";
 import { gTriggerAlert } from "./shared/alert-toast";
 import DeleteModal from "./shared/delete-modal";
 import ImgPreview from "./shared/img-preview";
 import GenericModal from "./shared/modal";
+
+const getAiJsonRes = async (apiKey: string, imgData: string) => {
+  "use server";
+  return await gGeminiFunctions.parseImage(apiKey, imgData);
+};
 
 export default function CreateClothingModal(
   prop: SignalProps & {
@@ -279,7 +283,7 @@ export default function CreateClothingModal(
                       try {
                         setIsAiGeneratingData(true);
 
-                        const aiJsonResponse = await understandImageWithGemini(
+                        const aiJsonResponse = await getAiJsonRes(
                           gSettings.apiKeys.gemini,
                           await clothingItem.base64(true),
                         );
@@ -292,7 +296,7 @@ export default function CreateClothingModal(
                               i,
                             )
                           ) {
-                            const key = i as keyof AiJsonResponse;
+                            const key = i as keyof GeminiAiJsonResponse;
                             const value = aiJsonResponse[key];
 
                             const state = clothingItem;
@@ -322,13 +326,13 @@ export default function CreateClothingModal(
                                   winter: false,
                                 };
 
-                                (value as AiJsonResponse["Season"]).forEach(
-                                  (val) => {
-                                    state.season[
-                                      val.toLowerCase() as keyof ClothingItem["season"]
-                                    ] = true;
-                                  },
-                                );
+                                (
+                                  value as GeminiAiJsonResponse["Season"]
+                                ).forEach((val) => {
+                                  state.season[
+                                    val.toLowerCase() as keyof ClothingItem["season"]
+                                  ] = true;
+                                });
                                 break;
                               case "Occasion":
                                 // Just reset it at first
@@ -338,17 +342,17 @@ export default function CreateClothingModal(
                                   activeWear: false,
                                 };
 
-                                (value as AiJsonResponse["Occasion"]).forEach(
-                                  (val) => {
-                                    if (val == "Active Wear") {
-                                      state.occasion.activeWear = true;
-                                    } else {
-                                      state.occasion[
-                                        val.toLowerCase() as keyof ClothingItem["occasion"]
-                                      ] = true;
-                                    }
-                                  },
-                                );
+                                (
+                                  value as GeminiAiJsonResponse["Occasion"]
+                                ).forEach((val) => {
+                                  if (val == "Active Wear") {
+                                    state.occasion.activeWear = true;
+                                  } else {
+                                    state.occasion[
+                                      val.toLowerCase() as keyof ClothingItem["occasion"]
+                                    ] = true;
+                                  }
+                                });
                                 break;
                               case "Subcategory":
                                 state.subCategory =
