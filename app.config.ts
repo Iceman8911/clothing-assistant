@@ -63,19 +63,20 @@ export default defineConfig({
   },
   server: {
     preset: "cloudflare_pages",
-    // rollupConfig: {
-    //   external: ["node:async_hooks",],
-    // },
     prerender: {
       crawlLinks: true,
     },
-    cloudflare: { nodeCompat: true },
+    cloudflare: {
+      nodeCompat: true,
+      wrangler: {
+        // node_compat: true,
+        compatibility_date: "2025-05-23",
+        name: "clothing-assistant",
+      },
+      deployConfig: true,
+    },
     compressPublicAssets: { gzip: true, brotli: true },
-    // compatibilityDate: "2025-05-23",
-    // cloudflare: {
-    //   deployConfig: true,
-    //   nodeCompat: true,
-    // },
+    compatibilityDate: { cloudflare: "latest", default: "latest" },
   },
   ssr: false,
 });
