@@ -78,6 +78,25 @@ export default defineConfig({
     },
     compressPublicAssets: { gzip: true, brotli: true },
     compatibilityDate: { cloudflare: "latest", default: "latest" },
+    routeRules: {
+      "index.html": {
+        headers: {
+          "cache-control": "public, max-age=0, must-revalidate",
+        },
+      },
+      "/_build/sw.js": {
+        headers: {
+          "content-type": "application/javascript",
+          "cache-control": "public, max-age=0, must-revalidate",
+          "service-worker-allowed": "/",
+        },
+      },
+      "_build/manifest.webmanifest": {
+        headers: {
+          "content-type": "application/manifest+json",
+        },
+      },
+    },
   },
   ssr: false,
 });
