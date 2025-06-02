@@ -2,7 +2,7 @@
 import { type ClothingItem } from "../../classes/clothing";
 import { type ContentListUnion, GoogleGenAI } from "@google/genai";
 
-const geminiModels = [
+const GEMINI_MODELS = [
   "gemini-2.0-flash",
   "gemini-2.0-flash-lite",
   "gemini-1.5-flash",
@@ -23,14 +23,14 @@ async function tryGenerateContent(
 ) {
   if (!ai) ai = initGoogleGenAI(apiKey);
 
-  if (modelIndex + 1 > geminiModels.length) {
+  if (modelIndex + 1 > GEMINI_MODELS.length) {
     throw new Error("No more models available. Please try again later");
   }
 
   try {
     return (
       await ai.models.generateContent({
-        model: geminiModels[modelIndex],
+        model: GEMINI_MODELS[modelIndex],
         contents,
       })
     ).text!;
