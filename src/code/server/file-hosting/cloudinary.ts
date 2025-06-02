@@ -52,8 +52,6 @@ const uploadImage = async (
   // This utility function should be compatible as it's a local calculation, not making network calls directly
   const signature = cloudinary.utils.api_sign_request(params, apiSecret);
 
-  console.log("Signature is:", signature);
-
   // Add API key and signature to parameters for the fetch request body
   params.api_key = apiKey;
   params.signature = signature;
