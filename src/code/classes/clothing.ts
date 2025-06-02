@@ -210,7 +210,8 @@ export class ClothingItem implements MutableClassProps, ID {
     // Remove cache
     clone._imgCache = undefined;
 
-    return clone;
+    // Dunno why I need to call unwrap twice :p
+    return unwrap(clone);
   }
 }
 
