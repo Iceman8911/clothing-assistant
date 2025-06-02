@@ -54,12 +54,17 @@ export const gClothingItemStore = {
   /**
    * Preferred to `gClothingItemStore.items.set`. Only call this in a reactive context
    */
-  addItem(clothing: ClothingItem, uploadToServer = true) {
+  addItem(
+    clothing: ClothingItem,
+    /** The only time this will be false would be when we sync data from the server to the client */
+    uploadToServer = true,
+  ) {
     gShowSavingAlert();
 
     /** Set the timestamps */
     this.storeLastEdited[gEnumReactiveMember.SETTER](
-      (this.lastEdited = clothing.dateEdited = new Date()),
+      (this.lastEdited = clothing.dateEdited =
+        uploadToServer ? new Date() : clothing.dateEdited),
     );
 
     const unwrapped = unwrap(clothing);
