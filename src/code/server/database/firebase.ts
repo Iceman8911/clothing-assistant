@@ -302,6 +302,9 @@ async function addClothing(
           shouldUpdate = false;
         }
 
+        // NOTE: For some reason, all POST requests fail :(. Maybe moving over to the SDK would be better.
+        shouldUpdate = true;
+
         const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
           syncId,
           clothingId: clothingItem.id,
