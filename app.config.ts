@@ -72,6 +72,8 @@ export default defineConfig({
         // node_compat: true,
         compatibility_date: "2025-05-23",
         name: "clothing-assistant",
+        vars: { NODE_VERSION: 22 },
+        build: { command: "bun bun build" },
       },
       deployConfig: true,
     },

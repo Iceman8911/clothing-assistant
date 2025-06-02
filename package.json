@@ -6,7 +6,7 @@
     "build": "bun run generate-pwa-assets && vinxi build && node ./scripts/set-html-hash.mjs",
     "start": "vinxi start",
     "bun-dev": "bun --bun vinxi dev",
-    "bun-build": "bun --bun generate-pwa-assets && bun --bun run build",
+    "bun-build": "bun --bun run build",
     "bun-start": "bun --bun vinxi start",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.svg"
   },
