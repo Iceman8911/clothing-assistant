@@ -187,7 +187,7 @@ export class ClothingItem implements MutableClassProps, ID {
 
   /** Returns a plain object copy that can be easily used in server side code. */
   async safeForServer(): Promise<SerializableClothingDatabaseItem> {
-    const clone = this.clone();
+    const clone = this.store();
     const possibleBase64String = await this.base64();
 
     const uploadedImgUrl = query(async (id: UUID) => {
@@ -201,6 +201,16 @@ export class ClothingItem implements MutableClassProps, ID {
       imgUrl: await uploadedImgUrl(this.id),
       imgFile: undefined,
     };
+  }
+
+  /** Returns a clone of the clothing item that is trimmed of unnecessary cache. For cases like storing in IndexedDB */
+  store() {
+    const clone = this.clone(true);
+
+    // Remove cache
+    clone._imgCache = undefined;
+
+    return clone;
   }
 }
 

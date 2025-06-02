@@ -67,10 +67,9 @@ export const gClothingItemStore = {
         uploadToServer ? new Date() : clothing.dateEdited),
     );
 
-    const unwrapped = unwrap(clothing);
     this.items.set(clothing.id, clothing);
 
-    this.store.setItem(clothing.id, unwrapped).then((_) => {
+    this.store.setItem(clothing.id, clothing.store()).then((_) => {
       if (!uploadToServer) return;
 
       clothing.safeForServer().then((data) => {
