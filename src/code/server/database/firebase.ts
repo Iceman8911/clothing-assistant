@@ -1,11 +1,11 @@
 import type {
   SerializableClothingDatabaseItem,
   ClothingItem,
-} from "../classes/clothing";
-import { gIsUserConnectedToInternet } from "../functions";
-import { type gClothingItemStore } from "../variables";
-import { gEnumClothingConflictReason, gEnumStatus } from "../enums";
-import { UUID } from "../types";
+} from "../../classes/clothing";
+import { gIsUserConnectedToInternet } from "../../functions";
+import { type gClothingItemStore } from "../../variables";
+import { gEnumClothingConflictReason, gEnumStatus } from "../../enums";
+import { UUID } from "../../types";
 import { gTriggerAlert } from "~/components/shared/alert-toast";
 
 interface AnonSignUpResponse {

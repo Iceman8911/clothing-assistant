@@ -3,7 +3,7 @@ import { fileToDataURL } from "../utilities";
 import PlaceholderImage from "~/assets/images/placeholder.webp";
 import { generateRandomId } from "../functions";
 import { UUID } from "../types";
-import gCloudinaryFunctions from "../file-hosting/cloudinary";
+import gCloudinaryFunctions from "../server/file-hosting/cloudinary";
 import { query } from "@solidjs/router";
 
 interface MutableClassProps {

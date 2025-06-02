@@ -6,7 +6,7 @@ import SettingsIcon from "lucide-solid/icons/settings";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import { createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import gFirebaseFunctions from "~/code/database/firebase";
+import gFirebaseFunctions from "~/code/server/database/firebase";
 import { gEnumCustomRoute } from "~/code/enums";
 import { SyncIssueArray } from "~/code/types";
 import {

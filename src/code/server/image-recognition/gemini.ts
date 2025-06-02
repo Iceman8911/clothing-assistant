@@ -1,5 +1,5 @@
 "use server";
-import { type ClothingItem } from "../classes/clothing";
+import { type ClothingItem } from "../../classes/clothing";
 import { type ContentListUnion, GoogleGenAI } from "@google/genai";
 
 const geminiModels = [

@@ -5,11 +5,11 @@ import { createStore, unwrap } from "solid-js/store";
 import { makePersisted } from "@solid-primitives/storage";
 import localforage from "localforage";
 import { isServer } from "solid-js/web";
-import gFirebaseFunctions from "./database/firebase";
-import { generateRandomId, gShowSavingAlert } from "./functions";
+import gFirebaseFunctions from "./server/database/firebase";
+import { gShowSavingAlert } from "./functions";
 import { gEnumReactiveMember } from "./enums";
 import { UUID } from "./types";
-import gCloudinaryFunctions from "./file-hosting/cloudinary";
+import gCloudinaryFunctions from "./server/file-hosting/cloudinary";
 
 type Settings = {
   currency: "$" | "€" | "£" | "¥" | "₦";

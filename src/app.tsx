@@ -5,7 +5,7 @@ import { pwaInfo } from "virtual:pwa-info";
 import NavBar from "~/components/navbar";
 import "./app.css";
 import { ClothingItem } from "./code/classes/clothing";
-import gFirebaseFunctions from "./code/database/firebase";
+import gFirebaseFunctions from "./code/server/database/firebase";
 import {
   gEnumCustomRoute,
   gEnumReactiveMember,

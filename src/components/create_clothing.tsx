@@ -18,7 +18,7 @@ import { SignalProps, UUID } from "~/code/types";
 import { gClothingItemStore, gSettings } from "~/code/variables";
 import gGeminiFunctions, {
   GeminiAiJsonResponse,
-} from "../code/image-recognition/gemini";
+} from "../code/server/image-recognition/gemini";
 import { gTriggerAlert } from "./shared/alert-toast";
 import DeleteModal from "./shared/delete-modal";
 import ImgPreview from "./shared/img-preview";

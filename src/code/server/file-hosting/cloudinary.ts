@@ -1,6 +1,6 @@
 "use server";
 import { v2 as cloudinary, SignApiOptions } from "cloudinary";
-import { UUID } from "../types";
+import { UUID } from "../../types";
 
 const FOLDER = "clothing";
 /** Since I also need to specify the folder :p */
