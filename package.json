@@ -20,6 +20,7 @@
     "@solidjs/router": "^0.15.3",
     "@solidjs/start": "^1.1.4",
     "cloudinary": "^2.6.1",
+    "firebase": "^11.8.1",
     "fuse.js": "^7.1.0",
     "localforage": "^1.10.0",
     "lucide-solid": "^0.511.0",
