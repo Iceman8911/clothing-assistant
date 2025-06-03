@@ -129,10 +129,10 @@ const deleteImage = async (id: UUID) => {
   return cloudinary.uploader.destroy(completePublicId(id));
 };
 
-const gCloudinaryFunctions = {
+const gCloudinaryServerFunctions = {
   getImage,
   uploadImage,
   deleteImage,
 } as const;
 
-export default gCloudinaryFunctions;
+export default gCloudinaryServerFunctions;

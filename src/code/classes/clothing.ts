@@ -3,8 +3,8 @@ import { fileToDataURL } from "../utilities";
 import PlaceholderImage from "~/assets/images/placeholder.webp";
 import { generateRandomId } from "../functions";
 import { UUID } from "../types";
-import gCloudinaryFunctions from "../server/file-hosting/cloudinary";
 import { query } from "@solidjs/router";
+import gCloudinaryClientFunctions from "../server/file-hosting/cloudinary-client";
 
 interface MutableClassProps {
   name: string;
@@ -192,7 +192,11 @@ export class ClothingItem implements MutableClassProps, ID {
 
     const uploadedImgUrl = query(async (id: UUID) => {
       return possibleBase64String != PlaceholderImage
-        ? uploadImg(possibleBase64String, id, this.name)
+        ? gCloudinaryClientFunctions.uploadImg(
+            possibleBase64String,
+            id,
+            this.name,
+          )
         : "";
     }, "data");
 
@@ -213,12 +217,6 @@ export class ClothingItem implements MutableClassProps, ID {
     // Dunno why I need to call unwrap twice :p
     return unwrap(clone);
   }
-}
-
-/** Due to a regression, this can't be inlined */
-function uploadImg(imgString: string, id: UUID, name?: string) {
-  "use server";
-  return gCloudinaryFunctions.uploadImage(imgString, id, name);
 }
 
 /** The serializable structure of the clothing data that will then be converted to a form the database will accept. Since the database code is ran on the server, we need to get rid of anything not easily serializable */

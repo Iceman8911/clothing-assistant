@@ -8,8 +8,8 @@ import { isServer } from "solid-js/web";
 import { gShowSavingAlert } from "./functions";
 import { gEnumReactiveMember } from "./enums";
 import { UUID } from "./types";
-import gCloudinaryFunctions from "./server/file-hosting/cloudinary";
 import gFirebaseClientFunctions from "./server/database/firebase-client";
+import gCloudinaryClientFunctions from "./server/file-hosting/cloudinary-client";
 
 type Settings = {
   currency: "$" | "€" | "£" | "¥" | "₦";
@@ -37,7 +37,7 @@ export const gDefaultSettings = {
 function removeServerClothing(syncId: UUID, clothingId: UUID) {
   "use server";
   gFirebaseClientFunctions.removeClothing(syncId, clothingId);
-  gCloudinaryFunctions.deleteImage(clothingId);
+  gCloudinaryClientFunctions.deleteImg(clothingId);
 }
 
 /** Contains the stores (in-memory and persistent) for clothing items */
