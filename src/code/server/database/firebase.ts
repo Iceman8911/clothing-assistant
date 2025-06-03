@@ -1,13 +1,11 @@
 "use server";
 import type {
-  SerializableClothingDatabaseItem,
   ClothingItem,
+  SerializableClothingDatabaseItem,
 } from "../../classes/clothing";
+import { gEnumClothingConflictReason } from "../../enums";
 import { gIsUserConnectedToInternet } from "../../functions";
-import { type gClothingItemStore } from "../../variables";
-import { gEnumClothingConflictReason, gEnumStatus } from "../../enums";
 import { UUID } from "../../types";
-import { gTriggerAlert } from "~/components/shared/alert-toast";
 
 interface AnonSignUpResponse {
   kind: string;
