@@ -72,9 +72,16 @@ export default defineConfig({
         // node_compat: true,
         compatibility_date: "2025-05-23",
         name: "clothing-assistant",
-        vars: { NODE_VERSION: 22 },
+        vars: {
+          NODE_VERSION: 22,
+        },
+        minify: false,
       },
       deployConfig: true,
+      pages: {
+        routes: { exclude: ["/_server/*"], include: ["/*"] },
+        defaultRoutes: false,
+      },
     },
     compressPublicAssets: { gzip: true, brotli: true },
     compatibilityDate: { cloudflare: "latest", default: "latest" },
