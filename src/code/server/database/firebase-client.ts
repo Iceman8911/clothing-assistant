@@ -1,38 +1,31 @@
-import { SerializableClothingDatabaseItem } from "~/code/classes/clothing";
-import { UUID } from "~/code/types";
 import gFirebaseServerFunctions from "./firebase";
 
-const getClothing = async (syncId: UUID, clothingId: UUID) => {
-  "use server";
-  return gFirebaseServerFunctions.getClothing(syncId, clothingId);
-};
-
-const addClothing = async (
-  syncId: UUID,
-  clothingData: SerializableClothingDatabaseItem,
+const getClothing = (
+  ...args: Parameters<typeof gFirebaseServerFunctions.getClothing>
 ) => {
   "use server";
-  return gFirebaseServerFunctions.addClothing(
-    syncId,
-    clothingData,
-    // gClothingItemStore,
-  );
+  return gFirebaseServerFunctions.getClothing(...args);
 };
 
-const removeClothing = async (syncId: UUID, clothingId: UUID) => {
-  "use server";
-  return gFirebaseServerFunctions.removeClothing(syncId, clothingId);
-};
-
-const getClothingUpdates = async (
-  syncId: UUID,
-  clientSideClothingItems: Map<UUID, Promise<SerializableClothingDatabaseItem>>,
+const addClothing = (
+  ...args: Parameters<typeof gFirebaseServerFunctions.addClothing>
 ) => {
   "use server";
-  return gFirebaseServerFunctions.getClothingUpdates(
-    syncId,
-    clientSideClothingItems,
-  );
+  return gFirebaseServerFunctions.addClothing(...args);
+};
+
+const removeClothing = (
+  ...args: Parameters<typeof gFirebaseServerFunctions.removeClothing>
+) => {
+  "use server";
+  return gFirebaseServerFunctions.removeClothing(...args);
+};
+
+const getClothingUpdates = (
+  ...args: Parameters<typeof gFirebaseServerFunctions.getClothingUpdates>
+) => {
+  "use server";
+  return gFirebaseServerFunctions.getClothingUpdates(...args);
 };
 
 const gFirebaseClientFunctions = {
