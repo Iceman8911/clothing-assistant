@@ -5,11 +5,11 @@ import { For, Match, Show, Switch } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
 import PlaceholderImage from "~/assets/images/placeholder.webp";
 import { ClothingItem } from "~/code/classes/clothing";
-import gFirebaseFunctions from "~/code/server/database/firebase";
 import { gEnumClothingConflictReason } from "~/code/enums";
 import { SignalProps, SyncIssueArray } from "~/code/types";
 import { gClothingItemStore, gSettings } from "~/code/variables";
 import GenericModal from "./modal";
+import gFirebaseClientFunctions from "~/code/server/database/firebase-client";
 
 export default function SyncModal(
   props: SignalProps & {
@@ -110,14 +110,14 @@ export default function SyncModal(
                             gEnumClothingConflictReason.MISSING_ON_CLIENT
                           ) {
                             // Overwrite the data on the server
-                            gFirebaseFunctions.addClothing(
+                            gFirebaseClientFunctions.addClothing(
                               gSettings.syncId,
                               val.data.client,
-                              gClothingItemStore,
+                              // gClothingItemStore,
                             );
                           } else {
                             // Remove the data from the server
-                            gFirebaseFunctions.removeClothing(
+                            gFirebaseClientFunctions.removeClothing(
                               gSettings.syncId,
                               val.id,
                             );

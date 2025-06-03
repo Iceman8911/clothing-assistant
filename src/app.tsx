@@ -4,8 +4,10 @@ import { onMount, Suspense } from "solid-js";
 import { pwaInfo } from "virtual:pwa-info";
 import NavBar from "~/components/navbar";
 import "./app.css";
-import { ClothingItem } from "./code/classes/clothing";
-import gFirebaseFunctions from "./code/server/database/firebase";
+import {
+  ClothingItem,
+  SerializableClothingDatabaseItem,
+} from "./code/classes/clothing";
 import {
   gEnumCustomRoute,
   gEnumReactiveMember,
@@ -20,6 +22,7 @@ import HomePage from "./routes";
 import InventoryPage from "./routes/inventory";
 import ReportPage from "./routes/reports";
 import SettingsPage from "./routes/settings";
+import gFirebaseClientFunctions from "./code/server/database/firebase-client";
 
 export default function App() {
   onMount(() => {
@@ -40,7 +43,7 @@ export default function App() {
         const clothing = gClothingItemStore.items.get(clothingId)!;
 
         // Return the promise chain for each item
-        return gFirebaseFunctions
+        return gFirebaseClientFunctions
           .getClothing(gSettings.syncId, clothingId)
           .then((clothingDatabaseData) => {
             if (
@@ -49,10 +52,10 @@ export default function App() {
             ) {
               // Return the promise from the nested action if the condition is met
               return clothing.safeForServer().then((data) => {
-                gFirebaseFunctions.addClothing(
+                gFirebaseClientFunctions.addClothing(
                   gSettings.syncId,
                   data,
-                  gClothingItemStore,
+                  // gClothingItemStore,
                 );
               });
             }

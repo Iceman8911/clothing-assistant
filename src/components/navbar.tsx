@@ -6,7 +6,6 @@ import SettingsIcon from "lucide-solid/icons/settings";
 import ShirtIcon from "lucide-solid/icons/shirt";
 import { createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import gFirebaseFunctions from "~/code/server/database/firebase";
 import { gEnumCustomRoute } from "~/code/enums";
 import { SyncIssueArray } from "~/code/types";
 import {
@@ -16,6 +15,7 @@ import {
   gSettings,
 } from "~/code/variables";
 import SyncModal from "./shared/sync-modal";
+import gFirebaseClientFunctions from "~/code/server/database/firebase-client";
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -101,7 +101,7 @@ export default function NavBar() {
                 .entries()
                 .map(([id, val]) => [id, val.safeForServer()]);
 
-              gFirebaseFunctions
+              gFirebaseClientFunctions
                 .getClothingUpdates(
                   gSettings.syncId,
                   // gClothingItemStore.lastEdited.toISOString(),

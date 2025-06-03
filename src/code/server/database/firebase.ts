@@ -1,3 +1,4 @@
+"use server";
 import type {
   SerializableClothingDatabaseItem,
   ClothingItem,
@@ -201,7 +202,6 @@ const Auth: { _res: AnonSignUpResponse | null; token: Promise<string> } = {
 };
 
 const SHARED_HEADERS = async () => {
-  "use server";
   return {
     Authorization: `Bearer ${await Auth.token}`,
     "Content-Type": "application/json",
@@ -223,7 +223,6 @@ async function getClothing(
   syncId: UUID,
   clothingId: UUID,
 ): Promise<ClothingDatabaseEntry> {
-  "use server";
   return (
     await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
@@ -237,7 +236,6 @@ async function addClothingItemDoc(args: {
   fieldsToAdd: ClothingDatabaseEntry;
   shouldUpdate?: boolean;
 }) {
-  "use server";
   const { syncId, clothingId, fieldsToAdd, shouldUpdate } = args;
 
   const resJson = (
@@ -267,106 +265,81 @@ async function addClothingItemDoc(args: {
 async function addClothing(
   syncId: UUID,
   clothingItem: SerializableClothingDatabaseItem,
-  clothingStore: typeof gClothingItemStore,
 ) {
-  if (!(await gIsUserConnectedToInternet())) {
-    setTimeout(
-      () =>
-        gTriggerAlert(
-          gEnumStatus.INFO,
-          "No connection detected. Sync scheduled for when next connected.",
-        ),
-      1000,
-    );
+  try {
+    let shouldUpdate = false;
 
-    if (!clothingStore.pendingUpload[0].find((val) => val == clothingItem.id))
-      clothingStore.pendingUpload[1]([
-        ...clothingStore.pendingUpload[0],
-        clothingItem.id,
-      ]);
+    try {
+      shouldUpdate = (await getClothing(syncId, clothingItem.id)).fields.name
+        ? true
+        : false;
+    } catch (e) {
+      // The clothing item doesn't exist
+      shouldUpdate = false;
+    }
 
-    return;
-  } else {
-    (async () => {
-      // "use server";
-      try {
-        let shouldUpdate = false;
+    // NOTE: For some reason, all POST requests fail :(. Maybe moving over to the SDK would be better.
+    shouldUpdate = true;
 
-        try {
-          shouldUpdate = (await getClothing(syncId, clothingItem.id)).fields
-            .name
-            ? true
-            : false;
-        } catch (e) {
-          // The clothing item doesn't exist
-          shouldUpdate = false;
-        }
-
-        // NOTE: For some reason, all POST requests fail :(. Maybe moving over to the SDK would be better.
-        shouldUpdate = true;
-
-        const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
-          syncId,
-          clothingId: clothingItem.id,
-          fieldsToAdd: {
-            fields: {
-              brand: { stringValue: clothingItem.brand },
-              category: { stringValue: clothingItem.category },
-              color: { stringValue: clothingItem.color },
-              condition: { stringValue: clothingItem.condition },
-              costPrice: { integerValue: `${clothingItem.costPrice}` },
-              dateBought: {
-                timestampValue: clothingItem.dateBought.toISOString(),
-              },
-              dateEdited: {
-                timestampValue: clothingItem.dateEdited.toISOString(),
-              },
-              description: { stringValue: clothingItem.description },
-              gender: { stringValue: clothingItem.gender },
-              imgUrl: { stringValue: clothingItem.imgUrl },
-              material: { stringValue: clothingItem.material },
-              name: { stringValue: clothingItem.name },
-              occasion: {
-                mapValue: {
-                  fields: {
-                    activeWear: {
-                      booleanValue: clothingItem.occasion.activeWear,
-                    },
-                    casual: { booleanValue: clothingItem.occasion.casual },
-                    formal: { booleanValue: clothingItem.occasion.formal },
-                  },
+    const resJson: ClothingDatabaseEntry = await addClothingItemDoc({
+      syncId,
+      clothingId: clothingItem.id,
+      fieldsToAdd: {
+        fields: {
+          brand: { stringValue: clothingItem.brand },
+          category: { stringValue: clothingItem.category },
+          color: { stringValue: clothingItem.color },
+          condition: { stringValue: clothingItem.condition },
+          costPrice: { integerValue: `${clothingItem.costPrice}` },
+          dateBought: {
+            timestampValue: clothingItem.dateBought.toISOString(),
+          },
+          dateEdited: {
+            timestampValue: clothingItem.dateEdited.toISOString(),
+          },
+          description: { stringValue: clothingItem.description },
+          gender: { stringValue: clothingItem.gender },
+          imgUrl: { stringValue: clothingItem.imgUrl },
+          material: { stringValue: clothingItem.material },
+          name: { stringValue: clothingItem.name },
+          occasion: {
+            mapValue: {
+              fields: {
+                activeWear: {
+                  booleanValue: clothingItem.occasion.activeWear,
                 },
+                casual: { booleanValue: clothingItem.occasion.casual },
+                formal: { booleanValue: clothingItem.occasion.formal },
               },
-              quantity: { integerValue: `${clothingItem.quantity}` },
-              season: {
-                mapValue: {
-                  fields: {
-                    fall: { booleanValue: clothingItem.season.fall },
-                    spring: { booleanValue: clothingItem.season.spring },
-                    summer: { booleanValue: clothingItem.season.summer },
-                    winter: { booleanValue: clothingItem.season.winter },
-                  },
-                },
-              },
-              sellingPrice: { integerValue: `${clothingItem.sellingPrice}` },
-              size: { stringValue: clothingItem.size },
-              subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
             },
           },
-          shouldUpdate,
-        });
+          quantity: { integerValue: `${clothingItem.quantity}` },
+          season: {
+            mapValue: {
+              fields: {
+                fall: { booleanValue: clothingItem.season.fall },
+                spring: { booleanValue: clothingItem.season.spring },
+                summer: { booleanValue: clothingItem.season.summer },
+                winter: { booleanValue: clothingItem.season.winter },
+              },
+            },
+          },
+          sellingPrice: { integerValue: `${clothingItem.sellingPrice}` },
+          size: { stringValue: clothingItem.size },
+          subCategory: { stringValue: clothingItem.subCategory }, //,imgUrl:{stringValue:clothingItem.imgFile.}
+        },
+      },
+      shouldUpdate,
+    });
 
-        console.log("Document written. Response JSON is: ", resJson);
-      } catch (e) {
-        console.error("Error adding document: ", e);
-      }
-    })();
+    console.log("Document written. Response JSON is: ", resJson);
+  } catch (e) {
+    console.error("Error adding document: ", e);
   }
 }
 
 /** Returns `true` if the document has been deleted. */
 async function removeClothing(syncId: UUID, clothingId: UUID) {
-  "use server";
   return (
     await fetch(USER_CLOTHING_DOCUMENT_URL(syncId, clothingId), {
       headers: await SHARED_HEADERS(),
@@ -398,7 +371,6 @@ async function getClothingUpdates(
   syncId: UUID,
   clientSideClothingItems: Map<UUID, Promise<SerializableClothingDatabaseItem>>,
 ): Promise<ClothingConflictMap> {
-  "use server";
   if (await gIsUserConnectedToInternet()) {
     // REVIEW: Looks like I have to manually create indexes via the Firebase dashboard so that the queries would work but that's an issue for future me. The other workaround though, would just be to fetch all the clothing items and do comparisons, I believe that 4000 items shouldn't amount to >300~400kb if I'm lucky.
     // const query: StructuredQuery<ClothingDatabaseEntry> = {
@@ -493,11 +465,11 @@ async function getClothingUpdates(
 }
 
 /** Global methods solely for interacting with Firebase FireStore */
-const gFirebaseFunctions = {
+const gFirebaseServerFunctions = {
   getClothing,
   addClothing,
   removeClothing,
   getClothingUpdates,
 } as const;
 
-export default gFirebaseFunctions;
+export default gFirebaseServerFunctions;

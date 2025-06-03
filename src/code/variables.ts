@@ -5,11 +5,11 @@ import { createStore, unwrap } from "solid-js/store";
 import { makePersisted } from "@solid-primitives/storage";
 import localforage from "localforage";
 import { isServer } from "solid-js/web";
-import gFirebaseFunctions from "./server/database/firebase";
 import { gShowSavingAlert } from "./functions";
 import { gEnumReactiveMember } from "./enums";
 import { UUID } from "./types";
 import gCloudinaryFunctions from "./server/file-hosting/cloudinary";
+import gFirebaseClientFunctions from "./server/database/firebase-client";
 
 type Settings = {
   currency: "$" | "€" | "£" | "¥" | "₦";
@@ -36,7 +36,7 @@ export const gDefaultSettings = {
 
 function removeServerClothing(syncId: UUID, clothingId: UUID) {
   "use server";
-  gFirebaseFunctions.removeClothing(syncId, clothingId);
+  gFirebaseClientFunctions.removeClothing(syncId, clothingId);
   gCloudinaryFunctions.deleteImage(clothingId);
 }
 
@@ -73,10 +73,10 @@ export const gClothingItemStore = {
       if (!uploadToServer) return;
 
       clothing.safeForServer().then((data) => {
-        gFirebaseFunctions.addClothing(
+        gFirebaseClientFunctions.addClothing(
           gSettings.syncId,
           data,
-          gClothingItemStore,
+          // gClothingItemStore,
         );
       });
     });
