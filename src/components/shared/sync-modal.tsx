@@ -35,7 +35,8 @@ export default function SyncModal(
       </li> */}
 
         <For each={props.syncIssueArray}>
-          {({ id, data, isResolved }, index) => {
+          {/* Destructuring here loses reactivity... */}
+          {({ id, data }, index) => {
             return (
               <li class="list-row [&_img]:h-auto">
                 {/* The client's image, if any */}
@@ -95,7 +96,7 @@ export default function SyncModal(
 
                   <div class="flex justify-center items-center">
                     <Show
-                      when={!isResolved}
+                      when={!props.syncIssueArray[index()].isResolved}
                       fallback={
                         <span class="uppercase font-semibold text-success">
                           Resolved
