@@ -4,13 +4,13 @@ import type {
   SerializableClothingDatabaseItem,
 } from "../../classes/clothing";
 import { gEnumClothingConflictReason } from "../../enums";
-import { gIsUserConnectedToInternet } from "../../functions";
+// import { gIsUserConnectedToInternet } from "../../functions";
 import { UUID } from "../../types";
 import { initializeApp } from "firebase/app";
-import { 
-  getAuth, 
+import {
+  getAuth,
   signInAnonymously,
-  type Auth as FirebaseAuth 
+  type Auth as FirebaseAuth,
 } from "firebase/auth";
 import {
   getFirestore,
@@ -23,7 +23,7 @@ import {
   type Firestore,
   type DocumentData,
   serverTimestamp,
-  Timestamp
+  Timestamp,
 } from "firebase/firestore";
 
 // Your web app's Firebase configuration
@@ -61,6 +61,21 @@ interface ClothingDocument {
   imgUrl: string;
 }
 
+type SerializableClothingDocument = Omit<
+  ClothingDocument,
+  "dateBought" | "dateEdited"
+> & { dateBought: Date; dateEdited: Date };
+
+function serializeClothingDocument(
+  doc: ClothingDocument,
+): SerializableClothingDocument {
+  return {
+    ...doc,
+    dateEdited: doc.dateEdited.toDate(),
+    dateBought: doc.dateBought.toDate(),
+  };
+}
+
 async function ensureAuthenticated() {
   if (!auth.currentUser) {
     await signInAnonymously(auth);
@@ -69,7 +84,7 @@ async function ensureAuthenticated() {
 }
 
 function getUserClothingCollection(syncId: UUID) {
-  return collection(db, 'users', syncId, 'clothing');
+  return collection(db, "users", syncId, "clothing");
 }
 
 function getClothingDocRef(syncId: UUID, clothingId: UUID) {
@@ -83,9 +98,9 @@ function getMetadataDocRef(syncId: UUID) {
 async function getAllClothingDocuments(syncId: UUID) {
   await ensureAuthenticated();
   const snapshot = await getDocs(getUserClothingCollection(syncId));
-  return snapshot.docs.map(doc => ({
+  return snapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   }));
 }
 
@@ -93,12 +108,12 @@ async function getClothing(syncId: UUID, clothingId: UUID) {
   await ensureAuthenticated();
   const docRef = getClothingDocRef(syncId, clothingId);
   const docSnap = await getDoc(docRef);
-  
+
   if (!docSnap.exists()) {
     throw new Error(`Clothing item ${clothingId} not found`);
   }
-  
-  return docSnap.data() as ClothingDocument;
+
+  return serializeClothingDocument(docSnap.data() as ClothingDocument);
 }
 
 async function addClothing(
@@ -107,7 +122,7 @@ async function addClothing(
 ) {
   try {
     await ensureAuthenticated();
-    
+
     const docRef = getClothingDocRef(syncId, clothingItem.id);
     const metadataRef = getMetadataDocRef(syncId);
 
@@ -137,9 +152,13 @@ async function addClothing(
     await setDoc(docRef, clothingDoc, { merge: true });
 
     // Update metadata
-    await setDoc(metadataRef, {
-      [LAST_UPDATED_FIELD_NAME]: Timestamp.fromDate(clothingItem.dateEdited)
-    }, { merge: true });
+    await setDoc(
+      metadataRef,
+      {
+        [LAST_UPDATED_FIELD_NAME]: Timestamp.fromDate(clothingItem.dateEdited),
+      },
+      { merge: true },
+    );
 
     console.log("Document written successfully");
   } catch (e) {
@@ -157,19 +176,19 @@ async function removeClothing(syncId: UUID, clothingId: UUID) {
 
 export type ClothingConflict =
   | {
-      client: SerializableClothingDatabaseItem;
-      server: ClothingDocument;
       reason:
         | gEnumClothingConflictReason.CLIENT_HAS_NEWER
         | gEnumClothingConflictReason.SERVER_HAS_NEWER;
-    }
-  | {
       client: SerializableClothingDatabaseItem;
-      reason: gEnumClothingConflictReason.MISSING_ON_SERVER;
+      server: SerializableClothingDocument;
     }
   | {
-      server: ClothingDocument;
+      reason: gEnumClothingConflictReason.MISSING_ON_SERVER;
+      client: SerializableClothingDatabaseItem;
+    }
+  | {
       reason: gEnumClothingConflictReason.MISSING_ON_CLIENT;
+      server: SerializableClothingDocument;
     };
 
 type ClothingConflictMap = Map<UUID, ClothingConflict>;
@@ -178,30 +197,34 @@ async function getClothingUpdates(
   syncId: UUID,
   clientSideClothingItems: Map<UUID, Promise<SerializableClothingDatabaseItem>>,
 ): Promise<ClothingConflictMap> {
-  if (!(await gIsUserConnectedToInternet())) {
-    return new Map();
-  }
+  // if (!(await gIsUserConnectedToInternet())) {
+  //   return new Map();
+  // }
 
   await ensureAuthenticated();
   const conflictingClothingItems: ClothingConflictMap = new Map();
 
   // Get all server documents
   const serverDocs = await getAllClothingDocuments(syncId);
-  
+
   // Process server documents
   for (const doc of serverDocs) {
     if (doc.id === METADATA_DOCUMENT_NAME) continue;
 
     const id = doc.id as UUID;
     const localClothingItemPromise = clientSideClothingItems.get(id);
-    
+
     // Remove processed items so we can identify client-only items later
     clientSideClothingItems.delete(id);
+
+    const serverDoc = serializeClothingDocument(
+      doc as unknown as ClothingDocument,
+    );
 
     if (!localClothingItemPromise) {
       // Server has data not in client
       conflictingClothingItems.set(id, {
-        server: doc as unknown as ClothingDocument,
+        server: serverDoc,
         reason: gEnumClothingConflictReason.MISSING_ON_CLIENT,
       });
       continue;
@@ -213,13 +236,13 @@ async function getClothingUpdates(
     // Compare dates
     if (localClothingItem.dateEdited > serverDate) {
       conflictingClothingItems.set(id, {
-        server: doc as unknown as ClothingDocument,
+        server: serverDoc,
         client: localClothingItem,
         reason: gEnumClothingConflictReason.CLIENT_HAS_NEWER,
       });
     } else if (localClothingItem.dateEdited < serverDate) {
       conflictingClothingItems.set(id, {
-        server: doc as unknown as ClothingDocument,
+        server: serverDoc,
         client: localClothingItem,
         reason: gEnumClothingConflictReason.SERVER_HAS_NEWER,
       });

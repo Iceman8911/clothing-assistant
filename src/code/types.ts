@@ -1,5 +1,5 @@
 import { Accessor, Setter } from "solid-js";
-import { ClothingConflict } from "./database/firebase";
+import { ClothingConflict } from "./server/database/firebase";
 
 export interface SignalProps {
   stateAccessor: Accessor<boolean>;
