@@ -62,7 +62,7 @@ export default defineConfig({
     ],
   },
   server: {
-    preset: "cloudflare_pages",
+    preset: "cloudflare_module",
     prerender: {
       crawlLinks: true,
     },
@@ -75,7 +75,7 @@ export default defineConfig({
         vars: {
           NODE_VERSION: 22,
         },
-        minify: false,
+        // minify: false,
       },
       deployConfig: true,
       pages: {
@@ -104,6 +104,7 @@ export default defineConfig({
         },
       },
     },
+    node: false,
   },
   ssr: false,
 });
