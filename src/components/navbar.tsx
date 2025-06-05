@@ -53,7 +53,7 @@ export default function NavBar() {
         <div class="navbar-center">
           {/* <a class="btn btn-ghost text-xl">daisyUI</a> */}
           <ShirtIcon class="mr-1" />
-          Cloventh
+          Clothing Assistant
         </div>
 
         <div class="navbar-end">

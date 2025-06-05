@@ -21,7 +21,7 @@ export default defineConfig({
         },
         manifest: {
           name: "Clothing Assistant",
-          short_name: "Cloventh",
+          short_name: "Clothing Assistant",
           description:
             "A simple app to help manage your stock in your clothing/apparel-related business.",
           theme_color: "#ffffff",
