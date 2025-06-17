@@ -6,7 +6,7 @@ const FOLDER = "clothing";
 /** Since I also need to specify the folder :p */
 const completePublicId = (id: UUID) => `${FOLDER}/${id}` as const;
 
-/** If succesful, returns the url to the uploaded file */
+/** If successful, returns the url to the uploaded file */
 const uploadImage = async (
   /** Base 64 string */
   imgData: string,
@@ -97,7 +97,8 @@ const uploadImage = async (
     const result = await response.json();
     const resultUrl = result.secure_url;
 
-    cloudinary.image(id, { quality: "auto" });
+    // Uncomment this / switch to the REST API when cloudflare supports `__dirname`
+    // cloudinary.image(id, { quality: "auto" });
 
     return resultUrl;
   } catch (error) {
