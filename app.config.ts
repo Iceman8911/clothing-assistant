@@ -71,6 +71,10 @@ export default defineConfig({
       wrangler: {
         // node_compat: true,
         compatibility_date: "2025-05-23",
+        compatibility_flags: [
+          // "nodejs_compat",
+          // "no_handle_cross_request_promise_resolution",
+        ],
         name: "clothing-assistant",
         vars: {
           NODE_VERSION: 22,

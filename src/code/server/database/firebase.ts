@@ -4,16 +4,17 @@ import type {
   SerializableClothingDatabaseItem,
 } from "../../classes/clothing";
 import { gEnumClothingConflictReason } from "../../enums";
-// import { gIsUserConnectedToInternet } from "../../functions";
 import { UUID } from "../../types";
-import { initializeApp } from "firebase/app";
+import { initializeApp, FirebaseApp, deleteApp } from "firebase/app";
 import {
   getAuth,
   signInAnonymously,
   type Auth as FirebaseAuth,
+  type User,
 } from "firebase/auth";
 import {
   getFirestore,
+  initializeFirestore,
   doc,
   collection,
   getDoc,
@@ -26,16 +27,11 @@ import {
   Timestamp,
 } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   projectId: "clothing-assistant-b7ae8",
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 const METADATA_DOCUMENT_NAME = "metadata";
 const LAST_UPDATED_FIELD_NAME = "last_updated";
@@ -76,57 +72,103 @@ function serializeClothingDocument(
   };
 }
 
-async function ensureAuthenticated() {
-  if (!auth.currentUser) {
-    await signInAnonymously(auth);
-  }
-  return auth.currentUser;
+// Initialize Firebase per request
+function initializeFirebase() {
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Configure Firestore for serverless environment
+  const db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+    experimentalAutoDetectLongPolling: false,
+  });
+
+  return { app, auth, db };
 }
 
-function getUserClothingCollection(syncId: UUID) {
+// Cleanup Firebase after each request
+async function cleanupFirebase(app: FirebaseApp) {
+  try {
+    await deleteApp(app);
+  } catch (e) {
+    console.warn("Firebase cleanup warning:", e);
+  }
+}
+
+// Cache authentication per request
+let authPromise: Promise<User> | null = null;
+
+async function ensureAuthenticated(auth: FirebaseAuth) {
+  if (auth.currentUser) return auth.currentUser;
+
+  if (!authPromise) {
+    authPromise = signInAnonymously(auth)
+      .then((credential) => credential.user)
+      .catch((error) => {
+        authPromise = null;
+        throw error;
+      });
+  }
+
+  return authPromise;
+}
+
+function getUserClothingCollection(db: Firestore, syncId: UUID) {
   return collection(db, "users", syncId, "clothing");
 }
 
-function getClothingDocRef(syncId: UUID, clothingId: UUID) {
-  return doc(getUserClothingCollection(syncId), clothingId);
+function getClothingDocRef(db: Firestore, syncId: UUID, clothingId: UUID) {
+  return doc(getUserClothingCollection(db, syncId), clothingId);
 }
 
-function getMetadataDocRef(syncId: UUID) {
-  return doc(getUserClothingCollection(syncId), METADATA_DOCUMENT_NAME);
+function getMetadataDocRef(db: Firestore, syncId: UUID) {
+  return doc(getUserClothingCollection(db, syncId), METADATA_DOCUMENT_NAME);
 }
 
-async function getAllClothingDocuments(syncId: UUID) {
-  await ensureAuthenticated();
-  const snapshot = await getDocs(getUserClothingCollection(syncId));
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+async function getAllClothingDocuments(
+  db: Firestore,
+  auth: FirebaseAuth,
+  syncId: UUID,
+) {
+  await ensureAuthenticated(auth);
+  const snapshot = await getDocs(getUserClothingCollection(db, syncId));
+
+  return snapshot.docs
+    .filter((doc) => doc.id !== METADATA_DOCUMENT_NAME)
+    .map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 }
 
 async function getClothing(syncId: UUID, clothingId: UUID) {
-  await ensureAuthenticated();
-  const docRef = getClothingDocRef(syncId, clothingId);
-  const docSnap = await getDoc(docRef);
+  const { app, auth, db } = initializeFirebase();
+  try {
+    await ensureAuthenticated(auth);
+    const docRef = getClothingDocRef(db, syncId, clothingId);
+    const docSnap = await getDoc(docRef);
 
-  if (!docSnap.exists()) {
-    throw new Error(`Clothing item ${clothingId} not found`);
+    if (!docSnap.exists()) {
+      throw new Error(`Clothing item ${clothingId} not found`);
+    }
+
+    return serializeClothingDocument(docSnap.data() as ClothingDocument);
+  } finally {
+    await cleanupFirebase(app);
   }
-
-  return serializeClothingDocument(docSnap.data() as ClothingDocument);
 }
 
 async function addClothing(
   syncId: UUID,
   clothingItem: SerializableClothingDatabaseItem,
 ) {
+  const { app, auth, db } = initializeFirebase();
   try {
-    await ensureAuthenticated();
+    await ensureAuthenticated(auth);
 
-    const docRef = getClothingDocRef(syncId, clothingItem.id);
-    const metadataRef = getMetadataDocRef(syncId);
+    const docRef = getClothingDocRef(db, syncId, clothingItem.id);
+    const metadataRef = getMetadataDocRef(db, syncId);
 
-    // Convert the clothing item to Firestore format
     const clothingDoc: ClothingDocument = {
       name: clothingItem.name,
       brand: clothingItem.brand,
@@ -148,10 +190,8 @@ async function addClothing(
       subCategory: clothingItem.subCategory,
     };
 
-    // Set the document
     await setDoc(docRef, clothingDoc, { merge: true });
 
-    // Update metadata
     await setDoc(
       metadataRef,
       {
@@ -159,19 +199,24 @@ async function addClothing(
       },
       { merge: true },
     );
-
-    console.log("Document written successfully");
   } catch (e) {
-    console.error("Error adding document: ", e);
+    console.error("Firebase error:", e);
     throw e;
+  } finally {
+    await cleanupFirebase(app);
   }
 }
 
 async function removeClothing(syncId: UUID, clothingId: UUID) {
-  await ensureAuthenticated();
-  const docRef = getClothingDocRef(syncId, clothingId);
-  await deleteDoc(docRef);
-  return true;
+  const { app, auth, db } = initializeFirebase();
+  try {
+    await ensureAuthenticated(auth);
+    const docRef = getClothingDocRef(db, syncId, clothingId);
+    await deleteDoc(docRef);
+    return true;
+  } finally {
+    await cleanupFirebase(app);
+  }
 }
 
 export type ClothingConflict =
@@ -197,67 +242,68 @@ async function getClothingUpdates(
   syncId: UUID,
   clientSideClothingItems: Map<UUID, Promise<SerializableClothingDatabaseItem>>,
 ): Promise<ClothingConflictMap> {
-  // if (!(await gIsUserConnectedToInternet())) {
-  //   return new Map();
-  // }
+  const { app, auth, db } = initializeFirebase();
+  try {
+    await ensureAuthenticated(auth);
+    const conflictingClothingItems: ClothingConflictMap = new Map();
 
-  await ensureAuthenticated();
-  const conflictingClothingItems: ClothingConflictMap = new Map();
+    // Process server documents
+    const serverDocs = await getAllClothingDocuments(db, auth, syncId);
+    const processedIds = new Set<UUID>();
 
-  // Get all server documents
-  const serverDocs = await getAllClothingDocuments(syncId);
+    for (const doc of serverDocs) {
+      const id = doc.id as UUID;
+      processedIds.add(id);
 
-  // Process server documents
-  for (const doc of serverDocs) {
-    if (doc.id === METADATA_DOCUMENT_NAME) continue;
+      const localClothingItemPromise = clientSideClothingItems.get(id);
+      clientSideClothingItems.delete(id);
 
-    const id = doc.id as UUID;
-    const localClothingItemPromise = clientSideClothingItems.get(id);
+      const serverDoc = serializeClothingDocument(
+        doc as unknown as ClothingDocument,
+      );
 
-    // Remove processed items so we can identify client-only items later
-    clientSideClothingItems.delete(id);
+      if (!localClothingItemPromise) {
+        conflictingClothingItems.set(id, {
+          server: serverDoc,
+          reason: gEnumClothingConflictReason.MISSING_ON_CLIENT,
+        });
+        continue;
+      }
 
-    const serverDoc = serializeClothingDocument(
-      doc as unknown as ClothingDocument,
-    );
+      const localClothingItem = await localClothingItemPromise;
+      const serverDate = (
+        doc as unknown as ClothingDocument
+      ).dateEdited.toDate();
 
-    if (!localClothingItemPromise) {
-      // Server has data not in client
-      conflictingClothingItems.set(id, {
-        server: serverDoc,
-        reason: gEnumClothingConflictReason.MISSING_ON_CLIENT,
-      });
-      continue;
+      if (localClothingItem.dateEdited > serverDate) {
+        conflictingClothingItems.set(id, {
+          server: serverDoc,
+          client: localClothingItem,
+          reason: gEnumClothingConflictReason.CLIENT_HAS_NEWER,
+        });
+      } else if (localClothingItem.dateEdited < serverDate) {
+        conflictingClothingItems.set(id, {
+          server: serverDoc,
+          client: localClothingItem,
+          reason: gEnumClothingConflictReason.SERVER_HAS_NEWER,
+        });
+      }
     }
 
-    const localClothingItem = await localClothingItemPromise;
-    const serverDate = (doc as unknown as ClothingDocument).dateEdited.toDate();
-
-    // Compare dates
-    if (localClothingItem.dateEdited > serverDate) {
-      conflictingClothingItems.set(id, {
-        server: serverDoc,
-        client: localClothingItem,
-        reason: gEnumClothingConflictReason.CLIENT_HAS_NEWER,
-      });
-    } else if (localClothingItem.dateEdited < serverDate) {
-      conflictingClothingItems.set(id, {
-        server: serverDoc,
-        client: localClothingItem,
-        reason: gEnumClothingConflictReason.SERVER_HAS_NEWER,
-      });
+    // Process remaining client items
+    for (const [id, itemPromise] of clientSideClothingItems) {
+      if (!processedIds.has(id)) {
+        conflictingClothingItems.set(id, {
+          client: await itemPromise,
+          reason: gEnumClothingConflictReason.MISSING_ON_SERVER,
+        });
+      }
     }
-  }
 
-  // Process remaining client items (missing on server)
-  for (const [id, itemPromise] of clientSideClothingItems) {
-    conflictingClothingItems.set(id, {
-      client: await itemPromise,
-      reason: gEnumClothingConflictReason.MISSING_ON_SERVER,
-    });
+    return conflictingClothingItems;
+  } finally {
+    await cleanupFirebase(app);
   }
-
-  return conflictingClothingItems;
 }
 
 const gFirebaseServerFunctions = {
