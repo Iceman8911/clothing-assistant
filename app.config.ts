@@ -62,7 +62,7 @@ export default defineConfig({
     ],
   },
   server: {
-    preset: "cloudflare_module",
+    preset: "cloudflare_pages",
     prerender: {
       crawlLinks: true,
     },
@@ -83,7 +83,7 @@ export default defineConfig({
       },
       deployConfig: true,
       pages: {
-        routes: { exclude: ["/_server/*"], include: ["/*"] },
+        // routes: { exclude: ["/_server/*"], include: ["/*"] },
         defaultRoutes: false,
       },
     },
@@ -95,7 +95,7 @@ export default defineConfig({
           "cache-control": "public, max-age=0, must-revalidate",
         },
       },
-      "/_build/sw.js": {
+      "_build/sw.js": {
         headers: {
           "content-type": "application/javascript",
           "cache-control": "public, max-age=0, must-revalidate",
@@ -108,7 +108,6 @@ export default defineConfig({
         },
       },
     },
-    node: false,
   },
   ssr: false,
 });
