@@ -14,14 +14,12 @@ function initGoogleGenAI(apiKey: string) {
   return new GoogleGenAI({ apiKey });
 }
 
-let ai: GoogleGenAI | null = null;
-
 async function tryGenerateContent(
   apiKey: string,
   contents: ContentListUnion,
   modelIndex = 0,
 ) {
-  if (!ai) ai = initGoogleGenAI(apiKey);
+  const ai = initGoogleGenAI(apiKey);
 
   if (modelIndex + 1 > GEMINI_MODELS.length) {
     throw new Error("No more models available. Please try again later");

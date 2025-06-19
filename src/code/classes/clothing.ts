@@ -158,8 +158,7 @@ export class ClothingItem implements MutableClassProps, ID {
     /** If true, the mime type at the beginning of the string will be removed. */
     trimMime = false,
   ) {
-    const trim = (string: string) =>
-      string.replace(/^data:image\/\w+;base64,/, "");
+    const trim = (string: string) => string.replace(/^data:.+;base64,/, "");
 
     if (!this.imgFile) return PlaceholderImage;
 
