@@ -47,14 +47,13 @@ export default function App() {
           .getClothing(gSettings.syncId, clothingId)
           .then((clothingDatabaseData) => {
             if (
-              new Date(clothingDatabaseData.fields.dateEdited.timestampValue) <
-              clothing.dateEdited
+              new Date(clothingDatabaseData.dateEdited) < clothing.dateEdited
             ) {
               // Return the promise from the nested action if the condition is met
               return clothing.safeForServer().then((data) => {
                 gFirebaseClientFunctions.addClothing(
                   gSettings.syncId,
-                  data,
+                  new ClothingItem(data),
                   // gClothingItemStore,
                 );
               });
