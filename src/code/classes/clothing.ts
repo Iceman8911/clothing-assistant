@@ -184,26 +184,29 @@ export class ClothingItem implements MutableClassProps, ID {
       : new ClothingItem(this);
   }
 
-  /** Returns a plain object copy that can be easily used in server side code. */
-  async safeForServer(): Promise<SerializableClothingDatabaseItem> {
+  /** Returns a clean object copy */
+  async safeForServer(): Promise<ClothingItemNoClass> {
     const clone = this.store();
-    const possibleBase64String = await this.base64();
 
-    const uploadedImgUrl = query(async (id: UUID) => {
-      return possibleBase64String != PlaceholderImage
-        ? gCloudinaryClientFunctions.uploadImg(
-            possibleBase64String,
-            id,
-            this.name,
-          )
-        : "";
-    }, "data");
+    // Destructuring turns it to a plain object
+    return { ...clone };
+    // const possibleBase64String = await this.base64();
 
-    return {
-      ...clone,
-      imgUrl: await uploadedImgUrl(this.id),
-      imgFile: undefined,
-    };
+    // const uploadedImgUrl = query(async (id: UUID) => {
+    //   return possibleBase64String != PlaceholderImage
+    //     ? gCloudinaryClientFunctions.uploadImg(
+    //         possibleBase64String,
+    //         id,
+    //         this.name,
+    //       )
+    //     : "";
+    // }, "data");
+
+    // return {
+    //   ...clone,
+    //   imgUrl: await uploadedImgUrl(this.id),
+    //   imgFile: undefined,
+    // };
   }
 
   /** Returns a clone of the clothing item that is trimmed of unnecessary cache. For cases like storing in IndexedDB */
@@ -211,10 +214,14 @@ export class ClothingItem implements MutableClassProps, ID {
     const clone = this.clone(true);
 
     // Remove cache
-    clone._imgCache = undefined;
+    clone._clearCache();
 
     // Dunno why I need to call unwrap twice :p
     return unwrap(clone);
+  }
+
+  private _clearCache() {
+    this._imgCache = undefined;
   }
 }
 
@@ -227,3 +234,5 @@ export interface SerializableClothingDatabaseItem
   /** The image will be uploaded to a seperate file host (i.e Firebase Storage)*/
   imgUrl: string;
 }
+
+export interface ClothingItemNoClass extends MutableClassProps, ID {}

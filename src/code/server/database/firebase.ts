@@ -1,6 +1,7 @@
 "use server";
 import type {
   ClothingItem,
+  ClothingItemNoClass,
   SerializableClothingDatabaseItem,
 } from "../../classes/clothing";
 import { gEnumClothingConflictReason } from "../../enums";
@@ -26,6 +27,7 @@ import {
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
+import gCloudinaryServerFunctions from "../file-hosting/cloudinary";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -158,10 +160,7 @@ async function getClothing(syncId: UUID, clothingId: UUID) {
   }
 }
 
-async function addClothing(
-  syncId: UUID,
-  clothingItem: SerializableClothingDatabaseItem,
-) {
+async function addClothing(syncId: UUID, clothingItem: ClothingItemNoClass) {
   const { app, auth, db } = initializeFirebase();
   try {
     await ensureAuthenticated(auth);
@@ -180,7 +179,15 @@ async function addClothing(
       dateEdited: Timestamp.fromDate(clothingItem.dateEdited),
       description: clothingItem.description,
       gender: clothingItem.gender,
-      imgUrl: clothingItem.imgUrl,
+      imgUrl: clothingItem.imgFile
+        ? await gCloudinaryServerFunctions.uploadImage(
+            `data:image/png;base64,${new Buffer(
+              await clothingItem.imgFile.arrayBuffer(),
+            ).toString("base64")}`,
+            clothingItem.id,
+            clothingItem.name,
+          )
+        : "",
       material: clothingItem.material,
       occasion: clothingItem.occasion,
       quantity: clothingItem.quantity,
