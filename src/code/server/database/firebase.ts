@@ -1,7 +1,6 @@
 "use server";
 import type {
   ClothingItem,
-  ClothingItemNoClass,
   SerializableClothingDatabaseItem,
 } from "../../classes/clothing";
 import { gEnumClothingConflictReason } from "../../enums";
@@ -160,7 +159,10 @@ async function getClothing(syncId: UUID, clothingId: UUID) {
   }
 }
 
-async function addClothing(syncId: UUID, clothingItem: ClothingItemNoClass) {
+async function addClothing(
+  syncId: UUID,
+  clothingItem: SerializableClothingDatabaseItem,
+) {
   const { app, auth, db } = initializeFirebase();
   try {
     await ensureAuthenticated(auth);
@@ -181,9 +183,9 @@ async function addClothing(syncId: UUID, clothingItem: ClothingItemNoClass) {
       gender: clothingItem.gender,
       imgUrl: clothingItem.imgFile
         ? await gCloudinaryServerFunctions.uploadImage(
-            `data:image/png;base64,${new Buffer(
-              await clothingItem.imgFile.arrayBuffer(),
-            ).toString("base64")}`,
+            `data:image/png;base64,${new Buffer(clothingItem.imgFile).toString(
+              "base64",
+            )}`,
             clothingItem.id,
             clothingItem.name,
           )

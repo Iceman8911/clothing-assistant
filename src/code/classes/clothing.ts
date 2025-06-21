@@ -109,7 +109,11 @@ export class ClothingItem implements MutableClassProps, ID {
     }
 
     if (data.imgFile) {
-      this.addImg(data.imgFile);
+      this.addImg(
+        data.imgFile instanceof File
+          ? data.imgFile
+          : new File([data.imgFile], "img"),
+      );
     }
 
     return createMutable(this);
@@ -122,9 +126,11 @@ export class ClothingItem implements MutableClassProps, ID {
   static async create(data: SerializableClothingDatabaseItem) {
     const clothing = new ClothingItem(data);
 
+    //@ts-expect-error
     if (data.imgUrl) {
       await clothing.addImg(
         new File(
+          //@ts-expect-error
           [await (await fetch(data.imgUrl)).blob()],
           `${clothing.id}.webp`,
         ),
@@ -185,11 +191,11 @@ export class ClothingItem implements MutableClassProps, ID {
   }
 
   /** Returns a clean object copy */
-  async safeForServer(): Promise<ClothingItemNoClass> {
+  async safeForServer(): Promise<SerializableClothingDatabaseItem> {
     const clone = this.store();
 
     // Destructuring turns it to a plain object
-    return { ...clone };
+    return { ...clone, imgFile: await clone.imgFile?.arrayBuffer() };
     // const possibleBase64String = await this.base64();
 
     // const uploadedImgUrl = query(async (id: UUID) => {
@@ -226,13 +232,9 @@ export class ClothingItem implements MutableClassProps, ID {
 }
 
 /** The serializable structure of the clothing data that will then be converted to a form the database will accept. Since the database code is ran on the server, we need to get rid of anything not easily serializable */
+//@ts-expect-error
 export interface SerializableClothingDatabaseItem
   extends MutableClassProps,
     ID {
-  /** No longer exists since uploading / serializing a file isn't worth the space it takes up*/
-  imgFile: undefined | never;
-  /** The image will be uploaded to a seperate file host (i.e Firebase Storage)*/
-  imgUrl: string;
+  imgFile: ArrayBuffer | undefined;
 }
-
-export interface ClothingItemNoClass extends MutableClassProps, ID {}
