@@ -84,7 +84,7 @@ export default defineConfig({
       deployConfig: true,
       pages: {
         // routes: { exclude: ["/_server/*"], include: ["/*"] },
-        defaultRoutes: false,
+        // defaultRoutes: false,
       },
     },
     compressPublicAssets: { gzip: true, brotli: true },
