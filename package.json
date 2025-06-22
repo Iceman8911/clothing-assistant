@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
-    "build": "bun run generate-pwa-assets && vinxi build",
+    "build": "bun run generate-pwa-assets && vinxi build && bun ./scripts/set-html-hash.mjs",
     "start": "vinxi start",
     "bun-dev": "bun --bun vinxi dev",
     "bun-build": "bun --bun run build",
