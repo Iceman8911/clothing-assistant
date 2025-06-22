@@ -37,6 +37,11 @@ const firebaseConfig = {
 const METADATA_DOCUMENT_NAME = "metadata";
 const LAST_UPDATED_FIELD_NAME = "last_updated";
 
+type OmitProps<
+  TObjectType extends object,
+  TPropToOmit extends keyof TObjectType,
+> = Omit<TObjectType, TPropToOmit>;
+
 interface ClothingDocument {
   name: string;
   description: string;
@@ -58,7 +63,7 @@ interface ClothingDocument {
   imgUrl: string;
 }
 
-type SerializableClothingDocument = Omit<
+type SerializableClothingDocument = OmitProps<
   ClothingDocument,
   "dateBought" | "dateEdited"
 > & { dateBought: Date; dateEdited: Date };
@@ -228,17 +233,20 @@ async function removeClothing(syncId: UUID, clothingId: UUID) {
   }
 }
 
+// type ClientClothingTimeStamp = {
+//   id: UUID;
+//   dateEdited: Date;
+// };
+
 export type ClothingConflict =
   | {
       reason:
         | gEnumClothingConflictReason.CLIENT_HAS_NEWER
         | gEnumClothingConflictReason.SERVER_HAS_NEWER;
-      client: SerializableClothingDatabaseItem;
       server: SerializableClothingDocument;
     }
   | {
       reason: gEnumClothingConflictReason.MISSING_ON_SERVER;
-      client: SerializableClothingDatabaseItem;
     }
   | {
       reason: gEnumClothingConflictReason.MISSING_ON_CLIENT;
@@ -249,7 +257,7 @@ type ClothingConflictMap = Map<UUID, ClothingConflict>;
 
 async function getClothingUpdates(
   syncId: UUID,
-  clientSideClothingItems: Map<UUID, Promise<SerializableClothingDatabaseItem>>,
+  clientSideClothingTimestamps: Map<UUID, Date>,
 ): Promise<ClothingConflictMap> {
   const { app, auth, db } = initializeFirebase();
   try {
@@ -264,14 +272,14 @@ async function getClothingUpdates(
       const id = doc.id as UUID;
       processedIds.add(id);
 
-      const localClothingItemPromise = clientSideClothingItems.get(id);
-      clientSideClothingItems.delete(id);
+      const localClothingItemTimestamp = clientSideClothingTimestamps.get(id);
+      clientSideClothingTimestamps.delete(id);
 
       const serverDoc = serializeClothingDocument(
         doc as unknown as ClothingDocument,
       );
 
-      if (!localClothingItemPromise) {
+      if (!localClothingItemTimestamp) {
         conflictingClothingItems.set(id, {
           server: serverDoc,
           reason: gEnumClothingConflictReason.MISSING_ON_CLIENT,
@@ -279,31 +287,27 @@ async function getClothingUpdates(
         continue;
       }
 
-      const localClothingItem = await localClothingItemPromise;
-      const serverDate = (
+      const serverTimestamp = (
         doc as unknown as ClothingDocument
       ).dateEdited.toDate();
 
-      if (localClothingItem.dateEdited > serverDate) {
+      if (localClothingItemTimestamp > serverTimestamp) {
         conflictingClothingItems.set(id, {
           server: serverDoc,
-          client: localClothingItem,
           reason: gEnumClothingConflictReason.CLIENT_HAS_NEWER,
         });
-      } else if (localClothingItem.dateEdited < serverDate) {
+      } else if (localClothingItemTimestamp < serverTimestamp) {
         conflictingClothingItems.set(id, {
           server: serverDoc,
-          client: localClothingItem,
           reason: gEnumClothingConflictReason.SERVER_HAS_NEWER,
         });
       }
     }
 
     // Process remaining client items
-    for (const [id, itemPromise] of clientSideClothingItems) {
+    for (const [id, timeStamp] of clientSideClothingTimestamps) {
       if (!processedIds.has(id)) {
         conflictingClothingItems.set(id, {
-          client: await itemPromise,
           reason: gEnumClothingConflictReason.MISSING_ON_SERVER,
         });
       }

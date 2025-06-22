@@ -126,19 +126,6 @@ export class ClothingItem implements MutableClassProps, ID {
   static async create(data: SerializableClothingDatabaseItem) {
     const clothing = new ClothingItem(data);
 
-    //@ts-expect-error
-    if (data.imgUrl) {
-      await clothing.addImg(
-        new File(
-          //@ts-expect-error
-          [await (await fetch(data.imgUrl)).blob()],
-          `${clothing.id}.webp`,
-        ),
-      );
-
-      return clothing;
-    }
-
     return clothing;
   }
 
@@ -148,8 +135,10 @@ export class ClothingItem implements MutableClassProps, ID {
       return "";
     }
 
-    this._imgCache = await fileToDataURL(this.imgFile);
-    return this._imgCache;
+    const cache = await fileToDataURL(this.imgFile);
+
+    this._imgCache = cache;
+    return cache;
   }
 
   addImg(file: File) {
@@ -169,7 +158,7 @@ export class ClothingItem implements MutableClassProps, ID {
     if (!this.imgFile) return PlaceholderImage;
 
     // The cache is empty
-    if (!this._imgCache || this._imgCache.endsWith("base64,")) {
+    if (!this._imgCache) {
       return trimMime ? trim(await this._cacheImg()) : this._cacheImg();
     } else {
       return trimMime ? trim(this._imgCache) : this._imgCache;

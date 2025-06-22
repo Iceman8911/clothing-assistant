@@ -99,12 +99,11 @@ export default function NavBar() {
 
               const serverReadyClothingStore = gClothingItemStore.items
                 .entries()
-                .map(([id, val]) => [id, val.safeForServer()]);
+                .map(([id, val]) => [id, val.dateEdited]);
 
               gFirebaseClientFunctions
                 .getClothingUpdates(
                   gSettings.syncId,
-                  // gClothingItemStore.lastEdited.toISOString(),
                   //@ts-expect-error
                   new Map(serverReadyClothingStore),
                 )

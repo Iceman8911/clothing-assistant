@@ -10,6 +10,8 @@ import { SignalProps, SyncIssueArray } from "~/code/types";
 import { gClothingItemStore, gSettings } from "~/code/variables";
 import GenericModal from "./modal";
 import gFirebaseClientFunctions from "~/code/server/database/firebase-client";
+import { createAsync } from "@solidjs/router";
+import { Suspense } from "solid-js";
 
 export default function SyncModal(
   props: SignalProps & {
@@ -37,20 +39,29 @@ export default function SyncModal(
         <For each={props.syncIssueArray}>
           {/* Destructuring here loses reactivity... */}
           {({ id, data }, index) => {
+            const localClothing =
+              data.reason != gEnumClothingConflictReason.MISSING_ON_CLIENT
+                ? gClothingItemStore.items.get(id)
+                : null;
+
+            const localClothingImgData = localClothing
+              ? createAsync(
+                  () =>
+                    localClothing.base64() ?? Promise.resolve(PlaceholderImage),
+                )
+              : () => PlaceholderImage;
+
             return (
               <li class="list-row [&_img]:h-auto">
                 {/* The client's image, if any */}
                 <div class="avatar">
                   <div class="mask mask-squircle w-16 h-16">
-                    <img
-                      src={
-                        data.reason !=
-                        gEnumClothingConflictReason.MISSING_ON_CLIENT
-                          ? data.client.imgUrl || PlaceholderImage
-                          : PlaceholderImage
-                      }
-                      class="cursor-pointer aspect-square not-prose"
-                    />
+                    <Suspense>
+                      <img
+                        src={localClothingImgData()}
+                        class="cursor-pointer aspect-square not-prose"
+                      />
+                    </Suspense>
                   </div>
                 </div>
 
@@ -59,7 +70,7 @@ export default function SyncModal(
                   <div class="font-bold">
                     {data.reason !=
                     gEnumClothingConflictReason.MISSING_ON_CLIENT
-                      ? data.client.name
+                      ? localClothing!.name
                       : data.server.name}
                   </div>
 
@@ -105,7 +116,7 @@ export default function SyncModal(
                     >
                       <button
                         class="btn btn-circle btn-ghost"
-                        onClick={(_) => {
+                        onClick={async (_) => {
                           if (
                             data.reason !=
                             gEnumClothingConflictReason.MISSING_ON_CLIENT
@@ -113,7 +124,7 @@ export default function SyncModal(
                             // Overwrite the data on the server
                             gFirebaseClientFunctions.addClothing(
                               gSettings.syncId,
-                              data.client,
+                              await localClothing!.safeForServer(),
                               // gClothingItemStore,
                             );
                           } else {
@@ -198,13 +209,14 @@ export default function SyncModal(
                                 material,
                                 name,
                                 occasion,
-                                imgUrl,
                                 quantity,
                                 season,
                                 sellingPrice,
                                 size,
                                 subCategory,
-                                imgFile: undefined,
+                                imgFile: await (
+                                  await fetch(imgUrl)
+                                ).arrayBuffer(),
                               }),
                               false,
                             );
