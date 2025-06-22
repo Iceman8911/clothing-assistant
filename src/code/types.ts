@@ -12,3 +12,9 @@ export type SyncIssueArray = Array<{
   data: ClothingConflict;
   isResolved: boolean;
 }>;
+
+/** Like `satisfies` but for types */
+export type Satisfy<
+  TTypeToSatisfy,
+  TTypeToCheck extends TTypeToSatisfy,
+> = TTypeToCheck;
