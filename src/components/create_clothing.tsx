@@ -393,6 +393,7 @@ export default function CreateClothingModal(
               <legend class="fieldset-legend">Select an Image</legend>
               <input
                 type="file"
+                accept="image/*"
                 class="file-input"
                 required
                 ref={clothingImgInput}
