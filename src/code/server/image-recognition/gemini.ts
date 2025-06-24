@@ -1,56 +1,58 @@
 "use server";
-import { type ClothingItem } from "../../classes/clothing";
 import { type ContentListUnion, GoogleGenAI } from "@google/genai";
+import type { ClothingItem } from "../../classes/clothing";
 
 const GEMINI_MODELS = [
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-pro",
+	"gemini-2.0-flash",
+	"gemini-2.0-flash-lite",
+	"gemini-1.5-flash",
+	"gemini-1.5-flash-8b",
+	"gemini-1.5-pro",
 ] as const;
 
 function initGoogleGenAI(apiKey: string) {
-  return new GoogleGenAI({ apiKey });
+	return new GoogleGenAI({ apiKey });
 }
 
 async function tryGenerateContent(
-  apiKey: string,
-  contents: ContentListUnion,
-  modelIndex = 0,
+	apiKey: string,
+	contents: ContentListUnion,
+	modelIndex = 0,
 ) {
-  const ai = initGoogleGenAI(apiKey);
+	const ai = initGoogleGenAI(apiKey);
 
-  if (modelIndex + 1 > GEMINI_MODELS.length) {
-    throw new Error("No more models available. Please try again later");
-  }
+	if (modelIndex + 1 > GEMINI_MODELS.length) {
+		throw new Error("No more models available. Please try again later");
+	}
 
-  try {
-    return (
-      await ai.models.generateContent({
-        model: GEMINI_MODELS[modelIndex],
-        contents,
-      })
-    ).text!;
-  } catch (_) {
-    return await tryGenerateContent(apiKey, contents, modelIndex + 1);
-  }
+	try {
+		return (
+			(
+				await ai.models.generateContent({
+					model: GEMINI_MODELS[modelIndex],
+					contents,
+				})
+			).text ?? ""
+		);
+	} catch (_) {
+		return await tryGenerateContent(apiKey, contents, modelIndex + 1);
+	}
 }
 
 async function parseImage(
-  apiKey: string,
-  /** Base64 encoded image */
-  imageData: string,
+	apiKey: string,
+	/** Base64 encoded image */
+	imageData: string,
 ): Promise<GeminiAiJsonResponse> {
-  const contents = [
-    {
-      inlineData: {
-        mimeType: "image/jpeg",
-        data: imageData,
-      },
-    },
-    {
-      text: `Your answer must be in an easily parseable JSON format. I will list certain fields and based off the uploaded clothing image, you will derive an appropriate answer for the field listed. Focus on the main clothing item. Use an array format for "Color", "Season", and "Occasion". Use whatever feels appropriate for "Material", "Color", and "Brand". Ensure you stick to the format and obey the instructions exactly. Let's start:
+	const contents = [
+		{
+			inlineData: {
+				mimeType: "image/jpeg",
+				data: imageData,
+			},
+		},
+		{
+			text: `Your answer must be in an easily parseable JSON format. I will list certain fields and based off the uploaded clothing image, you will derive an appropriate answer for the field listed. Focus on the main clothing item. Use an array format for "Color", "Season", and "Occasion". Use whatever feels appropriate for "Material", "Color", and "Brand". Ensure you stick to the format and obey the instructions exactly. Let's start:
 
       Name (short string):
       Description (long string):
@@ -65,15 +67,15 @@ async function parseImage(
       Gender ("Male", "Female", "Unisex"):
 			Size ("XS", "S", "M", "L", "XL"):
       `,
-    },
-  ];
+		},
+	];
 
-  return JSON.parse(
-    (await tryGenerateContent(apiKey, contents))
-      .replace("```", "")
-      .replace("json", "")
-      .replace("```", ""),
-  );
+	return JSON.parse(
+		(await tryGenerateContent(apiKey, contents))
+			.replace("```", "")
+			.replace("json", "")
+			.replace("```", ""),
+	);
 }
 
 /**
@@ -96,22 +98,22 @@ async function parseImage(
   ```
   */
 export interface GeminiAiJsonResponse {
-  Name: string;
-  Description: string;
-  Category: ClothingItem["category"];
-  Subcategory: ClothingItem["subCategory"];
-  Material: string;
-  Color: string[];
-  Brand: string;
-  Season: Capitalize<keyof ClothingItem["season"]>[];
-  Occasion: ("Formal" | "Casual" | "Active Wear")[];
-  Condition: ClothingItem["condition"];
-  Gender: ClothingItem["gender"];
-  Size: ClothingItem["size"];
+	Name: string;
+	Description: string;
+	Category: ClothingItem["category"];
+	Subcategory: ClothingItem["subCategory"];
+	Material: string;
+	Color: string[];
+	Brand: string;
+	Season: Capitalize<keyof ClothingItem["season"]>[];
+	Occasion: ("Formal" | "Casual" | "Active Wear")[];
+	Condition: ClothingItem["condition"];
+	Gender: ClothingItem["gender"];
+	Size: ClothingItem["size"];
 }
 
 const gGeminiFunctions = {
-  parseImage,
+	parseImage,
 } as const;
 
 export default gGeminiFunctions;

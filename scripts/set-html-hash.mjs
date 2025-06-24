@@ -1,25 +1,26 @@
 // Based off `https://github.com/Vexcited/Signatures-IUT-Limoges/blob/main/packages/website/scripts/fix-assets-path-build.mjs`
-import { readFile, writeFile } from "node:fs/promises";
-import { createReadStream } from "node:fs";
-import { join } from "node:path";
+
 import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 /**
  * @param {string} filePath
  * @returns {Promise<string>}
  */
 function createMD5(filePath) {
-  return new Promise((res) => {
-    const hash = createHash("md5");
+	return new Promise((res) => {
+		const hash = createHash("md5");
 
-    const rStream = createReadStream(filePath);
-    rStream.on("data", (data) => {
-      hash.update(data);
-    });
-    rStream.on("end", () => {
-      res(hash.digest("hex"));
-    });
-  });
+		const rStream = createReadStream(filePath);
+		rStream.on("data", (data) => {
+			hash.update(data);
+		});
+		rStream.on("end", () => {
+			res(hash.digest("hex"));
+		});
+	});
 }
 
 const swFilePath = join(process.cwd(), "dist/_build/sw.js");
@@ -32,7 +33,7 @@ const indexHtmlMD5 = await createMD5(indexHtmlFilePath);
 console.log("The html's hash is: ", indexHtmlMD5);
 
 newFileContent = newFileContent.replace(
-  "REV_INDEX_HTML_TO_CHANGE",
-  indexHtmlMD5,
+	"REV_INDEX_HTML_TO_CHANGE",
+	indexHtmlMD5,
 );
 await writeFile(swFilePath, newFileContent, "utf8");
