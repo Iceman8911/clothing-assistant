@@ -48,7 +48,8 @@
     "@parcel/watcher",
     "@tailwindcss/oxide",
     "esbuild",
-    "protobufjs"
+    "protobufjs",
+    "sharp"
   ],
   "private": true,
   "peerDependencies": {
