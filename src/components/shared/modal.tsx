@@ -19,7 +19,7 @@ export default function GenericModal(
 				<div class="modal-box">
 					<form method="dialog">
 						<button
-							type="button"
+							type="submit"
 							class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
 						>
 							✕
@@ -28,7 +28,7 @@ export default function GenericModal(
 					<div class="prose">{props.children}</div>
 				</div>
 				<form method="dialog" class="modal-backdrop">
-					<button type="button"></button>
+					<button type="submit"></button>
 				</form>
 			</dialog>
 		</Portal>

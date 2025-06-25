@@ -76,9 +76,13 @@ export default function Dock() {
 				<span class="dock-label">Settings</span>
 			</button> */}
 
-				<button
-					type="button"
+				<div
+					role="tab"
+					tabIndex={0}
 					onClick={(e) => {
+						e.currentTarget.querySelector("input")?.click();
+					}}
+					onKeyUp={(e) => {
 						e.currentTarget.querySelector("input")?.click();
 					}}
 				>
@@ -104,7 +108,7 @@ export default function Dock() {
 					>
 						Toggle Theme
 					</button>
-				</button>
+				</div>
 			</div>
 
 			{/* Dialog for the create clothing modal */}

@@ -8,15 +8,16 @@ import { For, Match, Switch } from "solid-js";
 import { Portal } from "solid-js/web";
 import { gEnumStatus } from "~/code/enums";
 import { generateRandomId } from "~/code/functions";
+import type { UUID } from "~/code/types";
 
 interface Alert {
-	id: string;
+	id: UUID;
 	status: gEnumStatus;
 	message: string;
 	duration?: number;
 }
 
-const alerts = new ReactiveMap<string, Alert>();
+const alerts = new ReactiveMap<UUID, Alert>();
 
 /**
  * Please don't call this any where else, bar the main `app.tsx`
@@ -25,59 +26,65 @@ export function AlertToast() {
 	return (
 		<Portal>
 			<div class="toast toast-top z-[1999]">
-				<For each={[...alerts.values()]}>
-					{(alert) => (
-						<button
-							type="button"
-							class={
-								`alert alert-soft ` +
-								(alert.status === gEnumStatus.SUCCESS
-									? "alert-success"
-									: alert.status === gEnumStatus.INFO
-										? "alert-info"
-										: alert.status === gEnumStatus.WARNING
-											? "alert-warning"
-											: "alert-error")
-							}
-							ref={(el) => {
-								// Remove the alert after a while
-								if (el) {
-									const timer = setTimeout(() => {
-										alerts.delete(alert.id);
-										clearTimeout(timer);
-									}, alert.duration);
+				<For each={Array.from(alerts)}>
+					{([_, alert]) => {
+						const dismissAlert = () => alerts.delete(alert.id);
+
+						return (
+							<div
+								role="alertdialog"
+								aria-live="polite"
+								class={
+									`alert alert-soft ` +
+									(alert.status === gEnumStatus.SUCCESS
+										? "alert-success"
+										: alert.status === gEnumStatus.INFO
+											? "alert-info"
+											: alert.status === gEnumStatus.WARNING
+												? "alert-warning"
+												: "alert-error")
 								}
-							}}
-							onClick={() => alerts.delete(alert.id)}
-						>
-							<Switch>
-								<Match when={alert.status === gEnumStatus.SUCCESS}>
-									<SuccessIcon />
-								</Match>
-								<Match when={alert.status === gEnumStatus.INFO}>
-									<InfoIcon />
-								</Match>
-								<Match when={alert.status === gEnumStatus.WARNING}>
-									<WarningIcon />
-								</Match>
-								<Match when={alert.status === gEnumStatus.ERROR}>
-									<ErrorIcon />
-								</Match>
-							</Switch>
-							<button
-								type="button"
-								onClick={(e) => {
-									e.stopPropagation();
+								ref={(el) => {
+									// Remove the alert after a while
+									if (el) {
+										const timer = setTimeout(() => {
+											dismissAlert();
+											clearTimeout(timer);
+										}, alert.duration);
+									}
 								}}
+								onClick={dismissAlert}
+								onKeyUp={dismissAlert}
 							>
-								{alert.message}{" "}
-								<CopyIcon
-									class="inline-block cursor-pointer"
-									onClick={() => navigator.clipboard.writeText(alert.message)}
-								/>
-							</button>
-						</button>
-					)}
+								<Switch>
+									<Match when={alert.status === gEnumStatus.SUCCESS}>
+										<SuccessIcon />
+									</Match>
+									<Match when={alert.status === gEnumStatus.INFO}>
+										<InfoIcon />
+									</Match>
+									<Match when={alert.status === gEnumStatus.WARNING}>
+										<WarningIcon />
+									</Match>
+									<Match when={alert.status === gEnumStatus.ERROR}>
+										<ErrorIcon />
+									</Match>
+								</Switch>
+								<button
+									type="button"
+									onClick={(e) => {
+										e.stopPropagation();
+									}}
+								>
+									{alert.message}{" "}
+									<CopyIcon
+										class="inline-block cursor-pointer"
+										onClick={() => navigator.clipboard.writeText(alert.message)}
+									/>
+								</button>
+							</div>
+						);
+					}}
 				</For>
 			</div>
 		</Portal>

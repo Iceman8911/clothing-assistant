@@ -58,10 +58,14 @@ export default function NavBar() {
 
 				<div class="navbar-end">
 					{/* Search Dropdown */}
-					<button
-						type="button"
+					<div
+						role="tab"
+						tabIndex={0}
 						class="dropdown"
 						onClick={() => {
+							searchBar.focus();
+						}}
+						onKeyUp={() => {
 							searchBar.focus();
 						}}
 					>
@@ -89,7 +93,7 @@ export default function NavBar() {
 								ref={searchBar}
 							/>
 						</label>
-					</button>
+					</div>
 
 					<button
 						type="button"
