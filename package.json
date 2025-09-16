@@ -3,14 +3,15 @@
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
-    "build": "bun run generate-pwa-assets && vinxi build",
+    "build": "bun run generate-pwa-assets && vinxi build && bun ./scripts/set-html-hash.mjs",
     "start": "vinxi start",
     "bun-dev": "bun --bun vinxi dev",
-    "bun-build": "bun --bun generate-pwa-assets && bun --bun run build",
+    "bun-build": "bun --bun run build",
     "bun-start": "bun --bun vinxi start",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo.svg"
   },
   "dependencies": {
+    "@google/genai": "^1.5.1",
     "@solid-primitives/deep": "^0.3.2",
     "@solid-primitives/keyed": "^1.5.1",
     "@solid-primitives/map": "^0.7.1",
@@ -19,23 +20,24 @@
     "@solidjs/router": "^0.15.3",
     "@solidjs/start": "^1.1.4",
     "cloudinary": "^2.6.1",
+    "firebase": "^11.9.1",
     "fuse.js": "^7.1.0",
     "localforage": "^1.10.0",
-    "lucide-solid": "^0.511.0",
+    "lucide-solid": "^0.516.0",
     "seroval-plugins": "^1.3.2",
     "simple-image-compressor": "^1.8.2",
     "solid-js": "^1.9.7",
-    "vinxi": "^0.5.6"
+    "vinxi": "^0.5.7"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "^4.1.7",
-    "@types/bun": "^1.2.14",
+    "@tailwindcss/vite": "^4.1.10",
+    "@types/bun": "^1.2.16",
     "@vite-pwa/assets-generator": "^1.0.0",
-    "daisyui": "^5.0.38",
-    "rollup-plugin-visualizer": "^6.0.1",
-    "tailwindcss": "^4.1.7",
-    "vite-bundle-analyzer": "^0.22.0",
+    "daisyui": "^5.0.43",
+    "rollup-plugin-visualizer": "^6.0.3",
+    "tailwindcss": "^4.1.10",
+    "vite-bundle-analyzer": "^0.22.3",
     "vite-plugin-pwa": "^1.0.0"
   },
   "engines": {
@@ -46,7 +48,8 @@
     "@parcel/watcher",
     "@tailwindcss/oxide",
     "esbuild",
-    "protobufjs"
+    "protobufjs",
+    "sharp"
   ],
   "private": true,
   "peerDependencies": {

@@ -1,0 +1,8 @@
+words = [
+    "cloudflare",
+    "cloudinary",
+    "gzip",
+    "precached",
+    "prerender",
+    "workbox",
+]
